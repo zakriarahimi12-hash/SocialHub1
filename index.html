@@ -29,9 +29,9 @@ button{cursor:pointer;border:0}
 
 .wrap{
   display:grid;
-  grid-template-columns:240px minmax(400px,680px) 250px;
+  grid-template-columns:500px minmax(400px,680px) 250px;
   gap:18px;
-  max-width:1250px;
+  max-width:1510px;
   margin:18px auto;
   padding:0 12px
 }
@@ -41,10 +41,23 @@ button{cursor:pointer;border:0}
   margin-bottom:14px;box-shadow:0 1px 2px #0001
 }
 
-.side{position:sticky;top:78px;height:max-content}
-.side button{
-  display:block;width:100%;text-align:left;font-weight:600;margin:2px 0
+.side{
+  position:sticky;
+  top:78px;
+  height:max-content;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px 10px;
+  align-content:start;
 }
+.side button{
+  display:block;
+  width:100%;
+  text-align:left;
+  font-weight:600;
+  margin:2px 0;
+}
+.side .ico{display:inline-block;width:28px;font-size:19px}
 .side .ico{display:inline-block;width:28px;font-size:19px}
 .side h4{margin:10px 8px;color:#65676b}
 
