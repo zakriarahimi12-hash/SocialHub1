@@ -60,12 +60,12 @@ async function loadProfile(){
 async function showTab(tab){
  let html="";
  if(tab==="posts"){
-  let {data,error}=await client.from("posts").select("id,content,created_at,image_url,video_url,privacy").eq("user_id",user.id).order("created_at",{ascending:false});
-  if(error){
-   const fallback=await client.from("posts").select("id,content,created_at,image_url,video_url").eq("user_id",user.id).order("created_at",{ascending:false});
-   data=fallback.data||[]; error=fallback.error;
+  let {data,error}=await client.from("posts").select("id,content,created_at").eq("user_id",user.id).order("created_at",{ascending:false});
+  let posts=data||[];
+  if(!error && posts.length){
+   const media=await client.from("posts").select("id,image_url,video_url,privacy").in("id",posts.map(p=>p.id));
+   if(!media.error){const byId=Object.fromEntries((media.data||[]).map(p=>[p.id,p]));posts=posts.map(p=>({...p,...(byId[p.id]||{})}));}
   }
-  const posts=data||[];
   const {data:friends}=await client.from("friendships").select("requester_id,addressee_id").or("requester_id.eq."+user.id+",addressee_id.eq."+user.id).eq("status","accepted");
   const friendIds=(friends||[]).map(x=>x.requester_id===user.id?x.addressee_id:x.requester_id);
   let friendProfiles=[];
@@ -85,6 +85,16 @@ async function showTab(tab){
   const titles={photos:"Photos",videos:"Videos",checkins:"Check-ins",music:"Music"};html='<div class="card"><h2>'+titles[tab]+'</h2><p class="muted">Your '+titles[tab].toLowerCase()+' will appear here as you add them to SocialHub.</p></div>';
  }
  document.getElementById("content").innerHTML=html;
+}
+function openProfileComposer(){
+ openModal('<div class="edit"><h2>Create post</h2><textarea id="profilePostText" placeholder="What is on your mind?" style="min-height:140px"></textarea><div class="actions"><button class="primary" onclick="submitProfilePost()">Post</button><button class="action" onclick="closeModal()">Cancel</button></div></div>');
+}
+async function submitProfilePost(){
+ const textValue=document.getElementById("profilePostText")?.value.trim();
+ if(!textValue){toast("Write something first.");return}
+ const {error}=await client.from("posts").insert({user_id:user.id,content:textValue});
+ if(error){toast(error.message);return}
+ closeModal();toast("Post shared");showTab("posts");
 }
 function renderProfilePost(p){
  const privacy=p.privacy||"public";
