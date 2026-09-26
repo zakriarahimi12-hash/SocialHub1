@@ -514,12 +514,12 @@ button{cursor:pointer;border:0}
       </div>
     </div>
 
-    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)" />
+    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden="hidden" onchange="createStory(event)" />
   </div>
 
   <div class="card composer">
     <div id="postMediaStatus" class="muted" style="margin:8px 0">Add photos or videos to your post</div>
-    <input id="postMediaInput" type="file" accept="image/*,video/*" multiple hidden onchange="handlePostMedia(event)" />
+    <input id="postMediaInput" type="file" accept="image/*,video/*" multiple="multiple" hidden="hidden" onchange="handlePostMedia(event)" />
     <div id="postMediaPreview" class="post-media"></div>
 
     <textarea
@@ -867,7 +867,7 @@ button{cursor:pointer;border:0}
       </button>
     </div>
 
-    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)" />
+    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden="hidden" onchange="createStory(event)" />
 
     <div id="storiesList" class="storyrow"></div>
   </div>
