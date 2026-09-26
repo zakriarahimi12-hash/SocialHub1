@@ -40,12 +40,13 @@
 <script>
 const SUPABASE_URL="https://gkqyaroprqajwoubnsvs.supabase.co";
 const SUPABASE_KEY="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
-const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let user=null,profile=null;
+const client=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;let user=null,profile=null;
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function toast(s){const x=document.getElementById("toast");x.textContent=s;x.style.display="block";setTimeout(()=>x.style.display="none",2500)}
 function openModal(html){document.getElementById("modalContent").innerHTML=html;document.getElementById("modal").classList.add("show")}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 async function init(){
+ if(!client){toast("SocialHub services could not load. Please refresh.");return}
  const {data}=await client.auth.getSession(); if(!data.session){location.href="index.html";return} user=data.session.user; await loadProfile(); showTab("posts");
 }
 async function loadProfile(){
@@ -145,7 +146,7 @@ async function uploadProfileImage(type){
  toast(type==="cover"?"Cover photo updated":"Profile photo updated");
 }
 function togglePostMenu(event,id){event.stopPropagation();document.querySelectorAll(".post-menu").forEach(x=>x.style.display="none");document.getElementById("post-menu-"+id).style.display="block"}
-function togglePrivacyMenu(id){event.stopPropagation();document.getElementById("privacy-"+id).classList.toggle("show")}
+function togglePrivacyMenu(id){const el=document.getElementById("privacy-"+id);if(el)el.classList.toggle("show")}
 async function setPostPrivacy(id,privacy){const {error}=await client.from("posts").update({privacy}).eq("id",id).eq("user_id",user.id);if(error){toast(error.message);return}toast("Privacy updated");showTab("posts")}
 async function editPost(id){
  const {data,error}=await client.from("posts").select("content").eq("id",id).eq("user_id",user.id).single();
