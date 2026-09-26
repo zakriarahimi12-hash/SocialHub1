@@ -335,3 +335,6 @@ grant usage on schema public to anon,authenticated;
 grant select on public.profiles,public.posts,public.comments,public.reactions,public.friendships,public.saved_posts,public.stories,public.conversations,public.conversation_members,public.messages,public.notifications,public.marketplace_listings,public.groups,public.group_members,public.events,public.event_attendees,public.pages,public.page_followers to authenticated;
 grant insert,update,delete on public.profiles,public.posts,public.comments,public.reactions,public.friendships,public.saved_posts,public.stories,public.messages,public.marketplace_listings,public.groups,public.group_members,public.events,public.event_attendees,public.pages,public.page_followers to authenticated;
 grant execute on function public.create_direct_conversation(uuid) to authenticated;
+
+
+alter table public.stories add column if not exists video_url text;
