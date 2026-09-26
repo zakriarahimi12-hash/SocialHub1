@@ -1,237 +1,2600 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SocialHub</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SocialHub</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f0f2f5;color:#1c1e21}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;border:0}
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f4f6f8;
-    }
+.top{
+  height:60px;background:#fff;border-bottom:1px solid #ddd;
+  display:flex;align-items:center;gap:10px;padding:0 16px;
+  position:sticky;top:0;z-index:20
+}
 
-    .box {
-      max-width: 600px;
-      margin: 40px auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-    }
+.logo{font-size:24px;font-weight:800;color:#1877f2}
+.search{background:#f0f2f5;border-radius:22px;padding:10px 15px;width:230px;border:0}
 
-    input, textarea, button {
-      width: 100%;
-      padding: 12px;
-      margin: 6px 0;
-      box-sizing: border-box;
-    }
+.topnav{display:flex;gap:5px;margin-left:auto}
+.topnav button,.side button{
+  background:transparent;border-radius:10px;padding:10px 13px
+}
+.topnav button:hover,.side button:hover{background:#f0f2f5}
 
-    button {
-      cursor: pointer;
-    }
+.wrap{
+  display:grid;
+  grid-template-columns:240px minmax(400px,680px) 250px;
+  gap:18px;
+  max-width:1250px;
+  margin:18px auto;
+  padding:0 12px
+}
 
-    .post {
-      border-top: 1px solid #ddd;
-      padding: 15px 0;
-    }
+.card{
+  background:#fff;border-radius:12px;padding:16px;
+  margin-bottom:14px;box-shadow:0 1px 2px #0001
+}
 
-    #app {
-      display: none;
-    }
-  </style>
+.side{position:sticky;top:78px;height:max-content}
+.side button{
+  display:block;width:100%;text-align:left;font-weight:600;margin:2px 0
+}
+.side .ico{display:inline-block;width:28px;font-size:19px}
+.side h4{margin:10px 8px;color:#65676b}
+
+.composer textarea{
+  width:100%;resize:none;border:0;background:#f0f2f5;
+  border-radius:22px;padding:12px 16px;min-height:50px
+}
+
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:1}
+
+.action{
+  background:#f0f2f5;padding:10px;border-radius:8px;font-weight:600
+}
+
+.primary{
+  background:#1877f2;color:#fff;padding:11px 18px;
+  border-radius:8px;font-weight:700
+}
+
+.danger{background:#e41e3f;color:#fff}
+
+.storyrow{display:flex;gap:10px;overflow:auto}
+
+.story{
+  min-width:100px;height:150px;border-radius:12px;
+  background:#e4e6eb;padding:10px;display:flex;
+  align-items:end;font-weight:700
+}
+
+.posthead{
+  display:flex;justify-content:space-between;align-items:center
+}
+
+.avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:#ddd;display:grid;place-items:center;font-weight:bold
+}
+
+.postbody{white-space:pre-wrap;word-break:break-word}
+.postmeta{color:#65676b;font-size:13px}
+
+.postactions{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid #ddd;border-bottom:1px solid #ddd;
+  margin-top:12px
+}
+
+.postactions button{padding:10px;background:#fff}
+.postactions button:hover{background:#f0f2f5}
+
+.comment{
+  background:#f0f2f5;border-radius:16px;
+  padding:8px 12px;margin:6px 0
+}
+
+.commentbox{display:flex;gap:6px;margin-top:8px}
+.commentbox input{
+  flex:1;border:0;background:#f0f2f5;
+  border-radius:18px;padding:9px
+}
+
+.hidden{display:none!important}
+
+.auth{max-width:430px;margin:70px auto}
+
+.auth input{
+  width:100%;padding:13px;margin:6px 0;
+  border:1px solid #ccd0d5;border-radius:7px
+}
+
+.auth button{width:100%;margin:6px 0}
+.muted{color:#65676b}
+
+.section{display:none}
+.section.active{display:block}
+
+.menu-title{
+  font-size:20px;font-weight:700;margin:4px 0 15px
+}
+
+.modal{
+  position:fixed;inset:0;background:#0008;
+  display:none;align-items:center;justify-content:center;
+  z-index:50
+}
+
+.modal.show{display:flex}
+
+.modalbox{
+  background:#fff;border-radius:12px;
+  width:min(600px,92vw);max-height:85vh;
+  overflow:auto;padding:20px
+}
+
+.modalbox input,.modalbox textarea,.modalbox select{
+  width:100%;padding:11px;margin:6px 0;
+  border:1px solid #ccd0d5;border-radius:7px
+}
+
+@media(max-width:900px){
+  .wrap{grid-template-columns:70px minmax(0,1fr)}
+  .right{display:none}
+  .side button span.txt{display:none}
+  .side h4{display:none}
+  .search{width:150px}
+  .topnav button{font-size:0}
+  .topnav button:first-letter{font-size:20px}
+}
+
+@media(max-width:600px){
+  .top{padding:0 8px}
+  .logo{font-size:20px}
+  .search{width:120px}
+  .wrap{display:block;margin:8px auto}
+  .side{
+    position:static;display:flex;overflow:auto;
+    background:#fff;border-radius:10px;
+    margin-bottom:10px;padding:4px
+  }
+  .side button{min-width:max-content}
+  .side h4{display:none}
+  .topnav{display:none}
+  .card{border-radius:8px}
+  .postactions{grid-template-columns:repeat(4,1fr)}
+}
+</style>
 </head>
 
 <body>
 
-<div class="box" id="auth">
-  <h1>SocialHub</h1>
+<div id="auth" class="auth card">
+  <h1 class="logo">SocialHub</h1>
+
+  <p class="muted">
+    Connect with people and share what matters.
+  </p>
 
   <input id="email" type="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
-  <input id="username" placeholder="Username">
+  <input id="username" placeholder="Username (for new account)">
 
-  <button onclick="signup()">Create account</button>
-  <button onclick="login()">Log in</button>
+  <button class="primary" onclick="signup()">Create account</button>
+  <button class="action" onclick="login()">Log in</button>
 
-  <p id="message"></p>
+  <p id="authmsg"></p>
 </div>
 
-<div class="box" id="app">
-  <h1>SocialHub</h1>
 
-  <button onclick="logout()">Log out</button>
+<div id="site" class="hidden">
 
-  <textarea id="postContent" placeholder="What's happening?"></textarea>
-  <button onclick="createPost()">Post</button>
+<header class="top">
 
-  <h2>Feed</h2>
+  <div class="logo">SocialHub</div>
+
+  <input
+    class="search"
+    id="searchInput"
+    placeholder="Search SocialHub"
+    onkeydown="if(event.key==='Enter')searchAll()"
+  >
+
+  <div class="topnav">
+
+    <button onclick="show('home')">🏠</button>
+    <button onclick="show('friends')">👥</button>
+    <button onclick="show('messages')">💬</button>
+    <button onclick="show('notifications')">🔔</button>
+    <button onclick="show('profile')">👤</button>
+
+  </div>
+
+</header>
+
+
+<div class="wrap">
+
+<aside class="side">
+
+  <button onclick="show('home')">
+    <span class="ico">🏠</span>
+    <span class="txt">Home</span>
+  </button>
+
+  <button onclick="show('search')">
+    <span class="ico">🔍</span>
+    <span class="txt">Search</span>
+  </button>
+
+  <button onclick="show('friends')">
+    <span class="ico">👥</span>
+    <span class="txt">Friends</span>
+  </button>
+
+  <button onclick="show('requests')">
+    <span class="ico">🤝</span>
+    <span class="txt">Friend requests</span>
+  </button>
+
+  <button onclick="show('messages')">
+    <span class="ico">💬</span>
+    <span class="txt">Messenger</span>
+  </button>
+
+  <button onclick="show('notifications')">
+    <span class="ico">🔔</span>
+    <span class="txt">Notifications</span>
+  </button>
+
+  <button onclick="show('video')">
+    <span class="ico">🎬</span>
+    <span class="txt">Video</span>
+  </button>
+
+  <button onclick="show('marketplace')">
+    <span class="ico">🛒</span>
+    <span class="txt">Marketplace</span>
+  </button>
+
+  <button onclick="show('groups')">
+    <span class="ico">👨‍👩‍👧</span>
+    <span class="txt">Groups</span>
+  </button>
+
+  <button onclick="show('pages')">
+    <span class="ico">📄</span>
+    <span class="txt">Pages</span>
+  </button>
+
+  <button onclick="show('events')">
+    <span class="ico">📅</span>
+    <span class="txt">Events</span>
+  </button>
+
+  <button onclick="show('stories')">
+    <span class="ico">📖</span>
+    <span class="txt">Stories</span>
+  </button>
+
+  <button onclick="show('reels')">
+    <span class="ico">🎞️</span>
+    <span class="txt">Reels</span>
+  </button>
+
+  <button onclick="show('gaming')">
+    <span class="ico">🎮</span>
+    <span class="txt">Gaming</span>
+  </button>
+
+  <button onclick="show('saved')">
+    <span class="ico">🔖</span>
+    <span class="txt">Saved</span>
+  </button>
+
+  <button onclick="show('memories')">
+    <span class="ico">🕐</span>
+    <span class="txt">Memories</span>
+  </button>
+
+  <button onclick="show('feeds')">
+    <span class="ico">📰</span>
+    <span class="txt">Feeds</span>
+  </button>
+
+  <button onclick="show('live')">
+    <span class="ico">🔴</span>
+    <span class="txt">Live</span>
+  </button>
+
+  <button onclick="show('settings')">
+    <span class="ico">⚙️</span>
+    <span class="txt">Settings</span>
+  </button>
+
+  <button onclick="logout()">
+    <span class="ico">🚪</span>
+    <span class="txt">Log out</span>
+  </button>
+
+</aside>
+
+
+<main>
+
+<section id="home" class="section active">
+
+  <div class="card">
+    <div class="storyrow" id="storyrow"></div>
+  </div>
+
+  <div class="card composer">
+
+    <textarea
+      id="postContent"
+      placeholder="What's on your mind?"
+    ></textarea>
+
+    <div class="row">
+
+      <button class="action" onclick="addFeeling()">
+        😊 Feeling/activity
+      </button>
+
+      <button class="action" onclick="addLocation()">
+        📍 Check in
+      </button>
+
+      <button class="action" onclick="tagPeople()">
+        🏷️ Tag people
+      </button>
+
+      <button class="primary" onclick="createPost()">
+        Post
+      </button>
+
+    </div>
+
+  </div>
+
   <div id="feed"></div>
+
+</section>
+
+
+<section id="profile" class="section">
+
+  <div class="card">
+
+    <div
+      style="height:170px;background:#dfe3e8;border-radius:10px"
+    ></div>
+
+    <div class="row" style="margin-top:-30px">
+
+      <div
+        class="avatar"
+        style="width:80px;height:80px;font-size:25px"
+        id="profileAvatar"
+      >
+        S
+      </div>
+
+      <div>
+
+        <h2 id="profileName">Profile</h2>
+
+        <p
+          id="profileUsername"
+          class="muted"
+        ></p>
+
+      </div>
+
+    </div>
+
+    <p id="profileBio"></p>
+
+    <button
+      class="primary"
+      onclick="editProfile()"
+    >
+      Edit profile
+    </button>
+
+    <button
+      class="action"
+      onclick="show('friends')"
+    >
+      Friends
+    </button>
+
+    <button
+      class="action"
+      onclick="show('photos')"
+    >
+      Photos
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Posts</h3>
+
+    <div id="profilePosts"></div>
+
+  </div>
+
+</section>
+
+
+<section id="friends" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Friends
+    </div>
+
+    <button
+      class="primary"
+      onclick="loadFriends()"
+    >
+      Refresh
+    </button>
+
+    <div id="friendsList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="requests" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Friend requests
+    </div>
+
+    <div id="requestsList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="messages" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Messenger
+    </div>
+
+    <div class="row">
+
+      <input
+        id="messageUser"
+        placeholder="Friend user ID"
+      >
+
+      <button
+        class="primary"
+        onclick="startChat()"
+      >
+        New message
+      </button>
+
+    </div>
+
+    <div id="messagesList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="notifications" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Notifications
+    </div>
+
+    <div id="notificationsList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="search" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Search
+    </div>
+
+    <input
+      id="searchPage"
+      class="search"
+      style="width:100%"
+      placeholder="Search username..."
+      onkeydown="if(event.key==='Enter')searchAll()"
+    >
+
+    <div id="searchResults"></div>
+
+  </div>
+
+</section>
+
+
+<section id="video" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Video
+    </div>
+
+    <p class="muted">
+      Your video hub. Video posts appear in the feed.
+    </p>
+
+  </div>
+
+</section>
+
+
+<section id="reels" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Reels
+    </div>
+
+    <p class="muted">
+      Short-form video area.
+    </p>
+
+  </div>
+
+</section>
+
+
+<section id="gaming" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Gaming
+    </div>
+
+    <p class="muted">
+      Gaming area for your community.
+    </p>
+
+  </div>
+
+</section>
+
+
+<section id="saved" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Saved
+    </div>
+
+    <div id="savedList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="memories" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Memories
+    </div>
+
+    <p class="muted">
+      Your memories will appear here.
+    </p>
+
+  </div>
+
+</section>
+
+
+<section id="feeds" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Feeds
+    </div>
+
+    <button
+      class="primary"
+      onclick="loadFeed()"
+    >
+      Refresh feed
+    </button>
+
+    <div id="feedsList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="live" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Live
+    </div>
+
+    <p class="muted">
+      Live streaming requires a streaming provider/backend.
+    </p>
+
+    <button
+      class="primary"
+      onclick="alert('Live streaming needs a streaming provider and backend.')"
+    >
+      Start Live
+    </button>
+
+  </div>
+
+</section>
+
+
+<section id="marketplace" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Marketplace
+    </div>
+
+    <button
+      class="primary"
+      onclick="createListing()"
+    >
+      Sell something
+    </button>
+
+    <div id="marketList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="groups" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Groups
+    </div>
+
+    <button
+      class="primary"
+      onclick="createGroup()"
+    >
+      Create group
+    </button>
+
+    <div id="groupsList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="pages" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Pages
+    </div>
+
+    <button
+      class="primary"
+      onclick="createPage()"
+    >
+      Create page
+    </button>
+
+    <div id="pagesList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="events" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Events
+    </div>
+
+    <button
+      class="primary"
+      onclick="createEvent()"
+    >
+      Create event
+    </button>
+
+    <div id="eventsList"></div>
+
+  </div>
+
+</section>
+
+
+<section id="stories" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Stories
+    </div>
+
+    <button
+      class="primary"
+      onclick="createStory()"
+    >
+      Create story
+    </button>
+
+    <div
+      id="storiesList"
+      class="storyrow"
+    ></div>
+
+  </div>
+
+</section>
+
+
+<section id="photos" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Photos
+    </div>
+
+    <p class="muted">
+      Your photos will appear here.
+    </p>
+
+  </div>
+
+</section>
+
+
+<section id="settings" class="section">
+
+  <div class="card">
+
+    <div class="menu-title">
+      Settings
+    </div>
+
+    <button
+      class="action"
+      onclick="logout()"
+    >
+      Log out
+    </button>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<aside class="right">
+
+  <div class="card">
+
+    <h3>SocialHub</h3>
+
+    <p class="muted">
+      Connect with your community.
+    </p>
+
+  </div>
+
+</aside>
+
 </div>
+</div>
+
+
+<div id="modal" class="modal">
+
+  <div class="modalbox">
+
+    <div
+      style="display:flex;justify-content:space-between;align-items:center"
+    >
+
+      <button
+        class="action"
+        onclick="closeModal()"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div id="modalContent"></div>
+
+  </div>
+
+</div>
+
 
 <script>
+
 const SUPABASE_URL =
   "https://gkqyaroprqajwoubnsvs.supabase.co";
 
 const SUPABASE_KEY =
   "sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
 
-const client = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const client =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-async function signup() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const username = document.getElementById("username").value;
+let currentUser = null;
 
-  const { error } = await client.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        username: username
-      }
-    }
-  });
 
-  document.getElementById("message").textContent =
-    error
-      ? error.message
-      : "Account created. Check your email.";
+function esc(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
 }
 
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
 
-  const { error } = await client.auth.signInWithPassword({
-    email,
-    password
-  });
+function show(id){
 
-  if (error) {
-    document.getElementById("message").textContent =
-      error.message;
-  } else {
-    showApp();
+  document
+    .querySelectorAll(".section")
+    .forEach(x => x.classList.remove("active"));
+
+  const section =
+    document.getElementById(id);
+
+  if(section){
+    section.classList.add("active");
   }
+
+  if(id==="home") loadFeed();
+  if(id==="profile") loadProfile();
+  if(id==="friends") loadFriends();
+  if(id==="requests") loadRequests();
+  if(id==="notifications") loadNotifications();
+  if(id==="saved") loadSaved();
+  if(id==="stories") loadStories();
+  if(id==="marketplace") loadMarketplace();
+  if(id==="groups") loadGroups();
+  if(id==="pages") loadPages();
+  if(id==="events") loadEvents();
+
 }
 
-async function logout() {
+
+function openSite(){
+
+  document
+    .getElementById("auth")
+    .classList.add("hidden");
+
+  document
+    .getElementById("site")
+    .classList.remove("hidden");
+
+  loadProfile();
+  loadFeed();
+  loadStories();
+
+}
+
+
+async function signup(){
+
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+  const username =
+    document.getElementById("username").value.trim();
+
+  const msg =
+    document.getElementById("authmsg");
+
+  if(!email || !password || !username){
+
+    msg.textContent =
+      "Please fill in all fields.";
+
+    return;
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await client.auth.signUp({
+      email,
+      password
+    });
+
+  if(error){
+
+    msg.textContent =
+      error.message;
+
+    return;
+
+  }
+
+  if(data.user){
+
+    const {
+      error: profileError
+    } =
+      await client
+        .from("profiles")
+        .insert({
+          id:data.user.id,
+          username,
+          full_name:username
+        });
+
+    if(profileError){
+
+      msg.textContent =
+        profileError.message;
+
+      return;
+
+    }
+
+  }
+
+  msg.textContent =
+    "Account created. Check your email if confirmation is required.";
+
+}
+
+
+async function login(){
+
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+  const msg =
+    document.getElementById("authmsg");
+
+  const {
+    data,
+    error
+  } =
+    await client.auth.signInWithPassword({
+      email,
+      password
+    });
+
+  if(error){
+
+    msg.textContent =
+      error.message;
+
+    return;
+
+  }
+
+  currentUser =
+    data.user;
+
+  openSite();
+
+}
+
+
+async function logout(){
+
   await client.auth.signOut();
-  location.reload();
+
+  currentUser = null;
+
+  document
+    .getElementById("site")
+    .classList.add("hidden");
+
+  document
+    .getElementById("auth")
+    .classList.remove("hidden");
+
 }
 
-async function createPost() {
-  const { data: { user } } =
-    await client.auth.getUser();
+
+async function createPost(){
 
   const content =
-    document.getElementById("postContent")
-      .value.trim();
+    document
+      .getElementById("postContent")
+      .value
+      .trim();
 
-  if (!user || !content) return;
+  if(!content){
 
-  const { error } = await client
-    .from("posts")
-    .insert({
-      user_id: user.id,
-      content: content
-    });
+    alert("Write something first.");
 
-  if (error) {
-    alert(error.message);
-  } else {
-    document.getElementById("postContent").value = "";
-    loadFeed();
-  }
-}
-
-async function loadFeed() {
-  const { data: posts, error } = await client
-    .from("posts")
-    .select("id, content, created_at, user_id")
-    .order("created_at", {
-      ascending: false
-    });
-
-  if (error) {
-    document.getElementById("feed").textContent =
-      error.message;
     return;
+
   }
 
-  if (!posts || posts.length === 0) {
-    document.getElementById("feed").innerHTML =
-      "<p>No posts yet.</p>";
-    return;
-  }
-
-  const userIds = [
-    ...new Set(posts.map(post => post.user_id))
-  ];
-
-  const { data: profiles, error: profileError } =
+  const {
+    error
+  } =
     await client
-      .from("profiles")
-      .select("id, username")
-      .in("id", userIds);
+      .from("posts")
+      .insert({
+        user_id:currentUser.id,
+        content
+      });
 
-  if (profileError) {
-    document.getElementById("feed").textContent =
-      profileError.message;
+  if(error){
+
+    alert(error.message);
+
     return;
+
   }
 
-  const profileMap = {};
-
-  (profiles || []).forEach(profile => {
-    profileMap[profile.id] = profile.username;
-  });
-
-  document.getElementById("feed").innerHTML =
-    posts.map(post => `
-      <div class="post">
-        <b>@${escapeHtml(
-          profileMap[post.user_id] || "user"
-        )}</b>
-
-        <p>${escapeHtml(post.content)}</p>
-      </div>
-    `).join("");
-}
-
-function escapeHtml(text) {
-  return String(text).replace(/[&<>"']/g, function(m) {
-    return {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    }[m];
-  });
-}
-
-async function showApp() {
-  document.getElementById("auth").style.display =
-    "none";
-
-  document.getElementById("app").style.display =
-    "block";
+  document
+    .getElementById("postContent")
+    .value = "";
 
   loadFeed();
+
 }
 
-client.auth.getSession().then(({ data }) => {
-  if (data.session) {
-    showApp();
+
+async function loadFeed(){
+
+  if(!currentUser) return;
+
+  const {
+    data,
+    error
+  } =
+    await client
+      .from("posts")
+      .select("*")
+      .order("created_at",{ascending:false})
+      .limit(50);
+
+  if(error){
+
+    document.getElementById("feed").innerHTML =
+      `<div class="card">${esc(error.message)}</div>`;
+
+    return;
+
   }
-});
+
+  const ids =
+    [...new Set((data || []).map(p => p.user_id))];
+
+  const {
+    data:profiles
+  } =
+    ids.length
+      ? await client
+          .from("profiles")
+          .select("id,username,full_name")
+          .in("id",ids)
+      : {data:[]};
+
+  const pm =
+    Object.fromEntries(
+      (profiles || []).map(p => [p.id,p])
+    );
+
+  const html =
+    (data || []).map(p => {
+
+      const user =
+        pm[p.user_id] || {};
+
+      return `
+        <div class="card">
+
+          <div class="posthead">
+
+            <div class="row">
+
+              <div class="avatar">
+                ${esc((user.full_name || "U").charAt(0).toUpperCase())}
+              </div>
+
+              <div>
+
+                <b>${esc(user.full_name || "User")}</b>
+
+                <div class="postmeta">
+                  @${esc(user.username || "user")}
+                </div>
+
+              </div>
+
+            </div>
+
+            <button
+              class="action"
+              onclick="deletePost('${p.id}')"
+            >
+              ⋯
+            </button>
+
+          </div>
+
+          <div class="postbody" style="margin-top:12px">
+            ${esc(p.content)}
+          </div>
+
+          <div class="postmeta" style="margin-top:8px">
+            ${new Date(p.created_at).toLocaleString()}
+          </div>
+
+          <div class="postactions">
+
+            <button onclick="reactPost('${p.id}','like')">
+              👍 Like
+            </button>
+
+            <button onclick="focusComment('${p.id}')">
+              💬 Comment
+            </button>
+
+            <button onclick="sharePost('${p.id}')">
+              ↗️ Share
+            </button>
+
+            <button onclick="savePost('${p.id}')">
+              🔖 Save
+            </button>
+
+          </div>
+
+          <div id="comments-${p.id}"></div>
+
+          <div class="commentbox">
+
+            <input
+              id="comment-${p.id}"
+              placeholder="Write a comment..."
+              onkeydown="if(event.key==='Enter')addComment('${p.id}')"
+            >
+
+            <button
+              class="primary"
+              onclick="addComment('${p.id}')"
+            >
+              Send
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+  document.getElementById("feed").innerHTML =
+    html || `<div class="card">No posts yet.</div>`;
+
+}
+
+
+function focusComment(id){
+
+  const input =
+    document.getElementById(`comment-${id}`);
+
+  if(input){
+
+    input.focus();
+
+  }
+
+}
+
+
+async function reactPost(postId,type){
+
+  const {
+    error
+  } =
+    await client
+      .from("reactions")
+      .upsert({
+        post_id:postId,
+        user_id:currentUser.id,
+        type
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    alert("Reaction added.");
+
+  }
+
+}
+
+
+async function addComment(postId){
+
+  const input =
+    document.getElementById(`comment-${postId}`);
+
+  const content =
+    input.value.trim();
+
+  if(!content) return;
+
+  const {
+    error
+  } =
+    await client
+      .from("comments")
+      .insert({
+        post_id:postId,
+        user_id:currentUser.id,
+        content
+      });
+
+  if(error){
+
+    alert(error.message);
+
+    return;
+
+  }
+
+  input.value = "";
+
+  loadComments(postId);
+
+}
+
+
+async function loadComments(postId){
+
+  const {
+    data
+  } =
+    await client
+      .from("comments")
+      .select("*")
+      .eq("post_id",postId)
+      .order("created_at",{ascending:true});
+
+  const ids =
+    [...new Set((data || []).map(x => x.user_id))];
+
+  const {
+    data:profiles
+  } =
+    ids.length
+      ? await client
+          .from("profiles")
+          .select("id,username,full_name")
+          .in("id",ids)
+      : {data:[]};
+
+  const pm =
+    Object.fromEntries(
+      (profiles || []).map(p => [p.id,p])
+    );
+
+  const el =
+    document.getElementById(`comments-${postId}`);
+
+  if(!el) return;
+
+  el.innerHTML =
+    (data || []).map(c => {
+
+      const user =
+        pm[c.user_id] || {};
+
+      return `
+        <div class="comment">
+
+          <b>
+            ${esc(user.full_name || "User")}
+          </b>
+
+          ${esc(c.content)}
+
+        </div>
+      `;
+
+    }).join("");
+
+}
+
+
+async function deletePost(id){
+
+  if(!confirm("Delete this post?")) return;
+
+  const {
+    error
+  } =
+    await client
+      .from("posts")
+      .delete()
+      .eq("id",id)
+      .eq("user_id",currentUser.id);
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    loadFeed();
+
+  }
+
+}
+
+
+async function savePost(id){
+
+  const {
+    error
+  } =
+    await client
+      .from("saved_posts")
+      .upsert({
+        user_id:currentUser.id,
+        post_id:id
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    alert("Post saved.");
+
+  }
+
+}
+
+
+function sharePost(id){
+
+  navigator.clipboard
+    ?.writeText(location.href + "#post-" + id);
+
+  alert("Post link copied.");
+
+}
+
+
+function addFeeling(){
+
+  const feeling =
+    prompt("How are you feeling?");
+
+  if(feeling){
+
+    const box =
+      document.getElementById("postContent");
+
+    box.value +=
+      `\nFeeling ${feeling}`;
+
+    box.focus();
+
+  }
+
+}
+
+
+function addLocation(){
+
+  const location =
+    prompt("Where are you?");
+
+  if(location){
+
+    const box =
+      document.getElementById("postContent");
+
+    box.value +=
+      `\n📍 ${location}`;
+
+    box.focus();
+
+  }
+
+}
+
+
+function tagPeople(){
+
+  const people =
+    prompt("Tag people:");
+
+  if(people){
+
+    const box =
+      document.getElementById("postContent");
+
+    box.value +=
+      `\n🏷️ ${people}`;
+
+    box.focus();
+
+  }
+
+}
+
+
+async function loadProfile(){
+
+  if(!currentUser) return;
+
+  const {
+    data:p
+  } =
+    await client
+      .from("profiles")
+      .select("*")
+      .eq("id",currentUser.id)
+      .single();
+
+  if(!p) return;
+
+  document.getElementById("profileName").textContent =
+    p.full_name || "Profile";
+
+  document.getElementById("profileUsername").textContent =
+    "@" + (p.username || "user");
+
+  document.getElementById("profileBio").textContent =
+    p.bio || "";
+
+  document.getElementById("profileAvatar").textContent =
+    (p.full_name || "S").charAt(0).toUpperCase();
+
+  const {
+    data:posts
+  } =
+    await client
+      .from("posts")
+      .select("id,content,created_at")
+      .eq("user_id",currentUser.id)
+      .order("created_at",{ascending:false});
+
+  document.getElementById("profilePosts").innerHTML =
+    (posts || []).map(p => `
+      <div class="card">
+
+        <div class="postmeta">
+          ${new Date(p.created_at).toLocaleString()}
+        </div>
+
+        <p>${esc(p.content)}</p>
+
+      </div>
+    `).join("") || "No posts yet.";
+
+}
+
+
+function editProfile(){
+
+  openModal(`
+    <h2>Edit profile</h2>
+
+    <input
+      id="editName"
+      placeholder="Full name"
+    >
+
+    <input
+      id="editUsername"
+      placeholder="Username"
+    >
+
+    <textarea
+      id="editBio"
+      placeholder="Bio"
+    ></textarea>
+
+    <button
+      class="primary"
+      onclick="saveProfile()"
+    >
+      Save
+    </button>
+  `);
+
+}
+
+
+async function saveProfile(){
+
+  const full_name =
+    document
+      .getElementById("editName")
+      .value
+      .trim();
+
+  const username =
+    document
+      .getElementById("editUsername")
+      .value
+      .trim();
+
+  const bio =
+    document
+      .getElementById("editBio")
+      .value
+      .trim();
+
+  const obj = {};
+
+  if(full_name) obj.full_name = full_name;
+  if(username) obj.username = username;
+  if(bio) obj.bio = bio;
+
+  const {
+    error
+  } =
+    await client
+      .from("profiles")
+      .update(obj)
+      .eq("id",currentUser.id);
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    closeModal();
+    loadProfile();
+
+  }
+
+}
+
+
+async function loadFriends(){
+
+  const {
+    data
+  } =
+    await client
+      .from("friendships")
+      .select("*")
+      .or(
+        `requester_id.eq.${currentUser.id},addressee_id.eq.${currentUser.id}`
+      )
+      .eq("status","accepted");
+
+  renderProfiles(
+    "friendsList",
+    (data || []).map(x =>
+      x.requester_id === currentUser.id
+        ? x.addressee_id
+        : x.requester_id
+    )
+  );
+
+}
+
+
+async function loadRequests(){
+
+  const {
+    data
+  } =
+    await client
+      .from("friendships")
+      .select("*")
+      .eq("addressee_id",currentUser.id)
+      .eq("status","pending");
+
+  const ids =
+    (data || []).map(x => x.requester_id);
+
+  const {
+    data:ps
+  } =
+    ids.length
+      ? await client
+          .from("profiles")
+          .select("id,username,full_name")
+          .in("id",ids)
+      : {data:[]};
+
+  document.getElementById("requestsList").innerHTML =
+    (ps || []).map(p => `
+
+      <div class="card">
+
+        <b>${esc(p.full_name)}</b>
+
+        @${esc(p.username || "user")}
+
+        <button
+          class="primary"
+          onclick="acceptRequest('${p.id}')"
+        >
+          Accept
+        </button>
+
+      </div>
+
+    `).join("") || "No pending requests.";
+
+}
+
+
+async function acceptRequest(id){
+
+  await client
+    .from("friendships")
+    .update({status:"accepted"})
+    .eq("requester_id",id)
+    .eq("addressee_id",currentUser.id);
+
+  loadRequests();
+  loadFriends();
+
+}
+
+
+async function renderProfiles(el,ids){
+
+  const {
+    data
+  } =
+    ids.length
+      ? await client
+          .from("profiles")
+          .select("id,username,full_name")
+          .in("id",ids)
+      : {data:[]};
+
+  document.getElementById(el).innerHTML =
+    (data || []).map(p => `
+
+      <div class="card">
+
+        <b>${esc(p.full_name)}</b>
+
+        <br>
+
+        @${esc(p.username || "user")}
+
+        <br>
+
+        <button
+          class="action"
+          onclick="sendFriend('${p.id}')"
+        >
+          Add friend
+        </button>
+
+      </div>
+
+    `).join("") || "No friends yet.";
+
+}
+
+
+async function sendFriend(id){
+
+  const {
+    error
+  } =
+    await client
+      .from("friendships")
+      .insert({
+        requester_id:currentUser.id,
+        addressee_id:id,
+        status:"pending"
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    alert("Friend request sent.");
+
+  }
+
+}
+
+
+async function loadNotifications(){
+
+  const {
+    data
+  } =
+    await client
+      .from("notifications")
+      .select("*")
+      .order("created_at",{ascending:false})
+      .limit(50);
+
+  document.getElementById("notificationsList").innerHTML =
+    (data || []).map(n => `
+
+      <div class="comment">
+
+        ${esc(n.message)}
+
+        <span class="muted">
+          ${new Date(n.created_at).toLocaleString()}
+        </span>
+
+      </div>
+
+    `).join("") || "No notifications.";
+
+}
+
+
+async function searchAll(){
+
+  const q =
+    (
+      document.getElementById("searchPage")?.value ||
+      document.getElementById("searchInput").value
+    ).trim();
+
+  if(!q) return;
+
+  show("search");
+
+  document.getElementById("searchPage").value =
+    q;
+
+  const {
+    data
+  } =
+    await client
+      .from("profiles")
+      .select("id,username,full_name,bio")
+      .ilike("username","%" + q + "%")
+      .limit(30);
+
+  document.getElementById("searchResults").innerHTML =
+    (data || []).map(p => `
+
+      <div class="card">
+
+        <b>${esc(p.full_name)}</b>
+
+        <br>
+
+        @${esc(p.username || "user")}
+
+        <p>${esc(p.bio || "")}</p>
+
+        <button
+          class="primary"
+          onclick="sendFriend('${p.id}')"
+        >
+          Add friend
+        </button>
+
+      </div>
+
+    `).join("") || "No users found.";
+
+}
+
+
+async function loadSaved(){
+
+  const {
+    data
+  } =
+    await client
+      .from("saved_posts")
+      .select("post_id,created_at")
+      .eq("user_id",currentUser.id)
+      .order("created_at",{ascending:false});
+
+  const ids =
+    (data || []).map(x => x.post_id);
+
+  if(!ids.length){
+
+    document.getElementById("savedList").textContent =
+      "No saved posts.";
+
+    return;
+
+  }
+
+  const {
+    data:posts
+  } =
+    await client
+      .from("posts")
+      .select("id,content,created_at,user_id")
+      .in("id",ids);
+
+  document.getElementById("savedList").innerHTML =
+    (posts || []).map(p => `
+
+      <div class="card">
+
+        <p>${esc(p.content)}</p>
+
+        <span class="muted">
+          ${new Date(p.created_at).toLocaleString()}
+        </span>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+async function loadStories(){
+
+  const {
+    data
+  } =
+    await client
+      .from("stories")
+      .select(
+        "id,user_id,caption,created_at"
+      )
+      .gt(
+        "expires_at",
+        new Date().toISOString()
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      );
+
+  const ids =
+    [...new Set(
+      (data || []).map(x => x.user_id)
+    )];
+
+  const {
+    data:ps
+  } =
+    ids.length
+      ? await client
+          .from("profiles")
+          .select("id,username")
+          .in("id",ids)
+      : {data:[]};
+
+  const pm =
+    Object.fromEntries(
+      (ps || []).map(p => [p.id,p])
+    );
+
+  const html =
+    (data || []).map(s => `
+
+      <div class="story">
+
+        <span>
+
+          @${esc(
+            pm[s.user_id]?.username || "user"
+          )}
+
+          <br>
+
+          ${esc(s.caption)}
+
+        </span>
+
+      </div>
+
+    `).join("");
+
+  document.getElementById("storyrow").innerHTML =
+    html || '<div class="story">No stories</div>';
+
+  const sl =
+    document.getElementById("storiesList");
+
+  if(sl)
+    sl.innerHTML =
+      html || "No active stories.";
+
+}
+
+
+async function createStory(){
+
+  const caption =
+    prompt("Story text:");
+
+  if(!caption) return;
+
+  const {
+    error
+  } =
+    await client
+      .from("stories")
+      .insert({
+        user_id:currentUser.id,
+        caption
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    loadStories();
+
+  }
+
+}
+
+
+async function createListing(){
+
+  const title =
+    prompt("Item title:");
+
+  if(!title) return;
+
+  const price =
+    prompt("Price:","0");
+
+  const {
+    error
+  } =
+    await client
+      .from("marketplace_listings")
+      .insert({
+        seller_id:currentUser.id,
+        title,
+        price:Number(price) || 0,
+        currency:"EUR"
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    loadMarketplace();
+
+  }
+
+}
+
+
+async function loadMarketplace(){
+
+  const {
+    data
+  } =
+    await client
+      .from("marketplace_listings")
+      .select("*")
+      .eq("status","active")
+      .order(
+        "created_at",
+        {ascending:false}
+      );
+
+  const el =
+    document.getElementById("marketList");
+
+  if(el){
+
+    el.innerHTML =
+      (data || []).map(x => `
+
+        <div class="card">
+
+          <b>${esc(x.title)}</b>
+
+          <p>${esc(x.description)}</p>
+
+          <b>
+            ${esc(x.price)}
+            ${esc(x.currency)}
+          </b>
+
+        </div>
+
+      `).join("") || "No listings.";
+
+  }
+
+}
+
+
+async function createGroup(){
+
+  const name =
+    prompt("Group name:");
+
+  if(!name) return;
+
+  const {
+    data,
+    error
+  } =
+    await client
+      .from("groups")
+      .insert({
+        owner_id:currentUser.id,
+        name,
+        privacy:"public"
+      })
+      .select()
+      .single();
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    await client
+      .from("group_members")
+      .insert({
+        group_id:data.id,
+        user_id:currentUser.id,
+        role:"owner"
+      });
+
+    loadGroups();
+
+  }
+
+}
+
+
+async function loadGroups(){
+
+  const {
+    data
+  } =
+    await client
+      .from("groups")
+      .select("*")
+      .order(
+        "created_at",
+        {ascending:false}
+      );
+
+  const el =
+    document.getElementById("groupsList");
+
+  if(el){
+
+    el.innerHTML =
+      (data || []).map(g => `
+
+        <div class="card">
+
+          <b>${esc(g.name)}</b>
+
+          <p>${esc(g.description)}</p>
+
+          <button
+            class="action"
+            onclick="joinGroup('${g.id}')"
+          >
+            Join
+          </button>
+
+        </div>
+
+      `).join("") || "No groups.";
+
+  }
+
+}
+
+
+async function joinGroup(id){
+
+  const {
+    error
+  } =
+    await client
+      .from("group_members")
+      .upsert({
+        group_id:id,
+        user_id:currentUser.id,
+        role:"member"
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    alert("Joined group.");
+
+  }
+
+}
+
+
+async function createPage(){
+
+  const name =
+    prompt("Page name:");
+
+  if(!name) return;
+
+  const {
+    error
+  } =
+    await client
+      .from("pages")
+      .insert({
+        owner_id:currentUser.id,
+        name
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    loadPages();
+
+  }
+
+}
+
+
+async function loadPages(){
+
+  const {
+    data
+  } =
+    await client
+      .from("pages")
+      .select("*")
+      .order(
+        "created_at",
+        {ascending:false}
+      );
+
+  const el =
+    document.getElementById("pagesList");
+
+  if(el){
+
+    el.innerHTML =
+      (data || []).map(p => `
+
+        <div class="card">
+
+          <b>${esc(p.name)}</b>
+
+          <p>${esc(p.description)}</p>
+
+          <button
+            class="action"
+            onclick="followPage('${p.id}')"
+          >
+            Follow
+          </button>
+
+        </div>
+
+      `).join("") || "No pages.";
+
+  }
+
+}
+
+
+async function followPage(id){
+
+  const {
+    error
+  } =
+    await client
+      .from("page_followers")
+      .upsert({
+        page_id:id,
+        user_id:currentUser.id
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    alert("Following page.");
+
+  }
+
+}
+
+
+async function createEvent(){
+
+  const title =
+    prompt("Event title:");
+
+  if(!title) return;
+
+  const date =
+    prompt(
+      "Start date/time (e.g. 2026-12-31 18:00):"
+    );
+
+  if(!date) return;
+
+  const {
+    error
+  } =
+    await client
+      .from("events")
+      .insert({
+        owner_id:currentUser.id,
+        title,
+        starts_at:new Date(date).toISOString()
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    loadEvents();
+
+  }
+
+}
+
+
+async function loadEvents(){
+
+  const {
+    data
+  } =
+    await client
+      .from("events")
+      .select("*")
+      .order(
+        "starts_at",
+        {ascending:true}
+      );
+
+  const el =
+    document.getElementById("eventsList");
+
+  if(el){
+
+    el.innerHTML =
+      (data || []).map(e => `
+
+        <div class="card">
+
+          <b>${esc(e.title)}</b>
+
+          <p>
+            📅 ${new Date(e.starts_at).toLocaleString()}
+          </p>
+
+          <button
+            class="action"
+            onclick="attend('${e.id}')"
+          >
+            Interested
+          </button>
+
+        </div>
+
+      `).join("") || "No events.";
+
+  }
+
+}
+
+
+async function attend(id){
+
+  const {
+    error
+  } =
+    await client
+      .from("event_attendees")
+      .upsert({
+        event_id:id,
+        user_id:currentUser.id,
+        status:"interested"
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    alert("Added to events.");
+
+  }
+
+}
+
+
+function openModal(content){
+
+  document.getElementById("modalContent").innerHTML =
+    content;
+
+  document
+    .getElementById("modal")
+    .classList.add("show");
+
+}
+
+
+function closeModal(){
+
+  document
+    .getElementById("modal")
+    .classList.remove("show");
+
+}
+
+
+async function startChat(){
+
+  const other =
+    document
+      .getElementById("messageUser")
+      .value
+      .trim();
+
+  if(!other) return;
+
+  const {
+    data,
+    error
+  } =
+    await client.rpc(
+      "create_direct_conversation",
+      {
+        other_user:other
+      }
+    );
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    loadMessages(data);
+
+  }
+
+}
+
+
+async function loadMessages(conversationId){
+
+  const {
+    data,
+    error
+  } =
+    await client
+      .from("messages")
+      .select("*")
+      .eq(
+        "conversation_id",
+        conversationId
+      )
+      .order("created_at");
+
+  if(error){
+
+    alert(error.message);
+
+    return;
+
+  }
+
+  document.getElementById("messagesList").innerHTML =
+    (data || []).map(m => `
+
+      <div class="comment">
+
+        <b>
+          ${m.sender_id === currentUser.id
+            ? "You"
+            : "Friend"}:
+        </b>
+
+        ${esc(m.content)}
+
+      </div>
+
+    `).join("");
+
+  openModal(`
+
+    <h2>Conversation</h2>
+
+    <div id="chat">
+      ${document.getElementById("messagesList").innerHTML}
+    </div>
+
+    <div class="commentbox">
+
+      <input
+        id="chatText"
+        placeholder="Write a message"
+      >
+
+      <button
+        class="primary"
+        onclick="sendMessage('${conversationId}')"
+      >
+        Send
+      </button>
+
+    </div>
+
+  `);
+
+}
+
+
+async function sendMessage(cid){
+
+  const content =
+    document
+      .getElementById("chatText")
+      .value
+      .trim();
+
+  if(!content) return;
+
+  const {
+    error
+  } =
+    await client
+      .from("messages")
+      .insert({
+        conversation_id:cid,
+        sender_id:currentUser.id,
+        content
+      });
+
+  if(error){
+
+    alert(error.message);
+
+  }else{
+
+    loadMessages(cid);
+
+  }
+
+}
+
+
+client.auth
+  .getSession()
+  .then(async ({data}) => {
+
+    if(data.session){
+
+      currentUser =
+        data.session.user;
+
+      openSite();
+
+    }
+
+  });
+
+
+client.auth
+  .onAuthStateChange(
+    (_event,session) => {
+
+      if(session){
+
+        currentUser =
+          session.user;
+
+      }
+
+    }
+  );
+
 </script>
 
 </body>
