@@ -9,10 +9,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>SocialHub</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" data-socialhub-supabase="1"></script>
 <script><![CDATA[
-
-/* Blogger integration: public Blogger feeds require no secret key. */
+/* SocialHub Blogger bridge: one auth path and one Blogger feed helper. */
 let bloggerJsonpCounter=0;
 function escapeHtml(value){
   return String(value ?? "")
@@ -22,133 +21,169 @@ function escapeHtml(value){
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
 }
-function toast(message){
-  alert(message);
-}
+function toast(message){alert(message)}
 
-(function installBloggerAuthBridge(){
-  const URL="https://gkqyaroprqajwoubnsvs.supabase.co";
-  const KEY="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
-  let authClient=null;
-  function getClient(){
-    if(authClient) return authClient;
-    if(window.supabase && typeof window.supabase.createClient==="function"){
-      authClient=window.supabase.createClient(URL,KEY);
-      return authClient;
-    }
-    return null;
-  }
-  function setMsg(text){
-    const el=document.getElementById("authmsg");
-    if(el) el.textContent=text||"";
-  }
-  function waitForClient(){
-    const c=getClient();
-    if(c) return Promise.resolve(c);
-    return new Promise((resolve,reject)=>{
-      let tries=0;
-      const timer=setInterval(()=>{
-        const x=getClient();
-        if(x){clearInterval(timer);resolve(x);return}
-        if(++tries>60){clearInterval(timer);reject(new Error("SocialHub sign-in service is still loading."))}
-      },250);
+const SOCIALHUB_URL="https://gkqyaroprqajwoubnsvs.supabase.co";
+const SOCIALHUB_KEY="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+let socialHubAuthClient=null;
+
+function socialHubSetAuthMessage(text){
+  const el=document.getElementById("authmsg");
+  if(el)el.textContent=text||"";
+}
+function socialHubGetAuthClient(){
+  if(socialHubAuthClient)return socialHubAuthClient;
+  if(window.supabase&&typeof window.supabase.createClient==="function"){
+    socialHubAuthClient=window.supabase.createClient(SOCIALHUB_URL,SOCIALHUB_KEY,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
     });
+    return socialHubAuthClient;
   }
-  async function doLogin(){
-    try{
-      setMsg("Signing in...");
-      const c=await waitForClient();
-      const email=(document.getElementById("email")?.value||"").trim();
-      const password=document.getElementById("password")?.value||"";
-      if(!email||!password){setMsg("Please enter your email and password.");return}
-      const {error}=await c.auth.signInWithPassword({email,password});
-      if(error) throw error;
-    }catch(e){console.error(e);setMsg(e.message||"Login failed.");}
+  return null;
+}
+function socialHubWaitForAuthClient(){
+  const ready=socialHubGetAuthClient();
+  if(ready)return Promise.resolve(ready);
+  return new Promise((resolve,reject)=>{
+    let tries=0;
+    const timer=setInterval(()=>{
+      const client=socialHubGetAuthClient();
+      if(client){clearInterval(timer);resolve(client);return}
+      if(++tries>=80){clearInterval(timer);reject(new Error("SocialHub sign-in service could not be loaded."))}
+    },250);
+  });
+}
+async function socialHubLogin(){
+  try{
+    socialHubSetAuthMessage("Signing in...");
+    const client=await socialHubWaitForAuthClient();
+    const email=(document.getElementById("email")?.value||"").trim();
+    const password=document.getElementById("password")?.value||"";
+    if(!email||!password){socialHubSetAuthMessage("Please enter your email and password.");return}
+    const {error}=await client.auth.signInWithPassword({email,password});
+    if(error)throw error;
+  }catch(error){
+    console.error("SocialHub login:",error);
+    socialHubSetAuthMessage(error.message||"Login failed.");
   }
-  async function doSignup(){
-    try{
-      setMsg("Creating account...");
-      const c=await waitForClient();
-      const email=(document.getElementById("email")?.value||"").trim();
-      const password=document.getElementById("password")?.value||"";
-      const username=(document.getElementById("username")?.value||"").trim();
-      if(!email||!password||!username){setMsg("Please fill in all fields.");return}
-      const {data,error}=await c.auth.signUp({email,password});
-      if(error) throw error;
-      if(data?.user && data?.session){
-        const {error:pe}=await c.from("profiles").upsert({id:data.user.id,username,full_name:username},{onConflict:"id"});
-        if(pe) throw pe;
-      }
-      setMsg("Account created. Check your email if confirmation is required.");
-    }catch(e){console.error(e);setMsg(e.message||"Account creation failed.");}
+}
+async function socialHubSignup(){
+  try{
+    socialHubSetAuthMessage("Creating account...");
+    const client=await socialHubWaitForAuthClient();
+    const email=(document.getElementById("email")?.value||"").trim();
+    const password=document.getElementById("password")?.value||"";
+    const username=(document.getElementById("username")?.value||"").trim();
+    if(!email||!password||!username){socialHubSetAuthMessage("Please fill in email, password and username.");return}
+    const {data,error}=await client.auth.signUp({
+      email,password,options:{data:{username,full_name:username}}
+    });
+    if(error)throw error;
+    if(data?.user&&data?.session){
+      const {error:profileError}=await client.from("profiles").upsert(
+        {id:data.user.id,username,full_name:username},{onConflict:"id"}
+      );
+      if(profileError)console.warn("Profile creation:",profileError.message);
+    }
+    socialHubSetAuthMessage(data?.session?"Account created.":"Account created. Check your email if confirmation is required.");
+  }catch(error){
+    console.error("SocialHub signup:",error);
+    socialHubSetAuthMessage(error.message||"Account creation failed.");
   }
-  async function doGoogle(){
-    try{
-      setMsg("Opening Google sign-in...");
-      const c=await waitForClient();
-      const {error}=await c.auth.signInWithOAuth({provider:"google",options:{scopes:"openid email profile",redirectTo:window.location.origin+window.location.pathname}});
-      if(error) throw error;
-    }catch(e){console.error(e);setMsg(e.message||"Google sign-in could not be started.");}
+}
+async function socialHubGoogle(){
+  try{
+    socialHubSetAuthMessage("Opening Google sign-in...");
+    const client=await socialHubWaitForAuthClient();
+    const {error}=await client.auth.signInWithOAuth({
+      provider:"google",
+      options:{scopes:"openid email profile",redirectTo:window.location.origin+window.location.pathname}
+    });
+    if(error)throw error;
+  }catch(error){
+    console.error("SocialHub Google:",error);
+    socialHubSetAuthMessage(error.message||"Google sign-in could not be started.");
   }
-  window.socialHubLogin=doLogin;
-  window.socialHubSignup=doSignup;
-  window.socialHubGoogle=doGoogle;
-  function wire(){
-    const a=document.getElementById("loginBtn"), b=document.getElementById("signupBtn"), g=document.getElementById("googleBtn");
-    if(a)a.addEventListener("click",doLogin);
-    if(b)b.addEventListener("click",doSignup);
-    if(g)g.addEventListener("click",doGoogle);
+}
+function socialHubBindAuthButtons(){
+  const login=document.getElementById("loginBtn");
+  const signup=document.getElementById("signupBtn");
+  const google=document.getElementById("googleBtn");
+  if(login&&!login.dataset.socialhubBound){
+    login.dataset.socialhubBound="1";
+    login.addEventListener("click",socialHubLogin);
   }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",wire,{once:true}); else wire();
-})();
+  if(signup&&!signup.dataset.socialhubBound){
+    signup.dataset.socialhubBound="1";
+    signup.addEventListener("click",socialHubSignup);
+  }
+  if(google&&!google.dataset.socialhubBound){
+    google.dataset.socialhubBound="1";
+    google.addEventListener("click",socialHubGoogle);
+  }
+}
+window.socialHubLogin=socialHubLogin;
+window.socialHubSignup=socialHubSignup;
+window.socialHubGoogle=socialHubGoogle;
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",socialHubBindAuthButtons,{once:true});
+else socialHubBindAuthButtons();
+
 function normalizeBloggerUrl(value){
-  let u=(value||'').trim();
-  if(!u)return '';
-  if(!/^https?:\/\//i.test(u))u='https://'+u;
-  try{const x=new URL(u);return x.origin}catch(e){return ''}
+  let u=(value||"").trim();
+  if(!u)return "";
+  if(!/^https?:\/\//i.test(u))u="https://"+u;
+  try{return new URL(u).origin}catch(e){return ""}
 }
 function saveBloggerConnection(){
-  const url=normalizeBloggerUrl(document.getElementById('bloggerUrl')?.value);
-  if(!url){toast('Enter a valid Blogger blog URL.');return}
-  localStorage.setItem('socialhub_blogger_url',url);
+  const url=normalizeBloggerUrl(document.getElementById("bloggerUrl")?.value);
+  if(!url){toast("Enter a valid Blogger blog URL.");return}
+  localStorage.setItem("socialhub_blogger_url",url);
   loadBloggerPosts();
 }
 function loadBloggerPosts(){
-  const input=document.getElementById('bloggerUrl');
-  const saved=localStorage.getItem('socialhub_blogger_url')||'https://rahimi32145.blogspot.com';
+  const input=document.getElementById("bloggerUrl");
+  const saved=localStorage.getItem("socialhub_blogger_url")||"https://rahimi32145.blogspot.com";
   if(input&&!input.value)input.value=saved;
   const url=normalizeBloggerUrl(input?.value||saved);
-  const status=document.getElementById('bloggerStatus');
-  const box=document.getElementById('bloggerPosts');
-  if(!url){if(status)status.textContent='Connect your public Blogger URL to load posts.';if(box)box.innerHTML='<div class="blogger-empty">No Blogger blog connected yet.</div>';return}
-  if(status)status.textContent='Loading Blogger posts…';
-  if(box)box.innerHTML='';
-  const cb='socialhubBloggerCallback'+(++bloggerJsonpCounter);
+  const status=document.getElementById("bloggerStatus");
+  const box=document.getElementById("bloggerPosts");
+  if(!url){
+    if(status)status.textContent="Connect your public Blogger URL to load posts.";
+    if(box)box.innerHTML='<div class="blogger-empty">No Blogger blog connected yet.</div>';
+    return;
+  }
+  if(status)status.textContent="Loading Blogger posts…";
+  if(box)box.innerHTML="";
+  const cb="socialhubBloggerCallback"+(++bloggerJsonpCounter);
   window[cb]=(data)=>{
     try{
       const entries=data?.feed?.entry||[];
-      if(!entries.length){if(status)status.textContent='Connected, but no public posts were found.';if(box)box.innerHTML='<div class="blogger-empty">Your Blogger feed has no public posts yet.</div>';return}
-      localStorage.setItem('socialhub_blogger_url',url);
-      if(status)status.textContent='Connected to '+url;
+      if(!entries.length){
+        if(status)status.textContent="Connected, but no public posts were found.";
+        if(box)box.innerHTML='<div class="blogger-empty">Your Blogger feed has no public posts yet.</div>';
+        return;
+      }
+      localStorage.setItem("socialhub_blogger_url",url);
+      if(status)status.textContent="Connected to "+url;
       box.innerHTML=entries.slice(0,12).map((entry)=>{
-        const title=entry.title?.$t||'Untitled';
-        const link=(entry.link||[]).find(l=>l.rel==='alternate')?.href||url;
-        const published=entry.published?.$t||entry.updated?.$t||'';
-        const date=published?new Date(published).toLocaleString():''; 
-        const raw=entry.content?.$t||entry.summary?.$t||'';
-        const temp=document.createElement('div');temp.innerHTML=raw;
-        const img=temp.querySelector('img')?.src||'';
-        const textContent=(temp.textContent||'').trim().replace(/\s+/g,' ').slice(0,260);
-        return '<article class="blogger-post">'+
-          '<h3><a href="'+escapeHtml(link)+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a></h3>'+
-          (date?'<div class="postmeta">'+escapeHtml(date)+'</div>':'')+
-          (img?'<img src="'+escapeHtml(img)+'" alt="">':'')+
-          (textContent?'<p>'+escapeHtml(textContent)+(textContent.length>=260?'…':'')+'</p>':'')+
-          '<a class="action" href="'+escapeHtml(link)+'" target="_blank" rel="noopener">Read on Blogger</a>'+
-        '</article>';
-      }).join('');
-    }catch(err){
-      if(status)status.textContent='Blogger feed could not be displayed.';
+        const title=entry.title?.$t||"Untitled";
+        const link=(entry.link||[]).find(l=>l.rel==="alternate")?.href||url;
+        const published=entry.published?.$t||entry.updated?.$t||"";
+        const date=published?new Date(published).toLocaleString():"";
+        const raw=entry.content?.$t||entry.summary?.$t||"";
+        const temp=document.createElement("div");temp.innerHTML=raw;
+        const img=temp.querySelector("img")?.src||"";
+        const textContent=(temp.textContent||"").trim().replace(/\s+/g," ").slice(0,260);
+        return "<article class=\"blogger-post\">"+
+          "<h3><a href=\""+escapeHtml(link)+"\" target=\"_blank\" rel=\"noopener\">"+escapeHtml(title)+"</a></h3>"+
+          (date?"<div class=\"postmeta\">"+escapeHtml(date)+"</div>":"")+
+          (img?"<img src=\""+escapeHtml(img)+"\" alt=\"\">":"")+
+          (textContent?"<p>"+escapeHtml(textContent)+(textContent.length>=260?"…":"")+"</p>":"")+
+          "<a class=\"action\" href=\""+escapeHtml(link)+"\" target=\"_blank\" rel=\"noopener\">Read on Blogger</a>"+
+        "</article>";
+      }).join("");
+    }catch(error){
+      if(status)status.textContent="Blogger feed could not be displayed.";
       if(box)box.innerHTML='<div class="blogger-empty">The Blogger response was not in the expected format.</div>';
     }finally{
       delete window[cb];
@@ -156,18 +191,16 @@ function loadBloggerPosts(){
       if(node)node.remove();
     }
   };
-  const script=document.createElement('script');
+  const script=document.createElement("script");
   script.id=cb;
-  script.src=url.replace(/\/$/,'')+'/feeds/posts/default?alt=json-in-script&max-results=12&callback='+cb;
+  script.src=url.replace(/\/$/,"")+"/feeds/posts/default?alt=json-in-script&max-results=12&callback="+cb;
   script.onerror=()=>{
-    delete window[cb];
-    script.remove();
-    if(status)status.textContent='Could not connect to this Blogger feed. Make sure the blog is public and the URL is correct.';
+    delete window[cb];script.remove();
+    if(status)status.textContent="Could not connect to this Blogger feed. Make sure the blog is public and the URL is correct.";
     if(box)box.innerHTML='<div class="blogger-empty">Blogger connection failed. Check the blog URL and try again.</div>';
   };
   document.body.appendChild(script);
 }
-
 ]]></script>
 
 
@@ -495,72 +528,8 @@ button{cursor:pointer;border:0}
 <body>
 
 
-<script><![CDATA[
-(function(){
-  const U="https://gkqyaroprqajwoubnsvs.supabase.co";
-  const K="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
-  let c=null;
-  function msg(t){const e=document.getElementById("authmsg");if(e)e.textContent=t||""}
-  function get(){
-    if(c)return c;
-    if(window.supabase&&typeof window.supabase.createClient==="function"){c=window.supabase.createClient(U,K);return c}
-    return null;
-  }
-  function load(){
-    const x=get(); if(x)return Promise.resolve(x);
-    return new Promise((res,rej)=>{
-      const tag=document.createElement("script");
-      tag.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-      tag.onload=()=>{const y=get();y?res(y):rej(new Error("Supabase library did not initialize."))};
-      tag.onerror=()=>rej(new Error("Could not load SocialHub sign-in service."));
-      document.head.appendChild(tag);
-    });
-  }
-  window.socialHubDirectAuth=async function(mode){
-    try{
-      msg(mode==="google"?"Opening Google sign-in...":mode==="login"?"Signing in...":"Creating account...");
-      const db=await load();
-      const email=(document.getElementById("email")?.value||"").trim();
-      const password=document.getElementById("password")?.value||"";
-      const username=(document.getElementById("username")?.value||"").trim();
-      if(mode==="login"){
-        if(!email||!password){msg("Please enter your email and password.");return}
-        const r=await db.auth.signInWithPassword({email,password});
-        if(r.error)throw r.error;
-        return;
-      }
-      if(mode==="signup"){
-        if(!email||!password||!username){msg("Please fill in all fields.");return}
-        const r=await db.auth.signUp({email,password});
-        if(r.error)throw r.error;
-        if(r.data?.user&&r.data?.session){
-          const p=await db.from("profiles").upsert({id:r.data.user.id,username,full_name:username},{onConflict:"id"});
-          if(p.error)throw p.error;
-        }
-        msg("Account created. Check your email if confirmation is required.");
-        return;
-      }
-      const r=await db.auth.signInWithOAuth({provider:"google",options:{scopes:"openid email profile",redirectTo:window.location.origin+window.location.pathname}});
-      if(r.error)throw r.error;
-    }catch(e){console.error(e);msg(e.message||"SocialHub sign-in failed.")}
-  };
-})();
-]]></script>
-<script><![CDATA[
-document.addEventListener("click",function(event){
-  const b=event.target.closest && event.target.closest("#loginBtn,#signupBtn,#googleBtn");
-  if(!b)return;
-  event.preventDefault();
-  event.stopPropagation();
-  const mode=b.id==="loginBtn"?"login":b.id==="signupBtn"?"signup":"google";
-  if(typeof window.socialHubDirectAuth==="function"){
-    window.socialHubDirectAuth(mode);
-  }else{
-    const m=document.getElementById("authmsg");
-    if(m)m.textContent="Sign-in is starting. Please wait a moment.";
-  }
-},true);
-]]></script>
+
+
 <div id="auth" class="auth-page">
   <div class="auth-shell">
     <div class="auth-brand"><div class="auth-logo-mark">S</div><div><div class="auth-brand-name">SocialHub</div><div class="auth-brand-tag">Connect. Share. Belong.</div></div></div>
@@ -575,11 +544,11 @@ document.addEventListener("click",function(event){
         <input id="username" class="signup-only-field" placeholder="Choose a username" autocomplete="username" />
       </div>
       <div class="auth-actions">
-        <button id="loginBtn" class="auth-login" type="button">Log in</button>
-        <button id="signupBtn" class="auth-signup" type="button">Create account</button>
+        <button id="loginBtn" class="auth-login" type="button" onclick="socialHubLogin()">Log in</button>
+        <button id="signupBtn" class="auth-signup" type="button" onclick="socialHubSignup()">Create account</button>
       </div>
       <div class="auth-divider"><span>or continue with</span></div>
-      <button id="googleBtn" class="auth-google" type="button"><span class="google-icon">G</span> Continue with Google</button>
+      <button id="googleBtn" class="auth-google" type="button" onclick="socialHubGoogle()"><span class="google-icon">G</span> Continue with Google</button>
       <p id="authmsg" class="auth-message"></p>
       <div class="auth-note">Secure authentication by Supabase.</div>
     </div>
@@ -587,66 +556,7 @@ document.addEventListener("click",function(event){
   </div>
 </div>
 
-<script><![CDATA[
-(function(){
-  const U="https://gkqyaroprqajwoubnsvs.supabase.co";
-  const K="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
-  const REF="sb-gkqyaroprqajwoubnsvs-auth-token";
-  const msg=t=>{const e=document.getElementById("authmsg");if(e)e.textContent=t||""};
-  const val=id=>(document.getElementById(id)?.value||"").trim();
-  async function api(path,body){
-    const r=await fetch(U+path,{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+K},body:JSON.stringify(body)});
-    const j=await r.json().catch(()=>({}));
-    if(!r.ok)throw new Error(j.error_description||j.msg||j.message||"Authentication failed.");
-    return j;
-  }
-  function saveSession(s){
-    if(!s?.access_token||!s?.refresh_token||!s?.user)return;
-    const expiresIn=Number(s.expires_in||3600);
-    localStorage.setItem(REF,JSON.stringify({access_token:s.access_token,token_type:s.token_type||"bearer",expires_in:expiresIn,expires_at:Math.floor(Date.now()/1000)+expiresIn,refresh_token:s.refresh_token,user:s.user,weak_password:s.weak_password||false}));
-  }
-  async function login(){
-    try{
-      msg("Signing in...");
-      const email=val("email"),password=document.getElementById("password")?.value||"";
-      if(!email||!password){msg("Enter your email and password.");return}
-      const s=await api("/auth/v1/token?grant_type=password",{email,password});
-      saveSession(s);
-      location.reload();
-    }catch(e){console.error(e);msg(e.message||"Login failed.")}
-  }
-  async function signup(){
-    try{
-      msg("Creating account...");
-      const email=val("email"),password=document.getElementById("password")?.value||"",username=val("username");
-      if(!email||!password||!username){msg("Fill in email, password and username.");return}
-      const s=await api("/auth/v1/signup",{email,password,data:{username,full_name:username}});
-      if(s.access_token)saveSession(s);
-      if(s.user&&s.access_token){
-        const r=await fetch(U+"/rest/v1/profiles",{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+s.access_token,"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({id:s.user.id,username,full_name:username})});
-        if(!r.ok)console.warn("Profile creation:",await r.text());
-        location.reload();
-      }else msg("Account created. Check your email to confirm the account.");
-    }catch(e){console.error(e);msg(e.message||"Account creation failed.")}
-  }
-  async function google(){
-    try{
-      msg("Opening Google sign-in...");
-      const redirect=location.origin+location.pathname;
-      const r=await fetch(U+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirect),{headers:{apikey:K}});
-      if(r.redirected){location.href=r.url;return}
-      location.href=U+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirect);
-    }catch(e){location.href=U+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(location.origin+location.pathname)}
-  }
-  window.socialHubDirectAuth=mode=>mode==="login"?login():mode==="signup"?signup():google();
-  const bind=()=>{
-    document.getElementById("loginBtn")?.addEventListener("click",login);
-    document.getElementById("signupBtn")?.addEventListener("click",signup);
-    document.getElementById("googleBtn")?.addEventListener("click",google);
-  };
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind,{once:true});else bind();
-})();
-]]></script>
+
 
 <div id="site" class="hidden">
 
@@ -1210,23 +1120,7 @@ function initSupabase(){
 
 function ensureSupabaseReady(){
   if(initSupabase()) return Promise.resolve(client);
-  if(supabaseReadyPromise) return supabaseReadyPromise;
-  supabaseReadyPromise=new Promise((resolve,reject)=>{
-    const existing=document.querySelector('script[data-socialhub-supabase]');
-    if(existing){
-      existing.addEventListener("load",()=>initSupabase()?resolve(client):reject(new Error("Supabase library did not initialize.")),{once:true});
-      existing.addEventListener("error",()=>reject(new Error("Supabase library could not be loaded.")),{once:true});
-      return;
-    }
-    const s=document.createElement("script");
-    s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-    s.async=true;
-    s.dataset.socialhubSupabase="1";
-    s.onload=()=>initSupabase()?resolve(client):reject(new Error("Supabase library did not initialize."));
-    s.onerror=()=>reject(new Error("Supabase library could not be loaded in Blogger."));
-    document.head.appendChild(s);
-  });
-  return supabaseReadyPromise;
+  return Promise.reject(new Error("Supabase library could not be loaded."));
 }
 
 ensureSupabaseReady().catch(error=>console.error("Supabase startup error:",error));
@@ -3004,7 +2898,7 @@ ensureSupabaseReady()
   .catch(error=>{
     console.error("Session restore error:",error);
     const msg=document.getElementById("authmsg");
-    if(msg) msg.textContent="SocialHub is still loading. Please wait a moment and try again.";
+    if(msg) msg.textContent="Authentication service is unavailable. Please refresh and try again.";
   });
 
 ensureSupabaseReady()
