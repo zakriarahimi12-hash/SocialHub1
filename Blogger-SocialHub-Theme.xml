@@ -90,9 +90,11 @@ function toast(message){
       if(error) throw error;
     }catch(e){console.error(e);setMsg(e.message||"Google sign-in could not be started.");}
   }
+  window.socialHubLogin=doLogin;
+  window.socialHubSignup=doSignup;
+  window.socialHubGoogle=doGoogle;
   function wire(){
     const a=document.getElementById("loginBtn"), b=document.getElementById("signupBtn"), g=document.getElementById("googleBtn");
-    window.socialHubLogin=doLogin; window.socialHubSignup=doSignup; window.socialHubGoogle=doGoogle;
     if(a)a.addEventListener("click",doLogin);
     if(b)b.addEventListener("click",doSignup);
     if(g)g.addEventListener("click",doGoogle);
@@ -521,12 +523,12 @@ button{cursor:pointer;border:0}
       </div>
 
       <div class="auth-actions">
-        <button id="loginBtn" class="auth-login" type="button" onclick="socialHubLogin()">Log in</button>
-        <button id="signupBtn" class="auth-signup" type="button" onclick="socialHubSignup()">Create account</button>
+        <button id="loginBtn" class="auth-login" type="button" onclick="if(window.socialHubLogin){window.socialHubLogin()}else if(window.login){window.login()}else{alert('SocialHub is still loading. Please wait a moment.')} ">Log in</button>
+        <button id="signupBtn" class="auth-signup" type="button" onclick="if(window.socialHubSignup){window.socialHubSignup()}else if(window.signup){window.signup()}else{alert('SocialHub is still loading. Please wait a moment.')} ">Create account</button>
       </div>
 
       <div class="auth-divider"><span>or continue with</span></div>
-      <button id="googleBtn" class="auth-google" type="button" onclick="socialHubGoogle()"><span class="google-icon">G</span> Continue with Google</button>
+      <button id="googleBtn" class="auth-google" type="button" onclick="if(window.socialHubGoogle){window.socialHubGoogle()}else if(window.loginWithGoogle){window.loginWithGoogle()}else{alert('SocialHub is still loading. Please wait a moment.')} "><span class="google-icon">G</span> Continue with Google</button>
 
       <p id="authmsg" class="auth-message"></p>
       <div class="auth-note">Your account is securely handled by Supabase.</div>
