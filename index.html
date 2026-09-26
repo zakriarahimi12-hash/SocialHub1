@@ -1136,8 +1136,17 @@ async function loadFeed(){
 
 
 function postMenuHtml(p){
-  if(p.user_id!==currentUser.id)return '<button onclick="openPrivacyMenu(\\''+p.id+'\\',\\''+(p.privacy||"public")+'\\',true)">🔒 Privacy</button>';
-  return '<button onclick="editPost(\\''+p.id+'\\')">✏️ Edit</button><button onclick="deletePost(\\''+p.id+'\\')">🗑️ Delete</button><button onclick="togglePrivacySubmenu(\\''+p.id+'\\')">🔒 Privacy ›</button><div id="privacy-submenu-'+p.id+'" class="privacy-submenu hidden"><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'public\\',false)">🌎 Public</button><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'friends\\',false)">👥 Friends</button><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'me\\',false)">🔒 Only me</button></div>';
+  const id=esc(p.id);
+  if(p.user_id!==currentUser.id){
+    return '<button type="button" onclick="openPrivacyMenu(\''+id+'\',\''+(p.privacy||"public")+'\',true)">🔒 Privacy</button>';
+  }
+  return '<button type="button" onclick="editPost(\''+id+'\')">✏️ Edit</button>'+
+         '<button type="button" onclick="deletePost(\''+id+'\')">🗑️ Delete</button>'+
+         '<button type="button" onclick="togglePrivacySubmenu(\''+id+'\')">🔒 Privacy ›</button>'+
+         '<div id="privacy-submenu-'+id+'" class="privacy-submenu hidden">'+
+         '<button type="button" onclick="setPostPrivacy(\''+id+'\',\'public\',false)">🌎 Public</button>'+
+         '<button type="button" onclick="setPostPrivacy(\''+id+'\',\'friends\',false)">👥 Friends</button>'+
+         '<button type="button" onclick="setPostPrivacy(\''+id+'\',\'me\',false)">🔒 Only me</button></div>';
 }
 function toggleCommentMenu(id){document.querySelectorAll(".comment-menu").forEach(x=>{if(x.id!=="comment-menu-"+id)x.classList.add("hidden")});document.getElementById("comment-menu-"+id)?.classList.toggle("hidden")}
 async function editComment(id,content){const value=prompt("Edit your comment:",content);if(value===null)return;const text=value.trim();if(!text)return;const {error}=await client.from("comments").update({content:text}).eq("id",id).eq("user_id",currentUser.id);if(error)alert(error.message);else document.querySelectorAll("[id^=comments-]").forEach(el=>{if(el.querySelector("#comment-menu-"+id))loadComments(el.id.replace("comments-",""))})}
