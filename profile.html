@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SocialHub Profile</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f0f2f5;color:#1c1e21;font-family:Arial,Helvetica,sans-serif}button,input,textarea{font:inherit}button{cursor:pointer;border:0}
+.top{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;gap:12px;padding:0 18px;position:sticky;top:0;z-index:10}.logo{font-size:24px;font-weight:800;color:#1877f2}.search{background:#f0f2f5;border:0;border-radius:22px;padding:10px 15px;width:240px}.back{margin-left:auto;background:#f0f2f5;padding:10px 14px;border-radius:9px;font-weight:700}
+.wrap{max-width:1050px;margin:20px auto;padding:0 12px}.card{background:#fff;border-radius:12px;margin-bottom:16px;padding:18px;box-shadow:0 1px 2px #0001}
+.cover{height:300px;border-radius:12px;background:linear-gradient(135deg,#1877f2,#8ab4f8);position:relative;background-size:cover;background-position:center}.cover button{position:absolute;right:15px;bottom:15px;background:#fff;padding:10px 14px;border-radius:8px;font-weight:700}
+.profileHead{display:flex;align-items:end;gap:18px;margin-top:-55px;padding:0 25px}.avatar{width:130px;height:130px;border-radius:50%;background:#ddd;border:5px solid #fff;display:grid;place-items:center;font-size:42px;font-weight:800;overflow:hidden;background-size:cover;background-position:center}.headText{padding-bottom:10px}.headText h1{margin:0;font-size:30px}.muted{color:#65676b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.primary{background:#1877f2;color:#fff;padding:11px 18px;border-radius:8px;font-weight:700}.action{background:#e4e6eb;padding:11px 18px;border-radius:8px;font-weight:700}.tabs{display:flex;gap:5px;overflow:auto;border-top:1px solid #ddd;margin-top:18px;padding-top:8px}.tabs button{background:#fff;padding:12px 18px;font-weight:700;white-space:nowrap}.tabs button:hover{background:#f0f2f5}.layout{display:grid;grid-template-columns:360px 1fr;gap:16px}.detail{padding:12px 0;border-bottom:1px solid #eee}.detail:last-child{border:0}.post{border-bottom:1px solid #eee;padding:15px 0}.post:last-child{border:0}.edit{max-width:650px}.edit label{display:block;font-weight:700;margin-top:12px}.edit input,.edit textarea{width:100%;padding:12px;border:1px solid #ccd0d5;border-radius:8px;margin-top:5px}.edit textarea{min-height:100px;resize:vertical}.hidden{display:none!important}.notice{padding:12px;border-radius:9px;background:#e7f3ff;margin-bottom:12px}.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:20}.modal.show{display:flex}.modalbox{background:#fff;border-radius:12px;width:min(650px,94vw);max-height:90vh;overflow:auto;padding:22px}.toast{position:fixed;right:18px;bottom:18px;background:#1c1e21;color:#fff;padding:12px 16px;border-radius:9px;display:none;z-index:30}
+@media(max-width:750px){.search{width:140px}.layout{grid-template-columns:1fr}.cover{height:220px}.profileHead{align-items:center;flex-direction:column;margin-top:-65px;text-align:center}.avatar{width:115px;height:115px}.headText h1{font-size:25px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="logo">SocialHub</div><input id="topSearch" class="search" placeholder="Search SocialHub" onkeydown="if(event.key==='Enter')goSearch()"><button class="back" onclick="location.href='index.html'">← Back to SocialHub</button></header>
+<main class="wrap">
+<div class="card">
+  <div id="cover" class="cover"><button onclick="openCoverEditor()">📷 Edit cover photo</button></div>
+  <div class="profileHead">
+    <div id="avatar" class="avatar">S</div>
+    <div class="headText"><h1 id="name">Profile</h1><div id="username" class="muted"></div><div id="bio" class="muted"></div></div>
+  </div>
+  <div class="actions"><button class="primary" onclick="openEditor()">✏️ Edit profile</button><button class="action" onclick="showTab('posts')">Posts</button><button class="action" onclick="showTab('about')">About</button><button class="action" onclick="showTab('friends')">Friends</button><button class="action" onclick="showTab('photos')">Photos</button></div>
+  <div class="tabs"><button onclick="showTab('posts')">Posts</button><button onclick="showTab('about')">About</button><button onclick="showTab('friends')">Friends</button><button onclick="showTab('photos')">Photos</button><button onclick="showTab('videos')">Videos</button><button onclick="showTab('checkins')">Check-ins</button><button onclick="showTab('music')">Music</button></div>
+</div>
+<div id="content"></div>
+</main>
+<div id="modal" class="modal"><div class="modalbox"><div id="modalContent"></div></div></div>
+<div id="toast" class="toast"></div>
+<script>
+const SUPABASE_URL="https://gkqyaroprqajwoubnsvs.supabase.co";
+const SUPABASE_KEY="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let user=null,profile=null;
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function toast(s){const x=document.getElementById("toast");x.textContent=s;x.style.display="block";setTimeout(()=>x.style.display="none",2500)}
+function openModal(html){document.getElementById("modalContent").innerHTML=html;document.getElementById("modal").classList.add("show")}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+async function init(){
+ const {data}=await client.auth.getSession(); if(!data.session){location.href="index.html";return} user=data.session.user; await loadProfile(); showTab("posts");
+}
+async function loadProfile(){
+ const {data,error}=await client.from("profiles").select("*").eq("id",user.id).single(); if(error){toast(error.message);return} profile=data;
+ document.getElementById("name").textContent=data.full_name||"Profile";document.getElementById("username").textContent="@"+(data.username||"user");document.getElementById("bio").textContent=data.bio||"Add a bio to tell people about yourself.";
+ const av=document.getElementById("avatar");if(data.avatar_url){av.textContent="";av.style.backgroundImage="url('"+data.avatar_url+"')"}else{av.textContent=(data.full_name||"S").charAt(0).toUpperCase();av.style.backgroundImage=""}
+ if(data.cover_url)document.getElementById("cover").style.backgroundImage="url('"+data.cover_url+"')";
+}
+async function showTab(tab){
+ let html="";
+ if(tab==="posts"){
+  const {data}=await client.from("posts").select("id,content,created_at").eq("user_id",user.id).order("created_at",{ascending:false});
+  html='<div class="layout"><div class="card"><h2>Posts</h2><p class="muted">Everything you have shared on SocialHub.</p></div><div class="card">'+((data||[]).map(p=>'<div class="post"><div class="muted">'+new Date(p.created_at).toLocaleString()+'</div><p>'+esc(p.content)+'</p><button class="action" onclick="deletePost(\''+p.id+'\')">Delete</button></div>').join("")||"<p class='muted'>No posts yet.</p>")+"</div></div>";
+ }else if(tab==="about"){
+  html='<div class="card"><h2>About</h2><div class="detail"><b>Name</b><br>'+esc(profile.full_name||"Not added")+'</div><div class="detail"><b>Username</b><br>@'+esc(profile.username||"user")+'</div><div class="detail"><b>Bio</b><br>'+esc(profile.bio||"Not added")+'</div><div class="detail"><b>Member since</b><br>'+new Date(user.created_at).toLocaleDateString()+'</div><button class="primary" onclick="openEditor()">Edit your information</button></div>';
+ }else if(tab==="friends"){
+  const {data}=await client.from("friendships").select("*").or("requester_id.eq."+user.id+",addressee_id.eq."+user.id).eq("status","accepted");
+  const ids=(data||[]).map(x=>x.requester_id===user.id?x.addressee_id:x.requester_id);let ps=[];
+  if(ids.length){const r=await client.from("profiles").select("username,full_name").in("id",ids);ps=r.data||[]}
+  html='<div class="card"><h2>Friends</h2><div class="grid">'+(ps.map(p=>'<div class="detail"><b>'+esc(p.full_name||"User")+'</b><br>@'+esc(p.username||"user")+'</div>').join("")||"<p class='muted'>No friends yet.</p>")+"</div></div>";
+ }else{
+  const titles={photos:"Photos",videos:"Videos",checkins:"Check-ins",music:"Music"};html='<div class="card"><h2>'+titles[tab]+'</h2><p class="muted">Your '+titles[tab].toLowerCase()+' will appear here as you add them to SocialHub.</p><button class="primary" onclick="openEditor()">Edit profile</button></div>';
+ }
+ document.getElementById("content").innerHTML=html;
+}
+function openEditor(){
+ openModal('<div class="edit"><h2>Edit profile</h2><p class="muted">Changes are saved directly to your SocialHub profile.</p><label>Full name</label><input id="eName" value="'+esc(profile.full_name||"")+'"><label>Username</label><input id="eUsername" value="'+esc(profile.username||"")+'"><label>Bio</label><textarea id="eBio">'+esc(profile.bio||"")+'</textarea><label>Website</label><input id="eWebsite" value="'+esc(profile.website||"")+'"><label>Location</label><input id="eLocation" value="'+esc(profile.location||"")+'"><div class="actions"><button class="primary" onclick="saveProfile()">Save changes</button><button class="action" onclick="closeModal()">Cancel</button></div></div>');
+}
+async function saveProfile(){
+ const obj={full_name:document.getElementById("eName").value.trim(),username:document.getElementById("eUsername").value.trim(),bio:document.getElementById("eBio").value.trim(),website:document.getElementById("eWebsite").value.trim(),location:document.getElementById("eLocation").value.trim()};
+ const {error}=await client.from("profiles").update(obj).eq("id",user.id);if(error){toast(error.message);return}closeModal();await loadProfile();showTab("posts");toast("Profile updated");
+}
+function openCoverEditor(){openModal('<h2>Cover photo</h2><p class="muted">Enter a public image URL for your cover photo.</p><input id="coverUrl" placeholder="https://..."><div class="actions"><button class="primary" onclick="saveImageUrl(\'cover_url\')">Save cover</button><button class="action" onclick="closeModal()">Cancel</button></div>')}
+function openAvatarEditor(){openModal('<h2>Profile photo</h2><p class="muted">Enter a public image URL for your profile photo.</p><input id="avatarUrl" placeholder="https://..."><div class="actions"><button class="primary" onclick="saveImageUrl(\'avatar_url\')">Save photo</button><button class="action" onclick="closeModal()">Cancel</button></div>')}
+async function saveImageUrl(field){const id=field==="cover_url"?"coverUrl":"avatarUrl";const value=document.getElementById(id).value.trim();if(!value)return;const {error}=await client.from("profiles").update({[field]:value}).eq("id",user.id);if(error){toast(error.message);return}closeModal();await loadProfile();toast("Profile photo updated")}
+async function deletePost(id){if(!confirm("Delete this post?"))return;const {error}=await client.from("posts").delete().eq("id",id).eq("user_id",user.id);if(error)toast(error.message);else{toast("Post deleted");showTab("posts")}}
+function goSearch(){const q=document.getElementById("topSearch").value.trim();if(q)location.href="index.html#search="+encodeURIComponent(q)}
+document.getElementById("avatar").addEventListener("click",openAvatarEditor);init();
+</script>
+</body></html>
