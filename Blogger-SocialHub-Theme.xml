@@ -439,7 +439,7 @@ button{cursor:pointer;border:0}
       </div>
       <div class="auth-actions">
         <button id="loginBtn" class="auth-login" type="button" onclick="socialHubBloggerLogin()">Log in</button>
-        <button id="signupBtn" class="auth-signup" type="button" onclick="socialHubBloggerSignup()">Create account</button>
+        <button id="signupBtn" class="auth-signup" type="button" onclick="socialHubBloggerSignupDirect()">Create account</button>
       </div>
       <div class="auth-divider"><span>or continue with</span></div>
       <button id="googleBtn" class="auth-google" type="button" onclick="socialHubBloggerGoogle()"><span class="google-icon">G</span> Continue with Google</button>
@@ -1084,7 +1084,7 @@ function openSite(){
 }
 
 
-async function signup(){
+async async function socialHubBloggerSignupDirect(){
   const msg=document.getElementById("authmsg");
   try{
     await ensureSupabaseReady();
