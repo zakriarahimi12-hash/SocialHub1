@@ -23,7 +23,7 @@ function toast(message){
 function normalizeBloggerUrl(value){
   let u=(value||'').trim();
   if(!u)return '';
-  if(!/^https?:\\/\\//i.test(u))u='https://'+u;
+  if(!/^https?:\/\//i.test(u))u='https://'+u;
   try{const x=new URL(u);return x.origin}catch(e){return ''}
 }
 function saveBloggerConnection(){
@@ -57,7 +57,7 @@ function loadBloggerPosts(){
         const raw=entry.content?.$t||entry.summary?.$t||'';
         const temp=document.createElement('div');temp.innerHTML=raw;
         const img=temp.querySelector('img')?.src||'';
-        const textContent=(temp.textContent||'').trim().replace(/\\s+/g,' ').slice(0,260);
+        const textContent=(temp.textContent||'').trim().replace(/\s+/g,' ').slice(0,260);
         return '<article class="blogger-post">'+
           '<h3><a href="'+escapeHtml(link)+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a></h3>'+
           (date?'<div class="postmeta">'+escapeHtml(date)+'</div>':'')+
@@ -77,7 +77,7 @@ function loadBloggerPosts(){
   };
   const script=document.createElement('script');
   script.id=cb;
-  script.src=url.replace(/\\/$/,'')+'/feeds/posts/default?alt=json-in-script&max-results=12&callback='+cb;
+  script.src=url.replace(/\/$/,'')+'/feeds/posts/default?alt=json-in-script&max-results=12&callback='+cb;
   script.onerror=()=>{
     delete window[cb];
     script.remove();
