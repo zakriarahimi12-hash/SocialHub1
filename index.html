@@ -1086,18 +1086,9 @@ async function loadFeed(){
             <div class="postmenu-wrap">
               <button class="action" onclick="togglePostMenu('${p.id}')">⋯</button>
               <div id="postmenu-${p.id}" class="postmenu hidden">
-                ${p.user_id===currentUser.id ? `
-                  <button onclick="editPost('${p.id}',${JSON.stringify(p.content)})">✏️ Edit</button>
-                  <button onclick="deletePost('${p.id}')">🗑️ Delete</button>
-                  <div class="post-submenu-wrap">
-                    <button onclick="togglePrivacySubmenu('${p.id}')">🔒 Privacy <span>›</span></button>
-                    <div id="privacy-submenu-${p.id}" class="privacy-submenu hidden">
-                      <button onclick="setPostPrivacy('${p.id}','public',false)">🌎 Public</button>
-                      <button onclick="setPostPrivacy('${p.id}','friends',false)">👥 Friends</button>
-                      <button onclick="setPostPrivacy('${p.id}','me',false)">🔒 Only me</button>
-                    </div>
-                  </div>
-                ` : '' }
+                ${p.user_id===currentUser.id
+                  ? '<button onclick="editPost(\\''+p.id+'\\', '+JSON.stringify(p.content)+')">✏️ Edit</button><button onclick="deletePost(\\''+p.id+'\\')">🗑️ Delete</button><div class="post-submenu-wrap"><button onclick="togglePrivacySubmenu(\\''+p.id+'\\')">🔒 Privacy <span>›</span></button><div id="privacy-submenu-'+p.id+'" class="privacy-submenu hidden"><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'public\\',false)">🌎 Public</button><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'friends\\',false)">👥 Friends</button><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'me\\',false)">🔒 Only me</button></div></div>'
+                  : ''}
               </div>
             </div>
 
