@@ -38,9 +38,9 @@
     #auth {
       width: 100%;
       max-width: 430px;
-      margin: 70px auto;
+      margin: 60px auto;
       padding: 30px;
-      background: white;
+      background: #fff;
       border-radius: 12px;
       box-shadow: 0 2px 12px rgba(0,0,0,.12);
     }
@@ -50,7 +50,7 @@
       font-size: 38px;
       font-weight: bold;
       color: #1877f2;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .auth-subtitle {
@@ -62,7 +62,7 @@
     .auth-input {
       width: 100%;
       padding: 14px;
-      margin: 7px 0;
+      margin: 6px 0;
       border: 1px solid #ccd0d5;
       border-radius: 7px;
       outline: none;
@@ -98,9 +98,10 @@
     }
 
     #message {
+      min-height: 20px;
+      margin-top: 15px;
       text-align: center;
       color: #65676b;
-      min-height: 20px;
     }
 
     #verification {
@@ -108,7 +109,7 @@
     }
 
     /* =========================
-       TOP NAV
+       APP
     ========================= */
 
     #app {
@@ -124,30 +125,29 @@
       border-bottom: 1px solid #dddfe2;
       display: flex;
       align-items: center;
-      padding: 0 18px;
       gap: 15px;
+      padding: 0 18px;
     }
 
     .brand {
       color: #1877f2;
       font-size: 28px;
       font-weight: bold;
-      white-space: nowrap;
     }
 
     .search {
-      width: 240px;
+      width: 260px;
+      border: 0;
+      outline: none;
       background: #f0f2f5;
       border-radius: 22px;
-      border: 0;
       padding: 11px 16px;
-      outline: none;
     }
 
     .top-actions {
-      margin-left: auto;
       display: flex;
       gap: 8px;
+      margin-left: auto;
     }
 
     .circle-btn {
@@ -165,14 +165,14 @@
     }
 
     /* =========================
-       LAYOUT
+       PAGE
     ========================= */
 
     .page {
       max-width: 1200px;
       margin: auto;
       display: grid;
-      grid-template-columns: 250px 1fr 250px;
+      grid-template-columns: 240px 1fr 240px;
       gap: 20px;
       padding: 20px;
     }
@@ -184,11 +184,21 @@
       height: fit-content;
     }
 
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.12);
+    }
+
     .nav-btn {
-      display: flex;
       width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
       padding: 12px;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       border-radius: 8px;
       background: transparent;
       text-align: left;
@@ -196,29 +206,13 @@
     }
 
     .nav-icon {
-      width: 30px;
+      width: 28px;
       font-size: 18px;
     }
 
-    .card {
-      background: white;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: 0 1px 2px rgba(0,0,0,.12);
-      padding: 15px;
-    }
-
     /* =========================
-       PROFILE
+       AVATAR
     ========================= */
-
-    .profile-mini {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-      font-weight: bold;
-    }
 
     .avatar {
       width: 42px;
@@ -230,17 +224,20 @@
       align-items: center;
       justify-content: center;
       font-weight: bold;
+      flex-shrink: 0;
       overflow: hidden;
     }
 
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .profile-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      font-weight: bold;
     }
 
     /* =========================
-       CREATE POST
+       COMPOSER
     ========================= */
 
     .post-input-row {
@@ -251,8 +248,9 @@
 
     .post-input {
       flex: 1;
-      background: #f0f2f5;
       border: 0;
+      outline: none;
+      background: #f0f2f5;
       border-radius: 22px;
       padding: 13px 16px;
       cursor: pointer;
@@ -274,13 +272,13 @@
     }
 
     .composer-actions {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
       margin-top: 8px;
     }
 
     .composer-btn {
-      flex: 1;
       padding: 10px;
       border-radius: 7px;
       background: #e4e6eb;
@@ -297,19 +295,20 @@
     ========================= */
 
     .post {
+      padding-bottom: 14px;
+      margin-bottom: 14px;
       border-bottom: 1px solid #dddfe2;
-      padding-bottom: 12px;
     }
 
     .post:last-child {
       border-bottom: 0;
+      margin-bottom: 0;
     }
 
     .post-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      position: relative;
     }
 
     .post-user {
@@ -325,15 +324,15 @@
     .post-menu {
       margin-left: auto;
       background: transparent;
+      border-radius: 50%;
       font-size: 20px;
       padding: 5px 10px;
-      border-radius: 50%;
     }
 
     .post-content {
       margin: 14px 0;
       white-space: pre-wrap;
-      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     .post-image {
@@ -341,15 +340,15 @@
       max-height: 600px;
       object-fit: cover;
       border-radius: 8px;
-      margin-top: 5px;
+      margin-top: 8px;
     }
 
     .post-stats {
       display: flex;
       justify-content: space-between;
+      padding: 8px 0;
       color: #65676b;
       font-size: 14px;
-      padding: 8px 0;
     }
 
     .post-actions {
@@ -362,8 +361,8 @@
     .action-btn {
       padding: 10px;
       background: white;
-      font-weight: bold;
       color: #65676b;
+      font-weight: bold;
       border-radius: 5px;
     }
 
@@ -371,13 +370,17 @@
       color: #1877f2;
     }
 
+    /* =========================
+       COMMENTS
+    ========================= */
+
     .comments {
       margin-top: 10px;
     }
 
     .comment {
       background: #f0f2f5;
-      border-radius: 15px;
+      border-radius: 16px;
       padding: 8px 12px;
       margin: 5px 0;
       font-size: 14px;
@@ -392,14 +395,15 @@
     .comment-input {
       flex: 1;
       border: 0;
+      outline: none;
       background: #f0f2f5;
       border-radius: 20px;
       padding: 10px 14px;
-      outline: none;
     }
 
     .comment-send {
       width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: #1877f2;
       color: white;
@@ -425,40 +429,40 @@
     .online {
       width: 10px;
       height: 10px;
-      background: #31a24c;
-      border-radius: 50%;
       margin-left: auto;
+      border-radius: 50%;
+      background: #31a24c;
     }
 
     /* =========================
-       NOTIFICATIONS / MODALS
+       MODAL
     ========================= */
 
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.45);
       z-index: 500;
+      background: rgba(0,0,0,.45);
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
 
     .modal-content {
-      background: white;
       width: 100%;
       max-width: 500px;
       max-height: 80vh;
       overflow-y: auto;
+      background: white;
       border-radius: 12px;
       padding: 20px;
     }
 
     .modal-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 15px;
     }
 
@@ -472,14 +476,10 @@
 
     .notification {
       padding: 12px;
-      background: #f0f2f5;
-      border-radius: 8px;
       margin-bottom: 8px;
+      border-radius: 8px;
+      background: #f0f2f5;
     }
-
-    /* =========================
-       EMPTY / LOADING
-    ========================= */
 
     .center {
       text-align: center;
@@ -512,6 +512,7 @@
     @media (max-width: 700px) {
       .topbar {
         padding: 0 10px;
+        gap: 8px;
       }
 
       .brand {
@@ -531,8 +532,13 @@
         display: none;
       }
 
-      .top-actions .circle-btn:nth-child(1) {
-        display: none;
+      .circle-btn {
+        width: 38px;
+        height: 38px;
+      }
+
+      .composer-actions {
+        grid-template-columns: 1fr;
       }
 
       .card {
@@ -545,7 +551,7 @@
 <body>
 
 <!-- ============================================================
-     AUTHENTICATION
+     LOGIN / SIGNUP
 ============================================================ -->
 
 <div id="auth">
@@ -577,34 +583,45 @@
     <input
       id="username"
       class="auth-input"
+      type="text"
       placeholder="Username"
       autocomplete="username"
     >
 
-    <button class="primary-btn green-btn" onclick="signup()">
+    <button
+      class="primary-btn green-btn"
+      onclick="signup()">
       Create new account
     </button>
 
-    <button class="primary-btn" onclick="login()">
+    <button
+      class="primary-btn"
+      onclick="login()">
       Log in
     </button>
 
   </div>
 
-  <!-- Verification -->
+  <!-- EMAIL VERIFICATION -->
+
   <div id="verification">
 
-    <h2 class="center">Verify your email</h2>
+    <h2 class="center">
+      Verify your email
+    </h2>
 
     <p class="muted center">
-      We sent a verification email to:
+      A verification email was sent to:
     </p>
 
-    <p id="verificationEmail" class="center"></p>
+    <p
+      id="verificationEmail"
+      class="center">
+    </p>
 
     <p class="muted center">
       Open the email and click the verification link.
-      Then return here and log in.
+      Then return here.
     </p>
 
     <button
@@ -627,12 +644,12 @@
 
 
 <!-- ============================================================
-     MAIN APP
+     APP
 ============================================================ -->
 
 <div id="app">
 
-  <!-- TOP BAR -->
+  <!-- TOP NAVIGATION -->
 
   <div class="topbar">
 
@@ -682,62 +699,82 @@
   </div>
 
 
-  <!-- PAGE -->
+  <!-- THREE COLUMN PAGE -->
 
   <div class="page">
 
-    <!-- LEFT SIDEBAR -->
+    <!-- LEFT -->
 
     <aside class="sidebar">
 
       <div class="card">
 
         <div class="profile-mini">
-          <div id="sidebarAvatar" class="avatar">
+
+          <div
+            id="sidebarAvatar"
+            class="avatar">
             U
           </div>
 
           <span id="sidebarUsername">
             User
           </span>
+
         </div>
 
-        <button class="nav-btn" onclick="openProfile()">
+        <button
+          class="nav-btn"
+          onclick="openProfile()">
           <span class="nav-icon">👤</span>
           Profile
         </button>
 
-        <button class="nav-btn" onclick="scrollToFeed()">
+        <button
+          class="nav-btn"
+          onclick="scrollToFeed()">
           <span class="nav-icon">🏠</span>
           Home
         </button>
 
-        <button class="nav-btn" onclick="openNotifications()">
+        <button
+          class="nav-btn"
+          onclick="openNotifications()">
           <span class="nav-icon">🔔</span>
           Notifications
         </button>
 
-        <button class="nav-btn" onclick="openMessages()">
+        <button
+          class="nav-btn"
+          onclick="openMessages()">
           <span class="nav-icon">💬</span>
           Messages
         </button>
 
-        <button class="nav-btn" onclick="openFriends()">
+        <button
+          class="nav-btn"
+          onclick="openFriends()">
           <span class="nav-icon">👥</span>
           Friends
         </button>
 
-        <button class="nav-btn" onclick="openSaved()">
+        <button
+          class="nav-btn"
+          onclick="openSaved()">
           <span class="nav-icon">🔖</span>
           Saved
         </button>
 
-        <button class="nav-btn" onclick="openSettings()">
+        <button
+          class="nav-btn"
+          onclick="openSettings()">
           <span class="nav-icon">⚙️</span>
           Settings
         </button>
 
-        <button class="nav-btn" onclick="logout()">
+        <button
+          class="nav-btn"
+          onclick="logout()">
           <span class="nav-icon">🚪</span>
           Log out
         </button>
@@ -747,7 +784,7 @@
     </aside>
 
 
-    <!-- MAIN FEED -->
+    <!-- CENTER -->
 
     <main id="feedArea">
 
@@ -757,7 +794,9 @@
 
         <div class="post-input-row">
 
-          <div id="composerAvatar" class="avatar">
+          <div
+            id="composerAvatar"
+            class="avatar">
             U
           </div>
 
@@ -770,7 +809,9 @@
 
         </div>
 
-        <div id="postComposer" class="post-composer">
+        <div
+          id="postComposer"
+          class="post-composer">
 
           <textarea
             id="postContent"
@@ -830,7 +871,7 @@
     </main>
 
 
-    <!-- RIGHT SIDEBAR -->
+    <!-- RIGHT -->
 
     <aside class="rightbar">
 
@@ -877,7 +918,10 @@
      MODAL
 ============================================================ -->
 
-<div id="modal" class="modal" onclick="closeModalOutside(event)">
+<div
+  id="modal"
+  class="modal"
+  onclick="closeModalOutside(event)">
 
   <div class="modal-content">
 
@@ -904,7 +948,7 @@
 
 <script>
 /* ============================================================
-   SUPABASE
+   SUPABASE CONFIGURATION
 ============================================================ */
 
 const SUPABASE_URL =
@@ -921,7 +965,7 @@ const client =
 
 
 /* ============================================================
-   GLOBAL VARIABLES
+   GLOBAL STATE
 ============================================================ */
 
 let currentUser = null;
@@ -936,18 +980,26 @@ let selectedImage = null;
 async function signup() {
 
   const email =
-    document.getElementById("email").value.trim();
+    document
+      .getElementById("email")
+      .value
+      .trim();
 
   const password =
-    document.getElementById("password").value;
+    document
+      .getElementById("password")
+      .value;
 
   const username =
-    document.getElementById("username").value.trim();
+    document
+      .getElementById("username")
+      .value
+      .trim();
 
   if (!email || !password || !username) {
 
     showMessage(
-      "Please fill in email, password and username."
+      "Please enter your email, password and username."
     );
 
     return;
@@ -962,61 +1014,71 @@ async function signup() {
     return;
   }
 
-  showMessage("Creating account...");
+  showMessage(
+    "Creating your account..."
+  );
 
   const {
     data,
     error
-  } = await client.auth.signUp({
+  } =
+    await client.auth.signUp({
 
-    email,
+      email,
 
-    password,
+      password,
 
-    options: {
-      data: {
-        username: username
+      options: {
+        data: {
+          username: username
+        }
       }
-    }
 
-  });
+    });
 
   if (error) {
 
-    showMessage(error.message);
-
-    return;
-  }
-
-  /*
-    Supabase can require email confirmation.
-    In that case there is no active session yet.
-  */
-
-  if (!data.session) {
-
-    document.getElementById(
-      "signup-form"
-    ).style.display = "none";
-
-    document.getElementById(
-      "verification"
-    ).style.display = "block";
-
-    document.getElementById(
-      "verificationEmail"
-    ).textContent = email;
-
     showMessage(
-      "Check your email for the verification link."
+      error.message
     );
 
     return;
   }
 
-  currentUser = data.user;
+  /*
+    If email confirmation is enabled,
+    Supabase returns no session.
+  */
 
-  await createProfile(username);
+  if (!data.session) {
+
+    document
+      .getElementById("signup-form")
+      .style.display = "none";
+
+    document
+      .getElementById("verification")
+      .style.display = "block";
+
+    document
+      .getElementById("verificationEmail")
+      .textContent = email;
+
+    showMessage(
+      "Check your email and click the verification link."
+    );
+
+    return;
+  }
+
+  currentUser =
+    data.user;
+
+  await createProfile(
+    username
+  );
+
+  await loadProfile();
 
   showApp();
 }
@@ -1029,41 +1091,52 @@ async function signup() {
 async function login() {
 
   const email =
-    document.getElementById("email").value.trim();
+    document
+      .getElementById("email")
+      .value
+      .trim();
 
   const password =
-    document.getElementById("password").value;
+    document
+      .getElementById("password")
+      .value;
 
   if (!email || !password) {
 
     showMessage(
-      "Enter your email and password."
+      "Please enter your email and password."
     );
 
     return;
   }
 
-  showMessage("Logging in...");
+  showMessage(
+    "Logging in..."
+  );
 
   const {
     data,
     error
-  } = await client.auth.signInWithPassword({
+  } =
+    await client.auth.signInWithPassword({
 
-    email,
+      email,
 
-    password
+      password
 
-  });
+    });
 
   if (error) {
 
-    showMessage(error.message);
+    showMessage(
+      error.message
+    );
 
     return;
   }
 
-  currentUser = data.user;
+  currentUser =
+    data.user;
 
   await loadProfile();
 
@@ -1072,7 +1145,7 @@ async function login() {
 
 
 /* ============================================================
-   CHECK VERIFICATION
+   EMAIL VERIFICATION
 ============================================================ */
 
 async function checkVerification() {
@@ -1080,11 +1153,14 @@ async function checkVerification() {
   const {
     data,
     error
-  } = await client.auth.getSession();
+  } =
+    await client.auth.getSession();
 
   if (error) {
 
-    showMessage(error.message);
+    showMessage(
+      error.message
+    );
 
     return;
   }
@@ -1101,7 +1177,7 @@ async function checkVerification() {
   } else {
 
     showMessage(
-      "Your email has not been verified yet. Click the link in the email, then try again."
+      "Your email is not verified yet. Open the email and click the verification link first."
     );
 
   }
@@ -1110,16 +1186,15 @@ async function checkVerification() {
 
 function backToSignup() {
 
-  document.getElementById(
-    "signup-form"
-  ).style.display = "block";
+  document
+    .getElementById("signup-form")
+    .style.display = "block";
 
-  document.getElementById(
-    "verification"
-  ).style.display = "none";
+  document
+    .getElementById("verification")
+    .style.display = "none";
 
   showMessage("");
-
 }
 
 
@@ -1132,58 +1207,65 @@ async function logout() {
   await client.auth.signOut();
 
   currentUser = null;
+  currentProfile = null;
 
   location.reload();
-
 }
 
 
 /* ============================================================
-   PROFILE
+   PROFILE DATABASE
 ============================================================ */
 
-async function createProfile(username) {
+async function createProfile(
+  username
+) {
 
-  if (!currentUser) return;
+  if (!currentUser) {
+    return;
+  }
 
   const {
     error
-  } = await client
-    .from("profiles")
-    .upsert({
-      id: currentUser.id,
-      username: username
-    });
-
-  /*
-    If your profiles table does not exist yet,
-    account creation still succeeds.
-  */
+  } =
+    await client
+      .from("profiles")
+      .upsert({
+        id: currentUser.id,
+        username: username
+      });
 
   if (error) {
 
     console.warn(
-      "Profile table:",
+      "Profile could not be created:",
       error.message
     );
 
   }
-
 }
 
 
 async function loadProfile() {
 
-  if (!currentUser) return;
+  if (!currentUser) {
+    return;
+  }
 
   const {
     data,
     error
-  } = await client
-    .from("profiles")
-    .select("id, username")
-    .eq("id", currentUser.id)
-    .maybeSingle();
+  } =
+    await client
+      .from("profiles")
+      .select(
+        "id, username"
+      )
+      .eq(
+        "id",
+        currentUser.id
+      )
+      .maybeSingle();
 
   if (!error && data) {
 
@@ -1192,40 +1274,47 @@ async function loadProfile() {
   } else {
 
     currentProfile = {
+
       id: currentUser.id,
+
       username:
-        currentUser.user_metadata?.username ||
-        currentUser.email?.split("@")[0] ||
+        currentUser
+          .user_metadata
+          ?.username ||
+        currentUser.email
+          ?.split("@")[0] ||
         "user"
+
     };
 
   }
 
   updateProfileUI();
-
 }
 
 
 function updateProfileUI() {
 
   const username =
-    currentProfile?.username || "User";
+    currentProfile?.username ||
+    "User";
 
-  document.getElementById(
-    "sidebarUsername"
-  ).textContent = username;
+  const initial =
+    username
+      .charAt(0)
+      .toUpperCase();
 
-  const letter =
-    username.charAt(0).toUpperCase() || "U";
+  document
+    .getElementById("sidebarUsername")
+    .textContent = username;
 
-  document.getElementById(
-    "sidebarAvatar"
-  ).textContent = letter;
+  document
+    .getElementById("sidebarAvatar")
+    .textContent = initial;
 
-  document.getElementById(
-    "composerAvatar"
-  ).textContent = letter;
-
+  document
+    .getElementById("composerAvatar")
+    .textContent = initial;
 }
 
 
@@ -1235,16 +1324,15 @@ function updateProfileUI() {
 
 function showApp() {
 
-  document.getElementById(
-    "auth"
-  ).style.display = "none";
+  document
+    .getElementById("auth")
+    .style.display = "none";
 
-  document.getElementById(
-    "app"
-  ).style.display = "block";
+  document
+    .getElementById("app")
+    .style.display = "block";
 
   loadFeed();
-
 }
 
 
@@ -1256,68 +1344,65 @@ async function createPost() {
 
   if (!currentUser) {
 
-    alert("Please log in first.");
-
-    return;
-  }
-
-  const content =
-    document.getElementById(
-      "postContent"
-    ).value.trim();
-
-  if (!content && !selectedImage) {
-
     alert(
-      "Write something or select a photo."
+      "Please log in first."
     );
 
     return;
   }
 
-  /*
-    The existing posts table has:
-      user_id
-      content
+  const content =
+    document
+      .getElementById("postContent")
+      .value
+      .trim();
 
-    This keeps compatibility with your existing database.
-  */
+  if (!content) {
 
-  const {
-    error
-  } = await client
-    .from("posts")
-    .insert({
-
-      user_id:
-        currentUser.id,
-
-      content:
-        content
-
-    });
-
-  if (error) {
-
-    alert(error.message);
+    alert(
+      "Please write something first."
+    );
 
     return;
   }
 
-  document.getElementById(
-    "postContent"
-  ).value = "";
+  const {
+    error
+  } =
+    await client
+      .from("posts")
+      .insert({
+
+        user_id:
+          currentUser.id,
+
+        content:
+          content
+
+      });
+
+  if (error) {
+
+    alert(
+      error.message
+    );
+
+    return;
+  }
+
+  document
+    .getElementById("postContent")
+    .value = "";
 
   selectedImage = null;
 
-  document.getElementById(
-    "imagePreview"
-  ).innerHTML = "";
+  document
+    .getElementById("imagePreview")
+    .innerHTML = "";
 
   closeComposer();
 
   await loadFeed();
-
 }
 
 
@@ -1328,7 +1413,8 @@ async function createPost() {
 async function loadFeed() {
 
   const feed =
-    document.getElementById("feed");
+    document
+      .getElementById("feed");
 
   feed.innerHTML =
     '<div class="loading">Loading feed...</div>';
@@ -1336,83 +1422,92 @@ async function loadFeed() {
   const {
     data: posts,
     error
-  } = await client
-    .from("posts")
-    .select(
-      "id, content, created_at, user_id"
-    )
-    .order(
-      "created_at",
-      {
-        ascending: false
-      }
-    );
+  } =
+    await client
+      .from("posts")
+      .select(
+        "id, content, created_at, user_id"
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
   if (error) {
 
     feed.innerHTML =
       "<p>" +
-      escapeHtml(error.message) +
+      escapeHtml(
+        error.message
+      ) +
       "</p>";
 
     return;
   }
 
-  if (!posts || posts.length === 0) {
+  if (
+    !posts ||
+    posts.length === 0
+  ) {
 
     feed.innerHTML = `
       <div class="center muted">
         <h3>No posts yet</h3>
-        <p>Be the first person to post something!</p>
+        <p>
+          Be the first person to post something!
+        </p>
       </div>
     `;
 
     return;
   }
 
-  const userIds = [
-    ...new Set(
-      posts.map(
-        post => post.user_id
+  const userIds =
+    [
+      ...new Set(
+        posts.map(
+          post => post.user_id
+        )
       )
-    )
-  ];
-
-  let profiles = [];
+    ];
 
   const {
-    data: profileData
-  } = await client
-    .from("profiles")
-    .select(
-      "id, username"
-    )
-    .in(
-      "id",
-      userIds
-    );
-
-  profiles = profileData || [];
+    data: profiles
+  } =
+    await client
+      .from("profiles")
+      .select(
+        "id, username"
+      )
+      .in(
+        "id",
+        userIds
+      );
 
   const profileMap = {};
 
-  profiles.forEach(profile => {
+  (profiles || [])
+    .forEach(profile => {
 
-    profileMap[
-      profile.id
-    ] = profile.username;
+      profileMap[
+        profile.id
+      ] =
+        profile.username;
 
-  });
+    });
 
   feed.innerHTML =
-    posts.map(
-      post =>
-        renderPost(
-          post,
-          profileMap
-        )
-    ).join("");
-
+    posts
+      .map(
+        post =>
+          renderPost(
+            post,
+            profileMap
+          )
+      )
+      .join("");
 }
 
 
@@ -1428,7 +1523,8 @@ function renderPost(
   const username =
     profileMap[
       post.user_id
-    ] || "user";
+    ] ||
+    "user";
 
   const initial =
     username
@@ -1444,7 +1540,8 @@ function renderPost(
 
   const isMine =
     currentUser &&
-    post.user_id === currentUser.id;
+    currentUser.id ===
+      post.user_id;
 
   return `
 
@@ -1472,14 +1569,15 @@ function renderPost(
 
         ${
           isMine
-          ? `
-            <button
-              class="post-menu"
-              onclick="deletePost('${post.id}')">
-              ⋯
-            </button>
-          `
-          : ""
+            ? `
+              <button
+                class="post-menu"
+                title="Delete post"
+                onclick="deletePost('${post.id}')">
+                ⋯
+              </button>
+            `
+            : ""
         }
 
       </div>
@@ -1490,12 +1588,14 @@ function renderPost(
 
       <div class="post-stats">
 
-        <span id="like-count-${post.id}">
+        <span
+          id="like-count-${post.id}">
           👍 0
         </span>
 
         <span>
-          <span id="comment-count-${post.id}">
+          <span
+            id="comment-count-${post.id}">
             0
           </span>
           comments
@@ -1529,7 +1629,6 @@ function renderPost(
       <div
         class="comments"
         id="comments-${post.id}">
-
       </div>
 
       <div class="comment-box">
@@ -1552,7 +1651,6 @@ function renderPost(
     </article>
 
   `;
-
 }
 
 
@@ -1560,37 +1658,43 @@ function renderPost(
    DELETE POST
 ============================================================ */
 
-async function deletePost(postId) {
+async function deletePost(
+  postId
+) {
 
-  if (!confirm(
-    "Delete this post?"
-  )) {
+  if (
+    !confirm(
+      "Delete this post?"
+    )
+  ) {
     return;
   }
 
   const {
     error
-  } = await client
-    .from("posts")
-    .delete()
-    .eq(
-      "id",
-      postId
-    )
-    .eq(
-      "user_id",
-      currentUser.id
-    );
+  } =
+    await client
+      .from("posts")
+      .delete()
+      .eq(
+        "id",
+        postId
+      )
+      .eq(
+        "user_id",
+        currentUser.id
+      );
 
   if (error) {
 
-    alert(error.message);
+    alert(
+      error.message
+    );
 
     return;
   }
 
   await loadFeed();
-
 }
 
 
@@ -1598,38 +1702,51 @@ async function deletePost(postId) {
    LIKE
 ============================================================ */
 
-async function toggleLike(postId) {
+function toggleLike(
+  postId
+) {
 
   const button =
-    document.getElementById(
-      "like-" + postId
-    );
+    document
+      .getElementById(
+        "like-" + postId
+      );
 
-  /*
-    This is a local UI reaction.
-
-    For permanent likes, create a "likes"
-    table in Supabase and connect it here.
-  */
+  const count =
+    document
+      .getElementById(
+        "like-count-" + postId
+      );
 
   if (
-    button.classList.contains("liked")
+    button.classList.contains(
+      "liked"
+    )
   ) {
 
-    button.classList.remove("liked");
+    button.classList.remove(
+      "liked"
+    );
 
     button.textContent =
       "👍 Like";
 
+    count.textContent =
+      "👍 0";
+
   } else {
 
-    button.classList.add("liked");
+    button.classList.add(
+      "liked"
+    );
 
     button.textContent =
       "👍 Liked";
 
-  }
+    count.textContent =
+      "👍 1";
 
+  }
 }
 
 
@@ -1637,19 +1754,19 @@ async function toggleLike(postId) {
    COMMENTS
 ============================================================ */
 
-function focusComment(postId) {
+function focusComment(
+  postId
+) {
 
   const input =
-    document.getElementById(
-      "comment-" + postId
-    );
+    document
+      .getElementById(
+        "comment-" + postId
+      );
 
   if (input) {
-
     input.focus();
-
   }
-
 }
 
 
@@ -1664,64 +1781,76 @@ function commentKey(
 
     event.preventDefault();
 
-    addComment(postId);
-
+    addComment(
+      postId
+    );
   }
-
 }
 
 
-function addComment(postId) {
+function addComment(
+  postId
+) {
 
   const input =
-    document.getElementById(
-      "comment-" + postId
-    );
+    document
+      .getElementById(
+        "comment-" + postId
+      );
 
   const text =
     input.value.trim();
 
-  if (!text) return;
-
-  /*
-    Temporary front-end comment.
-
-    For permanent comments, create a
-    comments table in Supabase.
-  */
+  if (!text) {
+    return;
+  }
 
   const comments =
-    document.getElementById(
-      "comments-" + postId
-    );
+    document
+      .getElementById(
+        "comments-" + postId
+      );
 
   const username =
     currentProfile?.username ||
     "You";
 
   const div =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   div.className =
     "comment";
 
-  div.innerHTML =
-    "<b>@" +
-    escapeHtml(username) +
-    "</b> " +
-    escapeHtml(text);
+  const name =
+    document.createElement(
+      "b"
+    );
 
-  comments.appendChild(div);
+  name.textContent =
+    "@" + username;
+
+  div.appendChild(name);
+
+  div.appendChild(
+    document.createTextNode(
+      " " + text
+    )
+  );
+
+  comments.appendChild(
+    div
+  );
 
   input.value = "";
 
-  const count =
-    comments.children.length;
-
-  document.getElementById(
-    "comment-count-" + postId
-  ).textContent = count;
-
+  document
+    .getElementById(
+      "comment-count-" + postId
+    )
+    .textContent =
+      comments.children.length;
 }
 
 
@@ -1729,10 +1858,13 @@ function addComment(postId) {
    SHARE
 ============================================================ */
 
-async function sharePost(postId) {
+async function sharePost(
+  postId
+) {
 
   const url =
-    window.location.href.split("#")[0] +
+    window.location.href
+      .split("#")[0] +
     "#post-" +
     postId;
 
@@ -1743,22 +1875,28 @@ async function sharePost(postId) {
     try {
 
       await navigator.share({
-        title: "SocialHub post",
-        text: "Check out this post on SocialHub.",
-        url: url
+
+        title:
+          "SocialHub post",
+
+        text:
+          "Check out this post on SocialHub.",
+
+        url:
+          url
+
       });
 
-    } catch (error) {
-      // User cancelled share.
+    } catch {
+      // User cancelled.
     }
 
   } else {
 
     try {
 
-      await navigator.clipboard.writeText(
-        url
-      );
+      await navigator.clipboard
+        .writeText(url);
 
       alert(
         "Post link copied!"
@@ -1771,81 +1909,100 @@ async function sharePost(postId) {
       );
 
     }
-
   }
-
 }
 
 
 /* ============================================================
-   COMPOSER
+   POST COMPOSER
 ============================================================ */
 
 function openComposer() {
 
-  document.getElementById(
-    "postComposer"
-  ).style.display = "block";
+  document
+    .getElementById(
+      "postComposer"
+    )
+    .style.display =
+      "block";
 
-  document.getElementById(
-    "postContent"
-  ).focus();
-
+  document
+    .getElementById(
+      "postContent"
+    )
+    .focus();
 }
 
 
 function closeComposer() {
 
-  document.getElementById(
-    "postComposer"
-  ).style.display = "none";
-
+  document
+    .getElementById(
+      "postComposer"
+    )
+    .style.display =
+      "none";
 }
 
 
 function chooseImage() {
 
-  document.getElementById(
-    "imageInput"
-  ).click();
-
+  document
+    .getElementById(
+      "imageInput"
+    )
+    .click();
 }
 
 
-function previewImage(event) {
+function previewImage(
+  event
+) {
 
   const file =
     event.target.files[0];
 
-  if (!file) return;
+  if (!file) {
+    return;
+  }
 
-  selectedImage = file;
+  selectedImage =
+    file;
 
   const url =
-    URL.createObjectURL(file);
+    URL.createObjectURL(
+      file
+    );
 
-  document.getElementById(
-    "imagePreview"
-  ).innerHTML = `
-    <img
-      class="post-image"
-      src="${url}"
-      alt="Selected image"
-    >
-  `;
-
+  document
+    .getElementById(
+      "imagePreview"
+    )
+    .innerHTML = `
+      <img
+        class="post-image"
+        src="${url}"
+        alt="Selected image">
+    `;
 }
 
 
 function addFeeling() {
 
   const feelings = [
+
     "😊 Feeling happy",
+
     "😂 Feeling funny",
+
     "❤️ Feeling loved",
+
     "😎 Feeling cool",
+
     "🎉 Feeling excited",
+
     "😢 Feeling sad"
+
   ];
 
   const selected =
@@ -1857,16 +2014,20 @@ function addFeeling() {
     ];
 
   const textarea =
-    document.getElementById(
-      "postContent"
-    );
+    document
+      .getElementById(
+        "postContent"
+      );
 
   textarea.value +=
-    (textarea.value ? "\n" : "") +
+    (
+      textarea.value
+        ? "\n"
+        : ""
+    ) +
     selected;
 
   textarea.focus();
-
 }
 
 
@@ -1903,7 +2064,6 @@ function searchPosts() {
         : "none";
 
   });
-
 }
 
 
@@ -1916,47 +2076,65 @@ function openModal(
   body
 ) {
 
-  document.getElementById(
-    "modalTitle"
-  ).textContent = title;
+  document
+    .getElementById(
+      "modalTitle"
+    )
+    .textContent =
+      title;
 
-  document.getElementById(
-    "modalBody"
-  ).innerHTML = body;
+  document
+    .getElementById(
+      "modalBody"
+    )
+    .innerHTML =
+      body;
 
-  document.getElementById(
-    "modal"
-  ).style.display = "flex";
-
+  document
+    .getElementById(
+      "modal"
+    )
+    .style.display =
+      "flex";
 }
 
 
 function closeModal() {
 
-  document.getElementById(
-    "modal"
-  ).style.display = "none";
-
+  document
+    .getElementById(
+      "modal"
+    )
+    .style.display =
+      "none";
 }
 
 
-function closeModalOutside(event) {
+function closeModalOutside(
+  event
+) {
 
   if (
-    event.target.id === "modal"
+    event.target.id ===
+    "modal"
   ) {
 
     closeModal();
 
   }
-
 }
 
+
+/* ============================================================
+   NOTIFICATIONS
+============================================================ */
 
 function openNotifications() {
 
   openModal(
+
     "Notifications",
+
     `
       <div class="notification">
         🔔 Welcome to SocialHub!
@@ -1967,19 +2145,25 @@ function openNotifications() {
       </div>
 
       <p class="muted">
-        Real-time notifications can be connected
-        to Supabase later.
+        Real-time notifications can be
+        connected to Supabase.
       </p>
     `
-  );
 
+  );
 }
 
+
+/* ============================================================
+   MESSAGES
+============================================================ */
 
 function openMessages() {
 
   openModal(
+
     "Messages",
+
     `
       <p class="muted">
         Your messages will appear here.
@@ -1987,61 +2171,85 @@ function openMessages() {
 
       <button
         class="primary-btn"
-        onclick="alert('Messaging database needs to be connected.')">
+        onclick="alert('Messaging requires a messages table in Supabase.')">
         Start a message
       </button>
     `
-  );
 
+  );
 }
 
+
+/* ============================================================
+   FRIENDS
+============================================================ */
 
 function openFriends() {
 
   openModal(
+
     "Friends",
+
     `
-      <p>
-        👥 Your friends list
-      </p>
+      <h3>Friends</h3>
 
       <p class="muted">
-        Add a friends table to Supabase to
-        enable friend requests and friendships.
+        Your friends and friend requests
+        will appear here.
       </p>
-    `
-  );
 
+      <button
+        class="primary-btn"
+        onclick="alert('Friend requests require a friends table in Supabase.')">
+        Find friends
+      </button>
+    `
+
+  );
 }
 
+
+/* ============================================================
+   SAVED
+============================================================ */
 
 function openSaved() {
 
   openModal(
+
     "Saved posts",
+
     `
       <p class="muted">
         Saved posts will appear here.
       </p>
     `
-  );
 
+  );
 }
 
 
+/* ============================================================
+   SETTINGS
+============================================================ */
+
 function openSettings() {
 
+  const email =
+    currentUser?.email ||
+    "";
+
   openModal(
+
     "Settings",
+
     `
       <h3>Account</h3>
 
       <p>
         Email:
         <b>
-          ${escapeHtml(
-            currentUser?.email || ""
-          )}
+          ${escapeHtml(email)}
         </b>
       </p>
 
@@ -2051,10 +2259,14 @@ function openSettings() {
         Log out
       </button>
     `
-  );
 
+  );
 }
 
+
+/* ============================================================
+   PROFILE
+============================================================ */
 
 function openProfile() {
 
@@ -2066,8 +2278,15 @@ function openProfile() {
     currentUser?.email ||
     "";
 
+  const initial =
+    username
+      .charAt(0)
+      .toUpperCase();
+
   openModal(
+
     "Your Profile",
+
     `
       <div class="center">
 
@@ -2079,11 +2298,7 @@ function openProfile() {
             margin:auto;
             font-size:30px;
           ">
-          ${escapeHtml(
-            username
-              .charAt(0)
-              .toUpperCase()
-          )}
+          ${escapeHtml(initial)}
         </div>
 
         <h2>
@@ -2096,18 +2311,24 @@ function openProfile() {
 
       </div>
     `
-  );
 
+  );
 }
 
+
+/* ============================================================
+   HOME
+============================================================ */
 
 function scrollToFeed() {
 
   window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
 
+    top: 0,
+
+    behavior: "smooth"
+
+  });
 }
 
 
@@ -2115,7 +2336,9 @@ function scrollToFeed() {
    SECURITY
 ============================================================ */
 
-function escapeHtml(text) {
+function escapeHtml(
+  text
+) {
 
   return String(
     text ?? ""
@@ -2124,16 +2347,26 @@ function escapeHtml(text) {
     function(m) {
 
       return {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
+
+        "&":
+          "&amp;",
+
+        "<":
+          "&lt;",
+
+        ">":
+          "&gt;",
+
+        '"':
+          "&quot;",
+
+        "'":
+          "&#039;"
+
       }[m];
 
     }
   );
-
 }
 
 
@@ -2141,17 +2374,21 @@ function escapeHtml(text) {
    MESSAGE
 ============================================================ */
 
-function showMessage(text) {
+function showMessage(
+  text
+) {
 
-  document.getElementById(
-    "message"
-  ).textContent = text;
-
+  document
+    .getElementById(
+      "message"
+    )
+    .textContent =
+      text;
 }
 
 
 /* ============================================================
-   SESSION CHECK
+   INITIALIZE SESSION
 ============================================================ */
 
 async function initialize() {
@@ -2159,11 +2396,18 @@ async function initialize() {
   const {
     data,
     error
-  } = await client.auth.getSession();
+  } =
+    await client.auth.getSession();
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
+
+    showMessage(
+      error.message
+    );
 
     return;
   }
@@ -2176,22 +2420,24 @@ async function initialize() {
     await loadProfile();
 
     showApp();
-
   }
-
 }
 
 
 /* ============================================================
-   AUTH STATE
+   AUTH STATE LISTENER
 ============================================================ */
 
 client.auth.onAuthStateChange(
-  async (event, session) => {
+  async (
+    event,
+    session
+  ) => {
 
     if (
       session &&
-      event === "SIGNED_IN"
+      event ===
+        "SIGNED_IN"
     ) {
 
       currentUser =
@@ -2206,7 +2452,7 @@ client.auth.onAuthStateChange(
 
 
 /* ============================================================
-   START
+   START APPLICATION
 ============================================================ */
 
 initialize();
