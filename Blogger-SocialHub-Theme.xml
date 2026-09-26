@@ -29,7 +29,7 @@ function saveBloggerConnection(){
 function loadBloggerPosts(){
   const input=document.getElementById('bloggerUrl');
   const saved=localStorage.getItem('socialhub_blogger_url')||'https://rahimi32145.blogspot.com';
-  if(input&amp;&amp;!input.value)input.value=saved;
+  if(input&&!input.value)input.value=saved;
   const url=normalizeBloggerUrl(input?.value||saved);
   const status=document.getElementById('bloggerStatus');
   const box=document.getElementById('bloggerPosts');
@@ -71,7 +71,7 @@ function loadBloggerPosts(){
   };
   const script=document.createElement('script');
   script.id=cb;
-  script.src=url.replace(/\\/$/,'')+'/feeds/posts/default?alt=json-in-script&amp;max-results=12&amp;callback='+cb;
+  script.src=url.replace(/\\/$/,'')+'/feeds/posts/default?alt=json-in-script&max-results=12&callback='+cb;
   script.onerror=()=>{
     delete window[cb];
     script.remove();
@@ -986,10 +986,10 @@ let currentUser = null;
 function esc(value){
 
   return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
+    .replace(/&/g,"&")
+    .replace(/</g,"<")
+    .replace(/>/g,">")
+    .replace(/"/g,""")
     .replace(/'/g,"&#039;");
 
 }
