@@ -1,0 +1,86 @@
+<!-- SocialHub connection for Pulse V8 Blogger theme -->
+<!-- Add this before the existing Pulse V8 application script, after loading Supabase. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="text/javascript">
+//<![CDATA[
+(function(){
+  "use strict";
+  var SUPABASE_URL="https://gkqyaroprqajwoubnsvs.supabase.co";
+  var SUPABASE_KEY="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+  var client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  var state={user:null,profile:null};
+
+  function $(id){return document.getElementById(id)}
+  function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+  function toast(m){var e=$("pulseToast");if(!e)return;e.textContent=m;e.classList.add("show");setTimeout(function(){e.classList.remove("show")},2500)}
+  function auth(){if($("pulseAuth"))$("pulseAuth").style.display="flex";if($("pulseApp"))$("pulseApp").style.display="none"}
+  function app(){if($("pulseAuth"))$("pulseAuth").style.display="none";if($("pulseApp"))$("pulseApp").style.display="block"}
+
+  async function profile(){
+    if(!state.user)return;
+    var r=await client.from("profiles").select("id,username,full_name,bio,avatar_url").eq("id",state.user.id).maybeSingle();
+    if(!r.error)state.profile=r.data||null;
+    var e=$("pulseProfile");
+    if(e){var p=state.profile||{};e.innerHTML='<div class="pulse-avatar" style="width:70px;height:70px;font-size:25px;margin-bottom:15px">'+esc((p.full_name||p.username||"U").slice(0,1).toUpperCase())+'</div><div class="pulse-profile-name">'+esc(p.full_name||p.username||"User")+'</div><div class="pulse-muted" style="margin-top:6px">'+esc(p.username?"@"+p.username:"")+'</div><div style="margin-top:18px;color:#667085">'+esc(p.bio||"")+'</div>'}
+  }
+
+  async function feed(){
+    var box=$("pulseFeed");if(!box)return;
+    box.innerHTML='<div class="pulse-loading">Loading SocialHub...</div>';
+    var r=await client.from("posts").select("id,user_id,content,image_url,video_url,privacy,created_at,profiles(username,full_name,avatar_url)").eq("privacy","public").order("created_at",{ascending:false}).limit(30);
+    if(r.error){box.innerHTML='<div class="pulse-card pulse-empty">'+esc(r.error.message)+'</div>';return}
+    var posts=r.data||[];
+    if(!posts.length){box.innerHTML='<div class="pulse-card pulse-empty">No public SocialHub posts yet.</div>';return}
+    box.innerHTML=posts.map(function(p){
+      var u=p.profiles||{},n=u.full_name||u.username||"SocialHub user",m="";
+      if(p.image_url)m+='<img src="'+esc(p.image_url)+'" style="width:100%;max-height:520px;object-fit:contain;border-radius:12px;margin-top:8px" alt=""/>';
+      if(p.video_url)m+='<video src="'+esc(p.video_url)+'" controls style="width:100%;max-height:520px;border-radius:12px;margin-top:8px"></video>';
+      return '<article class="pulse-card pulse-post"><div class="pulse-post-head"><div class="pulse-avatar">'+esc(n.slice(0,1).toUpperCase())+'</div><div><div class="pulse-user">'+esc(n)+'</div><div class="pulse-time">'+esc(p.created_at||"")+'</div></div></div><div class="pulse-content">'+esc(p.content||"")+'</div>'+m+'</article>'
+    }).join("")
+  }
+
+  async function login(){
+    var email=($("pulseEmail")?.value||"").trim(),password=$("pulsePassword")?.value||"";
+    if(!email||!password){toast("Enter email and password");return}
+    var r=await client.auth.signInWithPassword({email:email,password:password});
+    if(r.error){toast(r.error.message);return}
+    state.user=r.data.user;app();await profile();await feed()
+  }
+
+  async function signup(){
+    var name=($("pulseName")?.value||"").trim(),email=($("pulseEmail")?.value||"").trim(),password=$("pulsePassword")?.value||"";
+    if(!name||!email||!password){toast("Complete all fields");return}
+    var username=name.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"").slice(0,30)||("user_"+Date.now());
+    var r=await client.auth.signUp({email:email,password:password,options:{data:{full_name:name,username:username}}});
+    if(r.error){toast(r.error.message);return}
+    if(r.data.session){state.user=r.data.user;app();await profile();await feed()}else toast("Account created. Check your email if confirmation is enabled.")
+  }
+
+  async function createPost(){
+    if(!state.user){toast("Log in to SocialHub first");return}
+    var input=$("pulsePostText"),text=(input&&input.value||"").trim();
+    if(!text){toast("Write something first");return}
+    var r=await client.from("posts").insert({user_id:state.user.id,content:text,privacy:"public"});
+    if(r.error){toast(r.error.message);return}
+    input.value="";toast("Posted to SocialHub");feed()
+  }
+
+  async function logout(){await client.auth.signOut();state.user=null;state.profile=null;auth()}
+
+  function wire(){
+    if($("pulseAuthSubmit"))$("pulseAuthSubmit").onclick=function(){window.pulseSignup?signup():login()};
+    if($("pulseAuthSwitch"))$("pulseAuthSwitch").onclick=function(){window.pulseSignup=!window.pulseSignup;var v=window.pulseSignup;if($("pulseName"))$("pulseName").style.display=v?"block":"none";if($("pulseAuthSubmit"))$("pulseAuthSubmit").textContent=v?"Create account":"Login";if($("pulseAuthSwitchText"))$("pulseAuthSwitchText").textContent=v?"Already have an account?":"Don't have an account?";if($("pulseAuthSwitch"))$("pulseAuthSwitch").textContent=v?" Login":" Sign up"};
+    if($("pulseLogout"))$("pulseLogout").onclick=logout;
+    if($("pulseCreatePost"))$("pulseCreatePost").onclick=createPost;
+  }
+
+  async function init(){
+    var r=await client.auth.getSession();state.user=r.data.session?r.data.session.user:null;
+    if(state.user){app();await profile();await feed()}else auth();
+    client.auth.onAuthStateChange(function(e,s){state.user=s?s.user:null;if(state.user){app();profile();feed()}else auth()})
+  }
+
+  document.addEventListener("DOMContentLoaded",function(){wire();init()})
+})();
+//]]>
+</script>
