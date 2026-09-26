@@ -84,7 +84,7 @@ button{cursor:pointer;border:0}
   background:#ddd;display:grid;place-items:center;font-weight:bold
 }
 
-.postbody{white-space:pre-wrap;word-break:break-word}
+.post-media{display:grid;gap:10px;margin-top:12px}.post-media img,.post-media video{display:block;width:100%;max-height:520px;object-fit:contain;border-radius:10px;background:#f0f2f5}.postbody{white-space:pre-wrap;word-break:break-word}
 .postmeta{color:#65676b;font-size:13px}
 
 .postactions{
@@ -1074,7 +1074,11 @@ async function loadFeed(){
           </div>
 
           <div class="postbody" style="margin-top:12px">
-            ${esc(p.content)}
+            \${esc(p.content)}
+            \${(p.image_url||p.video_url)?\`<div class="post-media">
+              \${p.image_url?\`<img src="\${esc(p.image_url)}" alt="Post photo" loading="lazy">\`:""}
+              \${p.video_url?\`<video src="\${esc(p.video_url)}" controls playsinline preload="metadata"></video>\`:""}
+            </div>\`:""}
           </div>
 
           <div class="postmeta" style="margin-top:8px">
