@@ -1,0 +1,39 @@
+name: Repair profile page
+on:
+  push:
+    paths:
+      - .github/workflows/repair-profile.yml
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch profile
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("profile.html")
+          s=p.read_text()
+          s=s.replace(
+            'const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let user=null,profile=null;',
+            'const client=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;let user=null,profile=null;'
+          )
+          s=s.replace(
+            'async function init(){\n const {data}=await client.auth.getSession();',
+            'async function init(){\n if(!client){toast("SocialHub services could not load. Please refresh.");return}\n const {data}=await client.auth.getSession();'
+          )
+          s=s.replace(
+            'function togglePrivacyMenu(id){event.stopPropagation();document.getElementById("privacy-"+id).classList.toggle("show")}',
+            'function togglePrivacyMenu(id){const el=document.getElementById("privacy-"+id);if(el)el.classList.toggle("show")}'
+          )
+          p.write_text(s)
+          PY
+      - name: Commit repair
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add profile.html
+          git diff --cached --quiet || git commit -m "Repair profile page interactions"
+          git push
