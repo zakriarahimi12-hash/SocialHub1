@@ -25,6 +25,79 @@ function escapeHtml(value){
 function toast(message){
   alert(message);
 }
+
+(function installBloggerAuthBridge(){
+  const URL="https://gkqyaroprqajwoubnsvs.supabase.co";
+  const KEY="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+  let authClient=null;
+  function getClient(){
+    if(authClient) return authClient;
+    if(window.supabase && typeof window.supabase.createClient==="function"){
+      authClient=window.supabase.createClient(URL,KEY);
+      return authClient;
+    }
+    return null;
+  }
+  function setMsg(text){
+    const el=document.getElementById("authmsg");
+    if(el) el.textContent=text||"";
+  }
+  function waitForClient(){
+    const c=getClient();
+    if(c) return Promise.resolve(c);
+    return new Promise((resolve,reject)=>{
+      let tries=0;
+      const timer=setInterval(()=>{
+        const x=getClient();
+        if(x){clearInterval(timer);resolve(x);return}
+        if(++tries>60){clearInterval(timer);reject(new Error("SocialHub sign-in service is still loading."))}
+      },250);
+    });
+  }
+  async function doLogin(){
+    try{
+      setMsg("Signing in...");
+      const c=await waitForClient();
+      const email=(document.getElementById("email")?.value||"").trim();
+      const password=document.getElementById("password")?.value||"";
+      if(!email||!password){setMsg("Please enter your email and password.");return}
+      const {error}=await c.auth.signInWithPassword({email,password});
+      if(error) throw error;
+    }catch(e){console.error(e);setMsg(e.message||"Login failed.");}
+  }
+  async function doSignup(){
+    try{
+      setMsg("Creating account...");
+      const c=await waitForClient();
+      const email=(document.getElementById("email")?.value||"").trim();
+      const password=document.getElementById("password")?.value||"";
+      const username=(document.getElementById("username")?.value||"").trim();
+      if(!email||!password||!username){setMsg("Please fill in all fields.");return}
+      const {data,error}=await c.auth.signUp({email,password});
+      if(error) throw error;
+      if(data?.user && data?.session){
+        const {error:pe}=await c.from("profiles").upsert({id:data.user.id,username,full_name:username},{onConflict:"id"});
+        if(pe) throw pe;
+      }
+      setMsg("Account created. Check your email if confirmation is required.");
+    }catch(e){console.error(e);setMsg(e.message||"Account creation failed.");}
+  }
+  async function doGoogle(){
+    try{
+      setMsg("Opening Google sign-in...");
+      const c=await waitForClient();
+      const {error}=await c.auth.signInWithOAuth({provider:"google",options:{scopes:"openid email profile",redirectTo:window.location.origin+window.location.pathname}});
+      if(error) throw error;
+    }catch(e){console.error(e);setMsg(e.message||"Google sign-in could not be started.");}
+  }
+  function wire(){
+    const a=document.getElementById("loginBtn"), b=document.getElementById("signupBtn"), g=document.getElementById("googleBtn");
+    if(a)a.addEventListener("click",doLogin);
+    if(b)b.addEventListener("click",doSignup);
+    if(g)g.addEventListener("click",doGoogle);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",wire,{once:true}); else wire();
+})();
 function normalizeBloggerUrl(value){
   let u=(value||'').trim();
   if(!u)return '';
@@ -430,10 +503,10 @@ button{cursor:pointer;border:0}
   <input id="password" type="password" placeholder="Password" />
   <input id="username" placeholder="Username (for new account)" />
 
-  <button class="primary" onclick="signup()">Create account</button>
-  <button class="action" onclick="login()">Log in</button>
+  <button id="signupBtn" class="primary" type="button">Create account</button>
+  <button id="loginBtn" class="action" type="button">Log in</button>
   <div class="auth-divider"><span>or</span></div>
-  <button class="google-btn" type="button" onclick="loginWithGoogle()">Continue with Google</button>
+  <button id="googleBtn" class="google-btn" type="button">Continue with Google</button>
 
   <p id="authmsg"></p>
 </div>
