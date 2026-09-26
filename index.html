@@ -980,28 +980,9 @@ async function signup(){
 
   }
 
-  if(data.user){
-
-    const {
-      error: profileError
-    } =
-      await client
-        .from("profiles")
-        .insert({
-          id:data.user.id,
-          username,
-          full_name:username
-        });
-
-    if(profileError){
-
-      msg.textContent =
-        profileError.message;
-
-      return;
-
-    }
-
+  if(data.user && data.session){
+    const { error: profileError } = await client.from("profiles").upsert({id:data.user.id,username,full_name:username},{onConflict:"id"});
+    if(profileError){ msg.textContent=profileError.message; return; }
   }
 
   msg.textContent =
@@ -1788,6 +1769,7 @@ async function loadNotifications(){
     await client
       .from("notifications")
       .select("*")
+      .eq("user_id",currentUser.id)
       .order("created_at",{ascending:false})
       .limit(50);
 
@@ -2429,14 +2411,11 @@ function closeModal(){
 
 
 async function startChat(){
-
-  const other =
-    document
-      .getElementById("messageUser")
-      .value
-      .trim();
-
-  if(!other) return;
+  const username=document.getElementById("messageUser").value.trim().toLowerCase();
+  if(!username)return;
+  const {data:user,error:userError}=await client.from("profiles").select("id").eq("username",username).maybeSingle();
+  if(userError||!user)return alert("Friend not found. Enter the exact username.");
+  const other=user.id;
 
   const {
     data,
@@ -2581,19 +2560,13 @@ client.auth
   });
 
 
-client.auth
-  .onAuthStateChange(
-    (_event,session) => {
-
-      if(session){
-
-        currentUser =
-          session.user;
-
-      }
-
-    }
-  );
+client.auth.onAuthStateChange((_event,session)=>{
+  currentUser=session?.user||null;
+  if(session) openSite();
+  else { document.getElementById("site").classList.add("hidden"); document.getElementById("auth").classList.remove("hidden"); }
+});
+const authHash=new URLSearchParams(location.hash.replace(/^#/,""));
+if(authHash.get("error_code")==="otp_expired") document.getElementById("authmsg").textContent="Your email confirmation link expired. Request a new confirmation email.";
 
 </script>
 
