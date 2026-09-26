@@ -16,6 +16,7 @@ create table if not exists public.posts (
   user_id uuid not null references public.profiles(id) on delete cascade,
   content text default '',
   image_url text,
+  privacy text not null default 'public' check (privacy in ('public','friends','me')),
   created_at timestamptz not null default now()
 );
 
@@ -228,7 +229,10 @@ drop policy if exists profiles_update on public.profiles;
 create policy profiles_update on public.profiles for update to authenticated using(id=auth.uid()) with check(id=auth.uid());
 
 drop policy if exists posts_read on public.posts;
-create policy posts_read on public.posts for select to authenticated using(true);
+create policy posts_read on public.posts for select to authenticated using(
+  user_id=auth.uid() or privacy='public' or
+  (privacy='friends' and exists(select 1 from public.friendships f where f.status='accepted' and ((f.requester_id=auth.uid() and f.addressee_id=posts.user_id) or (f.addressee_id=auth.uid() and f.requester_id=posts.user_id))))
+);
 drop policy if exists posts_insert on public.posts;
 create policy posts_insert on public.posts for insert to authenticated with check(user_id=auth.uid());
 drop policy if exists posts_update on public.posts;
