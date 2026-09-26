@@ -20,6 +20,7 @@ create table if not exists public.posts (
   created_at timestamptz not null default now()
 );
 
+alter table public.posts add column if not exists image_url text;
 alter table public.posts add column if not exists video_url text;
 
 create table if not exists public.comments (
