@@ -1092,13 +1092,31 @@ async function signup(){
 
   }
 
-  if(data.user && data.session){
-    const { error: profileError } = await client.from("profiles").upsert({id:data.user.id,username,full_name:username},{onConflict:"id"});
-    if(profileError){ msg.textContent=profileError.message; return; }
+  let session = data.session || null;
+
+  if(!session){
+    const current = await client.auth.getSession();
+    session = current.data?.session || null;
+  }
+
+  if(session?.user){
+    const { error: profileError } = await client.from("profiles").upsert(
+      {id:session.user.id,username,full_name:username},
+      {onConflict:"id"}
+    );
+    if(profileError){
+      msg.textContent=profileError.message;
+      return;
+    }
+    currentUser=session.user;
+    openSite();
+    return;
   }
 
   msg.textContent =
-    "Account created. Check your email if confirmation is required.";
+    data.user
+      ? "Account created, but Supabase requires email confirmation before signing in. If you want instant signup, turn off Email → Confirm Email in Supabase Authentication → Providers."
+      : "Account could not be created.";
 
 }
 
