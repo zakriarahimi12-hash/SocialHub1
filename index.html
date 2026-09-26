@@ -379,6 +379,9 @@ button{cursor:pointer;border:0}
   </div>
 
   <div class="card composer">
+    <div id="postMediaStatus" class="muted" style="margin:8px 0">Add photos or videos to your post</div>
+    <input id="postMediaInput" type="file" accept="image/*,video/*" multiple hidden onchange="handlePostMedia(event)">
+    <div id="postMediaPreview" class="post-media"></div>
 
     <textarea
       id="postContent"
@@ -387,7 +390,9 @@ button{cursor:pointer;border:0}
 
     <div class="row">
 
-      <button class="action" onclick="addFeeling()">
+      <button class="action" type="button" onclick="document.getElementById('postMediaInput').click()">📷🎥 Photo/Video</button>
+
+      <button class="action" type="button" onclick="addFeeling()">
         😊 Feeling/activity
       </button>
 
@@ -969,6 +974,28 @@ async function logout(){
 
 }
 
+
+let selectedPostMedia=[];
+function handlePostMedia(event){
+  selectedPostMedia=[...(event.target.files||[])];
+  const preview=document.getElementById("postMediaPreview");
+  const status=document.getElementById("postMediaStatus");
+  preview.innerHTML=selectedPostMedia.map((file,i)=>{
+    const url=URL.createObjectURL(file);
+    return '<div style="position:relative"><button type="button" class="action" style="position:absolute;right:5px;top:5px;z-index:2" onclick="removePostMedia('+i+')">✕</button>'+
+      (file.type.startsWith("video/")?'<video src="'+url+'" controls style="width:100%;max-height:220px;border-radius:10px"></video>':'<img src="'+url+'" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px">')+
+      '</div>';
+  }).join("");
+  status.textContent=selectedPostMedia.length?selectedPostMedia.length+" file(s) selected":"Add photos or videos to your post";
+}
+function removePostMedia(index){
+  selectedPostMedia.splice(index,1);
+  const input=document.getElementById("postMediaInput");
+  const dt=new DataTransfer();
+  selectedPostMedia.forEach(file=>dt.items.add(file));
+  input.files=dt.files;
+  handlePostMedia({target:input});
+}
 
 async function createPost(){
   const content=document.getElementById("postContent").value.trim();
