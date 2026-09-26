@@ -867,7 +867,7 @@ button{cursor:pointer;border:0}
       <button
         class="primary"
         type="button"
-        onclick="document.getElementById('storyMediaInput').click()"
+        onclick="document.getElementById('storyMediaInputStories').click()"
       >
         ➕ Add photo or video
       </button>
@@ -880,7 +880,7 @@ button{cursor:pointer;border:0}
       </button>
     </div>
 
-    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden="hidden" onchange="createStory(event)" />
+    <input id="storyMediaInputStories" type="file" accept="image/*,video/*" hidden="hidden" onchange="createStory(event)" />
 
     <div id="storiesList" class="storyrow"></div>
   </div>
