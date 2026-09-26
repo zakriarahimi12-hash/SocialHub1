@@ -9,6 +9,17 @@
 
 /* Blogger integration: public Blogger feeds require no secret key. */
 let bloggerJsonpCounter=0;
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+function toast(message){
+  alert(message);
+}
 function normalizeBloggerUrl(value){
   let u=(value||'').trim();
   if(!u)return '';
@@ -2069,9 +2080,15 @@ async function loadSaved(){
 
 
 function openStoryViewer(encodedUrl,type,encodedUser,encodedCaption){
-  const url=decodeURIComponent(encodedUrl || "");
-  const user=decodeURIComponent(encodedUser || "");
-  const caption=decodeURIComponent(encodedCaption || "");
+  let url="",user="",caption="";
+  try{
+    url=decodeURIComponent(encodedUrl || "");
+    user=decodeURIComponent(encodedUser || "");
+    caption=decodeURIComponent(encodedCaption || "");
+  }catch(error){
+    console.warn("Story viewer decode error:",error);
+    return;
+  }
   if(!url)return;
   const viewer=document.getElementById("storyViewer");
   const content=document.getElementById("storyViewerContent");
@@ -2093,8 +2110,14 @@ function closeStoryViewer(){
   if(content)content.innerHTML="";
   document.body.style.overflow="";
 }
-
-function openStoryViewer(url,type,user,caption){const viewer=document.getElementById("storyViewer");const content=document.getElementById("storyViewerContent");const info=document.getElementById("storyViewerInfo");if(!viewer||!content)return;if(type==="video")content.innerHTML='<video class="story-viewer-media" src="'+esc(url)+'" controls autoplay playsinline></video>';else content.innerHTML='<img class="story-viewer-media" src="'+esc(url)+'" alt="Story">';if(info)info.textContent="@"+user+(caption?" — "+caption:"");viewer.classList.add("show");document.body.style.overflow="hidden"}function closeStoryViewer(){const viewer=document.getElementById("storyViewer");const content=document.getElementById("storyViewerContent");if(viewer)viewer.classList.remove("show");if(content)content.innerHTML="";document.body.style.overflow=""}
+function storyViewerCall(url,type,user,caption){
+  return "openStoryViewer("+
+    JSON.stringify(encodeURIComponent(url||""))+","+
+    JSON.stringify(type||"image")+","+
+    JSON.stringify(encodeURIComponent(user||""))+","+
+    JSON.stringify(encodeURIComponent(caption||""))+
+  ")";
+}
 
 async function loadStories(){
   const {data,error}=await client.from("stories").select("id,user_id,caption,image_url,video_url,created_at").gt("expires_at",new Date().toISOString()).order("created_at",{ascending:false});
@@ -2102,22 +2125,34 @@ async function loadStories(){
   const ids=[...new Set((data||[]).map(x=>x.user_id))];
   const {data:ps}=ids.length?await client.from("profiles").select("id,username").in("id",ids):{data:[]};
   const pm=Object.fromEntries((ps||[]).map(p=>[p.id,p]));
-  const html=(data||[]).map(s=>{const user=pm[s.user_id]?.username||"user";const url=s.image_url||s.video_url||"";const type=s.image_url?"image":"video";const media=s.image_url?'<img src="'+esc(s.image_url)+'" alt="Story image">':s.video_url?'<video src="'+esc(s.video_url)+'" muted playsinline></video>':"";return '<div class="story" role="button" tabindex="0" onclick="openStoryViewer(\''+esc(url)+'\',\''+type+'\',\''+esc(user)+'\',\''+esc(s.caption||"")+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \')openStoryViewer(\''+esc(url)+'\',\''+type+'\',\''+esc(user)+'\',\''+esc(s.caption||"")+'\')">'+media+'<span>@'+esc(user)+(s.caption?"<br>"+esc(s.caption):"")+"</span></div>"}).join("");
+  const html=(data||[]).map(s=>{
+    const user=pm[s.user_id]?.username||"user";
+    const url=s.image_url||s.video_url||"";
+    const type=s.image_url?"image":"video";
+    const media=s.image_url
+      ? '<img src="'+escapeHtml(s.image_url)+'" alt="Story image">'
+      : s.video_url
+        ? '<video src="'+escapeHtml(s.video_url)+'" muted playsinline></video>'
+        : "";
+    const call=escapeHtml(storyViewerCall(url,type,user,s.caption||""));
+    return '<div class="story" role="button" tabindex="0" onclick="'+call+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \')'+call+'">'+
+      media+'<span>@'+escapeHtml(user)+(s.caption?"<br>"+escapeHtml(s.caption):"")+"</span></div>";
+  }).join("");
   const row=document.getElementById("storyrow");
   if(row){
     const create=row.querySelector(".create-story-card");
     row.innerHTML="";
-    if(create) row.appendChild(create);
-    if(html) row.insertAdjacentHTML("beforeend",html);
+    if(create)row.appendChild(create);
+    if(html)row.insertAdjacentHTML("beforeend",html);
   }
   const sl=document.getElementById("storiesList");
-  if(sl)sl.innerHTML=html||"No active stories."
+  if(sl)sl.innerHTML=html||"No active stories.";
 }
 
 async function createStory(event){
 
-  const input=document.getElementById("storyMediaInput");
-  const file=event?.target?.files?.[0] || null;
+  const input=event?.target || document.getElementById("storyMediaInput");
+  const file=input?.files?.[0] || null;
 
   if(!currentUser){
     alert("Please log in again before creating a story.");
@@ -2726,9 +2761,8 @@ client.auth
 
       currentUser =
         data.session.user;
-      try{await ensureGoogleProfile(currentUser)}catch(error){console.warn("Profile sync error:",error)}
-
       openSite();
+      setTimeout(()=>ensureGoogleProfile(currentUser).catch(error=>console.warn("Profile sync error:",error)),0);
 
     }
 
@@ -2736,11 +2770,11 @@ client.auth
   .catch(error=>console.error("Session restore error:",error));
 
 
-client.auth.onAuthStateChange(async (_event,session)=>{
+client.auth.onAuthStateChange((_event,session)=>{
   currentUser=session?.user||null;
   if(session){
-    try{await ensureGoogleProfile(session.user)}catch(error){console.warn("Profile sync error:",error)}
     openSite();
+    setTimeout(()=>ensureGoogleProfile(session.user).catch(error=>console.warn("Profile sync error:",error)),0);
   }else{
     document.getElementById("site").classList.add("hidden");
     document.getElementById("auth").classList.remove("hidden");
