@@ -423,7 +423,7 @@ button{cursor:pointer;border:0}
       </div>
     </div>
     <p id="profileBio"></p>
-    <button class="primary" onclick="location.href='profile.html'>Edit profile</button>
+    <button class="primary" onclick="location.href='profile.html'">Edit profile</button>
     <button class="action" onclick="show('friends')">Friends</button>
     <button class="action" onclick="show('photos')">Photos</button>
     <div class="tabbar">
@@ -730,7 +730,7 @@ button{cursor:pointer;border:0}
 
 <section id="settings" class="section"><div class="card"><div class="menu-title">⚙️ Settings & privacy</div>
 <div class="grid2">
-<div class="feature"><h3>Account</h3><p>Email, username and profile information.</p><button class="action" onclick="location.href='profile.html'>Edit profile</button></div>
+<div class="feature"><h3>Account</h3><p>Email, username and profile information.</p><button class="action" onclick="location.href='profile.html'">Edit profile</button></div>
 <div class="feature"><h3>Password & security</h3><p>Authentication and account security.</p><button class="action" onclick="alert('Use Supabase authentication email flows to change your password securely.')">Security</button></div>
 <div class="feature"><h3>Privacy</h3><p>Control how your profile and content are shared.</p><button class="action" onclick="openSettingsPanel('Privacy')">Privacy</button></div>
 <div class="feature"><h3>Notifications</h3><p>Manage your notification center.</p><button class="action" onclick="show('notifications')">Notifications</button></div>
@@ -1075,10 +1075,10 @@ async function loadFeed(){
 
           <div class="postbody" style="margin-top:12px">
             ${esc(p.content)}
-            ${(p.image_url||p.video_url)?\`<div class="post-media">
-              ${p.image_url?\`<img src="${esc(p.image_url)}" alt="Post photo" loading="lazy">\`:""}
-              ${p.video_url?\`<video src="${esc(p.video_url)}" controls playsinline preload="metadata"></video>\`:""}
-            </div>\`:""}
+            ${(p.image_url||p.video_url)?`<div class="post-media">
+              ${p.image_url?`<img src="${esc(p.image_url)}" alt="Post photo" loading="lazy">`:""}
+              ${p.video_url?`<video src="${esc(p.video_url)}" controls playsinline preload="metadata"></video>`:""}
+            </div>`:""}
           </div>
 
           <div class="postmeta" style="margin-top:8px">
@@ -1252,11 +1252,11 @@ async function loadComments(postId){
 
   if(!el) return;
 
-  el.innerHTML = (data || []).map(c => \`
+  el.innerHTML = (data || []).map(c => `
     <div class="comment" style="position:relative">
       <div style="padding-right:42px"><b>${esc(pm[c.user_id]?.full_name || "User")}</b><div>${esc(c.content)}</div></div>
-      ${c.user_id===currentUser.id ? \`<div class="comment-menu-wrap"><button class="action" onclick="toggleCommentMenu('${c.id}')">⋯</button><div id="comment-menu-${c.id}" class="comment-menu hidden"><button onclick="editComment('${c.id}',${JSON.stringify(c.content)})">✏️ Edit</button><button onclick="deleteComment('${c.id}','${postId}')">🗑️ Delete</button></div></div>\` : ""}
-    </div>\`).join("");
+      ${c.user_id===currentUser.id ? `<div class="comment-menu-wrap"><button class="action" onclick="toggleCommentMenu('${c.id}')">⋯</button><div id="comment-menu-${c.id}" class="comment-menu hidden"><button onclick="editComment('${c.id}',${JSON.stringify(c.content)})">✏️ Edit</button><button onclick="deleteComment('${c.id}','${postId}')">🗑️ Delete</button></div></div>` : ""}
+    </div>`).join("");
 
 }
 
