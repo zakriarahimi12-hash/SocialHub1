@@ -28,7 +28,9 @@
 </div>
 <div id="content"></div>
 </main>
-<input id="avatarFileInput" type="file" accept="image/*" hidden onchange="uploadProfileImage(\'avatar\')">\n<input id="coverFileInput" type="file" accept="image/*" hidden onchange="uploadProfileImage(\'cover\')">\n<div id="modal" class="modal"><div class="modalbox"><div id="modalContent"></div></div></div>
+<input id="avatarFileInput" type="file" accept="image/*" hidden onchange="uploadProfileImage(\'avatar\')">
+<input id="coverFileInput" type="file" accept="image/*" hidden onchange="uploadProfileImage(\'cover\')">
+<div id="modal" class="modal"><div class="modalbox"><div id="modalContent"></div></div></div>
 <div id="toast" class="toast"></div>
 <script>
 const SUPABASE_URL="https://gkqyaroprqajwoubnsvs.supabase.co";
@@ -71,7 +73,9 @@ async function saveProfile(){
  const obj={full_name:document.getElementById("eName").value.trim(),username:document.getElementById("eUsername").value.trim(),bio:document.getElementById("eBio").value.trim(),website:document.getElementById("eWebsite").value.trim(),location:document.getElementById("eLocation").value.trim()};
  const {error}=await client.from("profiles").update(obj).eq("id",user.id);if(error){toast(error.message);return}closeModal();await loadProfile();showTab("posts");toast("Profile updated");
 }
-function openCoverEditor(){document.getElementById("coverFileInput").click()}\nfunction openAvatarEditor(){document.getElementById("avatarFileInput").click()}\nasync function uploadProfileImage(type){
+function openCoverEditor(){document.getElementById("coverFileInput").click()}
+function openAvatarEditor(){document.getElementById("avatarFileInput").click()}
+async function uploadProfileImage(type){
  const input=document.getElementById(type==="cover"?"coverFileInput":"avatarFileInput");
  const file=input.files&&input.files[0];
  if(!file)return;
