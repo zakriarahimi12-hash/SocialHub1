@@ -52,8 +52,13 @@ async function loadProfile(){
 async function showTab(tab){
  let html="";
  if(tab==="posts"){
-  const {data}=await client.from("posts").select("id,content,created_at,image_url,video_url,privacy").eq("user_id",user.id).order("created_at",{ascending:false});
-  html='<div class="layout"><div class="card"><h2>Posts</h2><p class="muted">Everything you have shared on SocialHub.</p></div><div class="card">'+((data||[]).map(renderProfilePost).join("")||"<p class='muted'>No posts yet.</p>")+"</div></div>";
+  let {data,error}=await client.from("posts").select("id,content,created_at,image_url,video_url,privacy").eq("user_id",user.id).order("created_at",{ascending:false});
+  if(error){
+    const fallback=await client.from("posts").select("id,content,created_at,image_url,video_url").eq("user_id",user.id).order("created_at",{ascending:false});
+    data=fallback.data||[];
+    error=fallback.error;
+  }
+  html='<div class="layout"><div class="card"><h2>Posts</h2><p class="muted">Everything you have shared on SocialHub.</p></div><div class="card">'+(error?'<p class="muted">Could not load posts: '+esc(error.message)+'</p>':((data||[]).map(renderProfilePost).join("")||"<p class='muted'>No posts yet.</p>"))+"</div></div>";
  }else if(tab==="about"){
   html='<div class="layout"><div class="card"><div class="section-title"><h2>Intro</h2><button class="action" onclick="openEditor()">Edit</button></div><div class="intro-list"><div class="intro-item">👤 <span>'+esc(profile.full_name||"SocialHub member")+'</span></div><div class="intro-item">📍 <span>'+esc(profile.location||"No location added")+'</span></div><div class="intro-item">🔗 <span>'+esc(profile.website||"No website added")+'</span></div><div class="intro-item">📝 <span>'+esc(profile.bio||"No bio added")+'</span></div></div></div><div class="card"><h2>About</h2><div class="detail"><b>Name</b><br>'+esc(profile.full_name||"Not added")+'</div><div class="detail"><b>Username</b><br>@'+esc(profile.username||"user")+'</div><div class="detail"><b>Bio</b><br>'+esc(profile.bio||"Not added")+'</div><div class="detail"><b>Member since</b><br>'+new Date(user.created_at).toLocaleDateString()+'</div><button class="primary" onclick="openEditor()">Edit your information</button></div></div>';
  }else if(tab==="friends"){
