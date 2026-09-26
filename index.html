@@ -145,7 +145,7 @@ button{cursor:pointer;border:0}
   border:1px solid #ccd0d5;border-radius:7px
 }
 
-.postmenu-wrap{position:relative}.postmenu{position:absolute;right:0;top:42px;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 25px #0002;min-width:170px;z-index:20;padding:6px}.postmenu button{display:block;width:100%;text-align:left;background:#fff;padding:10px;border-radius:7px}.postmenu button:hover{background:#f0f2f5}.postmenu.hidden{display:none!important}.post-submenu-wrap{position:relative}.post-submenu-wrap>button{display:flex!important;justify-content:space-between;align-items:center}.privacy-submenu{position:absolute;right:100%;top:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 25px #0002;min-width:170px;padding:6px}.privacy-submenu button{display:block;width:100%;text-align:left;background:#fff;padding:10px;border-radius:7px}.privacy-submenu button:hover{background:#f0f2f5}.privacy-submenu.hidden{display:none!important}.privacy-options{display:grid;gap:8px}.privacy-options button{padding:12px;text-align:left;background:#f0f2f5;border-radius:8px}.privacy-options button:hover{background:#e4e6eb}.moremenu{position:fixed;right:18px;top:62px;width:280px;max-height:75vh;overflow:auto;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 10px 35px #0003;padding:10px;z-index:100}
+.postmenu-wrap{position:relative}.postmenu{position:absolute;right:0;top:42px;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 25px #0002;min-width:170px;z-index:20;padding:6px} .comment-menu-wrap{position:absolute;right:8px;top:8px}.comment-action{font-size:16px}.comment-menu{position:absolute;right:0;top:34px;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 25px #0002;min-width:130px;z-index:30;padding:5px}.comment-menu button{display:block;width:100%;text-align:left;background:#fff;padding:9px;border:0;border-radius:7px}.comment-menu.hidden{display:none!important}.postmenu button{display:block;width:100%;text-align:left;background:#fff;padding:10px;border-radius:7px}.postmenu button:hover{background:#f0f2f5}.postmenu.hidden{display:none!important}.post-submenu-wrap{position:relative}.post-submenu-wrap>button{display:flex!important;justify-content:space-between;align-items:center}.privacy-submenu{position:absolute;right:100%;top:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 25px #0002;min-width:170px;padding:6px}.privacy-submenu button{display:block;width:100%;text-align:left;background:#fff;padding:10px;border-radius:7px}.privacy-submenu button:hover{background:#f0f2f5}.privacy-submenu.hidden{display:none!important}.privacy-options{display:grid;gap:8px}.privacy-options button{padding:12px;text-align:left;background:#f0f2f5;border-radius:8px}.privacy-options button:hover{background:#e4e6eb}.moremenu{position:fixed;right:18px;top:62px;width:280px;max-height:75vh;overflow:auto;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 10px 35px #0003;padding:10px;z-index:100}
 .moretitle{font-weight:800;font-size:18px;padding:8px 10px;border-bottom:1px solid #eee;margin-bottom:6px}
 .moremenu button{display:block;width:100%;text-align:left;background:#fff;padding:11px;border-radius:9px;font-weight:600}
 .moremenu button:hover{background:#f0f2f5}
@@ -1084,9 +1084,9 @@ async function loadFeed(){
             </div>
 
             <div class="postmenu-wrap">
-              <button class="action" onclick="togglePostMenu('${p.id}')">⋯</button>
-              <div id="postmenu-${p.id}" class="postmenu hidden">
-                ${p.user_id===currentUser.id ? '<button type="button" onclick="editPost(\'${p.id}\')">✏️ Edit</button><button type="button" onclick="deletePost(\'${p.id}\')">🗑️ Delete</button><button type="button" onclick="togglePrivacySubmenu(\'${p.id}\')">🔒 Privacy ›</button><div id="privacy-submenu-${p.id}" class="privacy-submenu hidden"><button type="button" onclick="setPostPrivacy(\'${p.id}\',\'public\',false)">🌎 Public</button><button type="button" onclick="setPostPrivacy(\'${p.id}\',\'friends\',false)">👥 Friends</button><button type="button" onclick="setPostPrivacy(\'${p.id}\',\'me\',false)">🔒 Only me</button></div>' : '<button type="button" onclick="openPrivacyMenu(\'${p.id}\',\'${p.privacy||"public"}\',true)">🔒 Privacy</button>'}
+              <button class="action" onclick="togglePostMenu('\${p.id}')">⋯</button>
+              <div id="postmenu-\${p.id}" class="postmenu hidden">
+                \${postMenuHtml(p)}
               </div>
             </div>
 
@@ -1150,6 +1150,13 @@ async function loadFeed(){
 }
 
 
+function postMenuHtml(p){
+  if(p.user_id!==currentUser.id)return '<button onclick="openPrivacyMenu(\\''+p.id+'\\',\\''+(p.privacy||"public")+'\\',true)">🔒 Privacy</button>';
+  return '<button onclick="editPost(\\''+p.id+'\\')">✏️ Edit</button><button onclick="deletePost(\\''+p.id+'\\')">🗑️ Delete</button><button onclick="togglePrivacySubmenu(\\''+p.id+'\\')">🔒 Privacy ›</button><div id="privacy-submenu-'+p.id+'" class="privacy-submenu hidden"><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'public\\',false)">🌎 Public</button><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'friends\\',false)">👥 Friends</button><button onclick="setPostPrivacy(\\''+p.id+'\\',\\'me\\',false)">🔒 Only me</button></div>';
+}
+function toggleCommentMenu(id){document.querySelectorAll(".comment-menu").forEach(x=>{if(x.id!=="comment-menu-"+id)x.classList.add("hidden")});document.getElementById("comment-menu-"+id)?.classList.toggle("hidden")}
+async function editComment(id,content){const value=prompt("Edit your comment:",content);if(value===null)return;const text=value.trim();if(!text)return;const {error}=await client.from("comments").update({content:text}).eq("id",id).eq("user_id",currentUser.id);if(error)alert(error.message);else document.querySelectorAll("[id^=comments-]").forEach(el=>{if(el.querySelector("#comment-menu-"+id))loadComments(el.id.replace("comments-",""))})}
+async function deleteComment(id,postId){if(!confirm("Delete this comment?"))return;const {error}=await client.from("comments").delete().eq("id",id).eq("user_id",currentUser.id);if(error)alert(error.message);else loadComments(postId)}
 function focusComment(id){
 
   const input =
@@ -1260,25 +1267,11 @@ async function loadComments(postId){
 
   if(!el) return;
 
-  el.innerHTML =
-    (data || []).map(c => {
-
-      const user =
-        pm[c.user_id] || {};
-
-      return `
-        <div class="comment">
-
-          <b>
-            ${esc(user.full_name || "User")}
-          </b>
-
-          ${esc(c.content)}
-
-        </div>
-      `;
-
-    }).join("");
+  el.innerHTML = (data || []).map(c => \`
+    <div class="comment" style="position:relative">
+      <div style="padding-right:42px"><b>\${esc(pm[c.user_id]?.full_name || "User")}</b><div>\${esc(c.content)}</div></div>
+      \${c.user_id===currentUser.id ? \`<div class="comment-menu-wrap"><button class="action" onclick="toggleCommentMenu('\${c.id}')">⋯</button><div id="comment-menu-\${c.id}" class="comment-menu hidden"><button onclick="editComment('\${c.id}',\${JSON.stringify(c.content)})">✏️ Edit</button><button onclick="deleteComment('\${c.id}','\${postId}')">🗑️ Delete</button></div></div>\` : ""}
+    </div>\`).join("");
 
 }
 
