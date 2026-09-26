@@ -495,6 +495,57 @@ button{cursor:pointer;border:0}
 <body>
 
 
+<script><![CDATA[
+(function(){
+  const U="https://gkqyaroprqajwoubnsvs.supabase.co";
+  const K="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+  let c=null;
+  function msg(t){const e=document.getElementById("authmsg");if(e)e.textContent=t||""}
+  function get(){
+    if(c)return c;
+    if(window.supabase&&typeof window.supabase.createClient==="function"){c=window.supabase.createClient(U,K);return c}
+    return null;
+  }
+  function load(){
+    const x=get(); if(x)return Promise.resolve(x);
+    return new Promise((res,rej)=>{
+      const tag=document.createElement("script");
+      tag.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      tag.onload=()=>{const y=get();y?res(y):rej(new Error("Supabase library did not initialize."))};
+      tag.onerror=()=>rej(new Error("Could not load SocialHub sign-in service."));
+      document.head.appendChild(tag);
+    });
+  }
+  window.socialHubDirectAuth=async function(mode){
+    try{
+      msg(mode==="google"?"Opening Google sign-in...":mode==="login"?"Signing in...":"Creating account...");
+      const db=await load();
+      const email=(document.getElementById("email")?.value||"").trim();
+      const password=document.getElementById("password")?.value||"";
+      const username=(document.getElementById("username")?.value||"").trim();
+      if(mode==="login"){
+        if(!email||!password){msg("Please enter your email and password.");return}
+        const r=await db.auth.signInWithPassword({email,password});
+        if(r.error)throw r.error;
+        return;
+      }
+      if(mode==="signup"){
+        if(!email||!password||!username){msg("Please fill in all fields.");return}
+        const r=await db.auth.signUp({email,password});
+        if(r.error)throw r.error;
+        if(r.data?.user&&r.data?.session){
+          const p=await db.from("profiles").upsert({id:r.data.user.id,username,full_name:username},{onConflict:"id"});
+          if(p.error)throw p.error;
+        }
+        msg("Account created. Check your email if confirmation is required.");
+        return;
+      }
+      const r=await db.auth.signInWithOAuth({provider:"google",options:{scopes:"openid email profile",redirectTo:window.location.origin+window.location.pathname}});
+      if(r.error)throw r.error;
+    }catch(e){console.error(e);msg(e.message||"SocialHub sign-in failed.")}
+  };
+})();
+]]></script>
 <div id="auth" class="auth-page">
   <div class="auth-shell">
     <div class="auth-brand">
@@ -523,12 +574,12 @@ button{cursor:pointer;border:0}
       </div>
 
       <div class="auth-actions">
-        <button id="loginBtn" class="auth-login" type="button" onclick="if(window.socialHubLogin){window.socialHubLogin()}else if(window.login){window.login()}else{alert('SocialHub is still loading. Please wait a moment.')} ">Log in</button>
-        <button id="signupBtn" class="auth-signup" type="button" onclick="if(window.socialHubSignup){window.socialHubSignup()}else if(window.signup){window.signup()}else{alert('SocialHub is still loading. Please wait a moment.')} ">Create account</button>
+        <button id="loginBtn" class="auth-login" type="button" onclick="socialHubDirectAuth('login')">Log in</button>
+        <button id="signupBtn" class="auth-signup" type="button" onclick="socialHubDirectAuth('signup')">Create account</button>
       </div>
 
       <div class="auth-divider"><span>or continue with</span></div>
-      <button id="googleBtn" class="auth-google" type="button" onclick="if(window.socialHubGoogle){window.socialHubGoogle()}else if(window.loginWithGoogle){window.loginWithGoogle()}else{alert('SocialHub is still loading. Please wait a moment.')} "><span class="google-icon">G</span> Continue with Google</button>
+      <button id="googleBtn" class="auth-google" type="button" onclick="socialHubDirectAuth('google')"><span class="google-icon">G</span> Continue with Google</button>
 
       <p id="authmsg" class="auth-message"></p>
       <div class="auth-note">Your account is securely handled by Supabase.</div>
