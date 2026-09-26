@@ -1001,35 +1001,39 @@ async function createPost(){
   const button=document.querySelector('.composer .primary[onclick*="createPost"]');
   const contentEl=document.getElementById("postContent");
   const content=contentEl ? contentEl.value.trim() : "";
+  const media=Array.isArray(selectedPostMedia) ? selectedPostMedia.slice() : [];
   if(!currentUser){alert("Please log in again before posting.");return}
-  if(!content && !selectedPostMedia.length){alert("Write something or add a photo/video first.");return}
+  if(!content && !media.length){alert("Write something or add a photo/video first.");return}
   if(button){button.disabled=true;button.textContent="Posting..."}
   try{
-    let image_url=null, video_url=null;
-    for(const file of selectedPostMedia){
-      const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
-      const path=currentUser.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2)+"."+ext;
-      const {error}=await client.storage.from("posts").upload(path,file,{upsert:false});
-      if(error) throw new Error("Media upload failed: "+error.message);
-      const {data}=client.storage.from("posts").getPublicUrl(path);
-      if(file.type.startsWith("image/")&&!image_url) image_url=data.publicUrl;
-      if(file.type.startsWith("video/")&&!video_url) video_url=data.publicUrl;
+    /*
+      Text posts intentionally use only the columns that exist in every
+      SocialHub posts table: user_id and content.
+      This avoids the image_url/video_url schema-cache problem.
+    */
+    if(content && !media.length){
+      const {error}=await client.from("posts").insert({
+        user_id:currentUser.id,
+        content:content
+      });
+      if(error) throw new Error(error.message);
+    }else{
+      let imageUrl=null, videoUrl=null;
+      for(const file of media){
+        const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+        const path=currentUser.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2)+"."+ext;
+        const {error}=await client.storage.from("posts").upload(path,file,{upsert:false});
+        if(error) throw new Error("Media upload failed: "+error.message);
+        const {data}=client.storage.from("posts").getPublicUrl(path);
+        if(file.type.startsWith("image/")&&!imageUrl) imageUrl=data.publicUrl;
+        if(file.type.startsWith("video/")&&!videoUrl) videoUrl=data.publicUrl;
+      }
+      const post={user_id:currentUser.id,content:content};
+      if(imageUrl) post.image_url=imageUrl;
+      if(videoUrl) post.video_url=videoUrl;
+      const {error}=await client.from("posts").insert(post);
+      if(error) throw new Error(error.message);
     }
-
-    let post={user_id:currentUser.id,content};
-    if(image_url) post.image_url=image_url;
-    if(video_url) post.video_url=video_url;
-
-    let result=await client.from("posts").insert(post);
-    if(result.error && /image_url.*schema cache/i.test(result.error.message)){
-      delete post.image_url;
-      result=await client.from("posts").insert(post);
-    }
-    if(result.error && /video_url.*schema cache/i.test(result.error.message)){
-      delete post.video_url;
-      result=await client.from("posts").insert(post);
-    }
-    if(result.error) throw new Error("Post could not be created: "+result.error.message);
 
     contentEl.value="";
     selectedPostMedia=[];
@@ -1042,7 +1046,7 @@ async function createPost(){
     await loadFeed();
   }catch(error){
     console.error("createPost error:",error);
-    alert(error.message||"Post could not be created.");
+    alert("Post could not be created: "+(error.message||"Unknown error"));
   }finally{
     if(button){button.disabled=false;button.textContent="Post"}
   }
