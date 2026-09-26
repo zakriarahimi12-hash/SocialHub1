@@ -72,10 +72,11 @@
 </div>
 
 <script>
-const SUPABASE_URL = "https://gkqyaroprqajwoubnsvs.supabase.co";
+const SUPABASE_URL =
+  "https://gkqyaroprqajwoubnsvs.supabase.co";
 
 const SUPABASE_KEY =
-"sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+  "sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
 
 const client = window.supabase.createClient(
   SUPABASE_URL,
@@ -98,7 +99,9 @@ async function signup() {
   });
 
   document.getElementById("message").textContent =
-    error ? error.message : "Account created. Check your email.";
+    error
+      ? error.message
+      : "Account created. Check your email.";
 }
 
 async function login() {
@@ -111,7 +114,8 @@ async function login() {
   });
 
   if (error) {
-    document.getElementById("message").textContent = error.message;
+    document.getElementById("message").textContent =
+      error.message;
   } else {
     showApp();
   }
@@ -123,10 +127,12 @@ async function logout() {
 }
 
 async function createPost() {
-  const { data: { user } } = await client.auth.getUser();
+  const { data: { user } } =
+    await client.auth.getUser();
 
   const content =
-    document.getElementById("postContent").value.trim();
+    document.getElementById("postContent")
+      .value.trim();
 
   if (!user || !content) return;
 
@@ -148,8 +154,10 @@ async function createPost() {
 async function loadFeed() {
   const { data, error } = await client
     .from("posts")
-    .select("id, content, created_at, profiles(username)")
-    .order("created_at", { ascending: false });
+    .select("id, content, created_at, user_id")
+    .order("created_at", {
+      ascending: false
+    });
 
   if (error) {
     document.getElementById("feed").textContent =
@@ -160,7 +168,7 @@ async function loadFeed() {
   document.getElementById("feed").innerHTML =
     data.map(post => `
       <div class="post">
-        <b>@${post.profiles?.username || "user"}</b>
+        <b>@user</b>
         <p>${escapeHtml(post.content)}</p>
       </div>
     `).join("");
@@ -179,8 +187,12 @@ function escapeHtml(text) {
 }
 
 async function showApp() {
-  document.getElementById("auth").style.display = "none";
-  document.getElementById("app").style.display = "block";
+  document.getElementById("auth").style.display =
+    "none";
+
+  document.getElementById("app").style.display =
+    "block";
+
   loadFeed();
 }
 
