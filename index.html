@@ -1,501 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialHub</title>
 
--- SOCIALHUB FULL FACEBOOK-STYLE SCHEMA
--- Run this entire file in Supabase SQL Editor.
--- This uses the browser-safe publishable key with RLS; NEVER put a service_role key in index.html.
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-create extension if not exists pgcrypto;
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+    }
 
--- ---------- PROFILES ----------
-create table if not exists public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  username text unique,
-  full_name text not null default 'New User',
-  bio text not null default '',
-  avatar_url text,
-  cover_url text,
-  location text,
-  website text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+    .box {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .post {
+      border-top: 1px solid #ddd;
+      padding: 15px 0;
+    }
+
+    #app {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box" id="auth">
+  <h1>SocialHub</h1>
+
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <input id="username" placeholder="Username">
+
+  <button onclick="signup()">Create account</button>
+  <button onclick="login()">Log in</button>
+
+  <p id="message"></p>
+</div>
+
+<div class="box" id="app">
+  <h1>SocialHub</h1>
+
+  <button onclick="logout()">Log out</button>
+
+  <textarea id="postContent" placeholder="What's happening?"></textarea>
+  <button onclick="createPost()">Post</button>
+
+  <h2>Feed</h2>
+  <div id="feed"></div>
+</div>
+
+<script>
+const SUPABASE_URL =
+  "https://gkqyaroprqajwoubnsvs.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+
+const client = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
 );
 
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer set search_path = public
-as $$
-begin
-  insert into public.profiles (id, username, full_name)
-  values (
-    new.id,
-    nullif(regexp_replace(coalesce(new.raw_user_meta_data->>'username',''), '[^a-zA-Z0-9_]', '', 'g'), ''),
-    coalesce(nullif(new.raw_user_meta_data->>'full_name',''), split_part(new.email,'@',1), 'New User')
-  )
-  on conflict (id) do nothing;
-  return new;
-end;
-$$;
+async function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value;
 
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-after insert on auth.users
-for each row execute procedure public.handle_new_user();
+  const { error } = await client.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        username: username
+      }
+    }
+  });
 
--- ---------- POSTS ----------
-create table if not exists public.posts (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  content text not null default '',
-  media_url text,
-  media_type text check (media_type in ('image','video') or media_type is null),
-  feeling text,
-  location text,
-  visibility text not null default 'public' check (visibility in ('public','friends','private')),
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
+  document.getElementById("message").textContent =
+    error
+      ? error.message
+      : "Account created. Check your email.";
+}
 
--- ---------- COMMENTS ----------
-create table if not exists public.comments (
-  id uuid primary key default gen_random_uuid(),
-  post_id uuid not null references public.posts(id) on delete cascade,
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  parent_id uuid references public.comments(id) on delete cascade,
-  content text not null,
-  created_at timestamptz not null default now()
-);
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
--- ---------- REACTIONS ----------
-create table if not exists public.reactions (
-  post_id uuid not null references public.posts(id) on delete cascade,
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  type text not null check (type in ('like','love','haha','wow','sad','angry')),
-  created_at timestamptz not null default now(),
-  primary key (post_id, user_id)
-);
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password
+  });
 
--- ---------- FRIENDSHIPS ----------
-create table if not exists public.friendships (
-  id uuid primary key default gen_random_uuid(),
-  requester_id uuid not null references public.profiles(id) on delete cascade,
-  addressee_id uuid not null references public.profiles(id) on delete cascade,
-  status text not null default 'pending' check (status in ('pending','accepted','declined','blocked')),
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (requester_id, addressee_id),
-  check (requester_id <> addressee_id)
-);
+  if (error) {
+    document.getElementById("message").textContent =
+      error.message;
+  } else {
+    showApp();
+  }
+}
 
--- ---------- CONVERSATIONS / MESSAGES ----------
-create table if not exists public.conversations (
-  id uuid primary key default gen_random_uuid(),
-  title text,
-  is_group boolean not null default false,
-  created_by uuid references public.profiles(id) on delete set null,
-  created_at timestamptz not null default now()
-);
+async function logout() {
+  await client.auth.signOut();
+  location.reload();
+}
 
-create table if not exists public.conversation_members (
-  conversation_id uuid not null references public.conversations(id) on delete cascade,
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  joined_at timestamptz not null default now(),
-  primary key (conversation_id, user_id)
-);
+async function createPost() {
+  const { data: { user } } =
+    await client.auth.getUser();
 
-create table if not exists public.messages (
-  id uuid primary key default gen_random_uuid(),
-  conversation_id uuid not null references public.conversations(id) on delete cascade,
-  sender_id uuid not null references public.profiles(id) on delete cascade,
-  content text not null default '',
-  attachment_url text,
-  created_at timestamptz not null default now(),
-  read_at timestamptz
-);
+  const content =
+    document.getElementById("postContent")
+      .value.trim();
 
--- ---------- NOTIFICATIONS ----------
-create table if not exists public.notifications (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  actor_id uuid references public.profiles(id) on delete set null,
-  type text not null,
-  post_id uuid references public.posts(id) on delete cascade,
-  friendship_id uuid references public.friendships(id) on delete cascade,
-  message text not null default '',
-  read_at timestamptz,
-  created_at timestamptz not null default now()
-);
+  if (!user || !content) return;
 
--- ---------- SAVED ----------
-create table if not exists public.saved_posts (
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  post_id uuid not null references public.posts(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  primary key (user_id, post_id)
-);
+  const { error } = await client
+    .from("posts")
+    .insert({
+      user_id: user.id,
+      content: content
+    });
 
--- ---------- STORIES ----------
-create table if not exists public.stories (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  media_url text,
-  media_type text check (media_type in ('image','video') or media_type is null),
-  caption text not null default '',
-  expires_at timestamptz not null default (now() + interval '24 hours'),
-  created_at timestamptz not null default now()
-);
+  if (error) {
+    alert(error.message);
+  } else {
+    document.getElementById("postContent").value = "";
+    loadFeed();
+  }
+}
 
--- ---------- MARKETPLACE ----------
-create table if not exists public.marketplace_listings (
-  id uuid primary key default gen_random_uuid(),
-  seller_id uuid not null references public.profiles(id) on delete cascade,
-  title text not null,
-  description text not null default '',
-  price numeric(12,2) not null default 0,
-  currency text not null default 'EUR',
-  category text not null default 'Other',
-  location text,
-  image_url text,
-  status text not null default 'active' check (status in ('active','sold','hidden')),
-  created_at timestamptz not null default now()
-);
+async function loadFeed() {
+  const { data: posts, error } = await client
+    .from("posts")
+    .select("id, content, created_at, user_id")
+    .order("created_at", {
+      ascending: false
+    });
 
--- ---------- GROUPS ----------
-create table if not exists public.groups (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references public.profiles(id) on delete cascade,
-  name text not null,
-  description text not null default '',
-  privacy text not null default 'public' check (privacy in ('public','private')),
-  image_url text,
-  created_at timestamptz not null default now()
-);
+  if (error) {
+    document.getElementById("feed").textContent =
+      error.message;
+    return;
+  }
 
-create table if not exists public.group_members (
-  group_id uuid not null references public.groups(id) on delete cascade,
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  role text not null default 'member' check (role in ('owner','admin','member')),
-  created_at timestamptz not null default now(),
-  primary key (group_id, user_id)
-);
+  if (!posts || posts.length === 0) {
+    document.getElementById("feed").innerHTML =
+      "<p>No posts yet.</p>";
+    return;
+  }
 
--- ---------- EVENTS ----------
-create table if not exists public.events (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references public.profiles(id) on delete cascade,
-  title text not null,
-  description text not null default '',
-  location text,
-  starts_at timestamptz not null,
-  image_url text,
-  created_at timestamptz not null default now()
-);
+  const userIds = [
+    ...new Set(posts.map(post => post.user_id))
+  ];
 
-create table if not exists public.event_attendees (
-  event_id uuid not null references public.events(id) on delete cascade,
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  status text not null default 'interested' check (status in ('interested','going','declined')),
-  created_at timestamptz not null default now(),
-  primary key (event_id, user_id)
-);
+  const { data: profiles, error: profileError } =
+    await client
+      .from("profiles")
+      .select("id, username")
+      .in("id", userIds);
 
--- ---------- PAGES ----------
-create table if not exists public.pages (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references public.profiles(id) on delete cascade,
-  name text not null,
-  description text not null default '',
-  category text not null default 'Community',
-  avatar_url text,
-  created_at timestamptz not null default now()
-);
+  if (profileError) {
+    document.getElementById("feed").textContent =
+      profileError.message;
+    return;
+  }
 
-create table if not exists public.page_followers (
-  page_id uuid not null references public.pages(id) on delete cascade,
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  primary key (page_id, user_id)
-);
+  const profileMap = {};
 
--- ---------- INDEXES ----------
-create index if not exists posts_created_at_idx on public.posts(created_at desc);
-create index if not exists posts_user_id_idx on public.posts(user_id);
-create index if not exists comments_post_id_idx on public.comments(post_id, created_at);
-create index if not exists reactions_post_id_idx on public.reactions(post_id);
-create index if not exists friendships_addressee_idx on public.friendships(addressee_id, status);
-create index if not exists friendships_requester_idx on public.friendships(requester_id, status);
-create index if not exists messages_conversation_idx on public.messages(conversation_id, created_at);
-create index if not exists notifications_user_idx on public.notifications(user_id, created_at desc);
-create index if not exists stories_expires_idx on public.stories(expires_at);
-create index if not exists marketplace_status_idx on public.marketplace_listings(status, created_at desc);
+  (profiles || []).forEach(profile => {
+    profileMap[profile.id] = profile.username;
+  });
 
--- ---------- HELPER FUNCTIONS ----------
-create or replace function public.is_conversation_member(p_conversation uuid)
-returns boolean
-language sql stable security definer set search_path = public
-as $$
-  select exists (
-    select 1 from public.conversation_members
-    where conversation_id = p_conversation and user_id = auth.uid()
-  );
-$$;
+  document.getElementById("feed").innerHTML =
+    posts.map(post => `
+      <div class="post">
+        <b>@${escapeHtml(
+          profileMap[post.user_id] || "user"
+        )}</b>
 
-create or replace function public.are_friends(a uuid, b uuid)
-returns boolean
-language sql stable security definer set search_path = public
-as $$
-  select exists (
-    select 1 from public.friendships
-    where status = 'accepted'
-      and ((requester_id=a and addressee_id=b) or (requester_id=b and addressee_id=a))
-  );
-$$;
+        <p>${escapeHtml(post.content)}</p>
+      </div>
+    `).join("");
+}
 
-create or replace function public.create_direct_conversation(other_user uuid)
-returns uuid
-language plpgsql security definer set search_path = public
-as $$
-declare
-  existing_id uuid;
-  new_id uuid;
-begin
-  if auth.uid() is null or other_user = auth.uid() then
-    raise exception 'Invalid users';
-  end if;
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, function(m) {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[m];
+  });
+}
 
-  select c.id into existing_id
-  from public.conversations c
-  where c.is_group = false
-    and exists (select 1 from public.conversation_members m where m.conversation_id=c.id and m.user_id=auth.uid())
-    and exists (select 1 from public.conversation_members m where m.conversation_id=c.id and m.user_id=other_user)
-  limit 1;
+async function showApp() {
+  document.getElementById("auth").style.display =
+    "none";
 
-  if existing_id is not null then return existing_id; end if;
+  document.getElementById("app").style.display =
+    "block";
 
-  insert into public.conversations (created_by, is_group) values (auth.uid(), false) returning id into new_id;
-  insert into public.conversation_members(conversation_id,user_id)
-  values (new_id, auth.uid()), (new_id, other_user);
-  return new_id;
-end;
-$$;
+  loadFeed();
+}
 
-create or replace function public.notify_friend_request()
-returns trigger
-language plpgsql security definer set search_path = public
-as $$
-begin
-  if new.status = 'pending' then
-    insert into public.notifications(user_id, actor_id, type, friendship_id, message)
-    values (new.addressee_id, new.requester_id, 'friend_request', new.id, 'sent you a friend request');
-  elsif new.status = 'accepted' then
-    insert into public.notifications(user_id, actor_id, type, friendship_id, message)
-    values (new.requester_id, new.addressee_id, 'friend_accepted', new.id, 'accepted your friend request');
-  end if;
-  return new;
-end;
-$$;
+client.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    showApp();
+  }
+});
+</script>
 
-drop trigger if exists friendships_notify on public.friendships;
-create trigger friendships_notify
-after insert or update on public.friendships
-for each row execute procedure public.notify_friend_request();
-
--- ---------- RLS ----------
-alter table public.profiles enable row level security;
-alter table public.posts enable row level security;
-alter table public.comments enable row level security;
-alter table public.reactions enable row level security;
-alter table public.friendships enable row level security;
-alter table public.conversations enable row level security;
-alter table public.conversation_members enable row level security;
-alter table public.messages enable row level security;
-alter table public.notifications enable row level security;
-alter table public.saved_posts enable row level security;
-alter table public.stories enable row level security;
-alter table public.marketplace_listings enable row level security;
-alter table public.groups enable row level security;
-alter table public.group_members enable row level security;
-alter table public.events enable row level security;
-alter table public.event_attendees enable row level security;
-alter table public.pages enable row level security;
-alter table public.page_followers enable row level security;
-
--- Drop policies so this script can be rerun.
-do $$
-declare r record;
-begin
-  for r in
-    select schemaname, tablename, policyname
-    from pg_policies
-    where schemaname='public'
-      and tablename in ('profiles','posts','comments','reactions','friendships','conversations','conversation_members','messages','notifications','saved_posts','stories','marketplace_listings','groups','group_members','events','event_attendees','pages','page_followers')
-  loop
-    execute format('drop policy if exists %I on %I.%I', r.policyname, r.schemaname, r.tablename);
-  end loop;
-end $$;
-
--- profiles
-create policy profiles_select on public.profiles for select to authenticated using (true);
-create policy profiles_insert on public.profiles for insert to authenticated with check (auth.uid()=id);
-create policy profiles_update on public.profiles for update to authenticated using (auth.uid()=id) with check (auth.uid()=id);
-
--- posts
-create policy posts_select on public.posts for select to authenticated using (
-  visibility='public' or user_id=auth.uid() or (visibility='friends' and public.are_friends(user_id,auth.uid()))
-);
-create policy posts_insert on public.posts for insert to authenticated with check (user_id=auth.uid());
-create policy posts_update on public.posts for update to authenticated using (user_id=auth.uid()) with check (user_id=auth.uid());
-create policy posts_delete on public.posts for delete to authenticated using (user_id=auth.uid());
-
--- comments
-create policy comments_select on public.comments for select to authenticated using (true);
-create policy comments_insert on public.comments for insert to authenticated with check (user_id=auth.uid());
-create policy comments_update on public.comments for update to authenticated using (user_id=auth.uid()) with check (user_id=auth.uid());
-create policy comments_delete on public.comments for delete to authenticated using (user_id=auth.uid());
-
--- reactions
-create policy reactions_select on public.reactions for select to authenticated using (true);
-create policy reactions_insert on public.reactions for insert to authenticated with check (user_id=auth.uid());
-create policy reactions_update on public.reactions for update to authenticated using (user_id=auth.uid()) with check (user_id=auth.uid());
-create policy reactions_delete on public.reactions for delete to authenticated using (user_id=auth.uid());
-
--- friendships
-create policy friendships_select on public.friendships for select to authenticated using (requester_id=auth.uid() or addressee_id=auth.uid());
-create policy friendships_insert on public.friendships for insert to authenticated with check (requester_id=auth.uid());
-create policy friendships_update on public.friendships for update to authenticated using (requester_id=auth.uid() or addressee_id=auth.uid());
-create policy friendships_delete on public.friendships for delete to authenticated using (requester_id=auth.uid() or addressee_id=auth.uid());
-
--- conversations
-create policy conversations_select on public.conversations for select to authenticated using (public.is_conversation_member(id) or created_by=auth.uid());
-create policy conversations_insert on public.conversations for insert to authenticated with check (created_by=auth.uid());
-create policy conversations_update on public.conversations for update to authenticated using (created_by=auth.uid()) with check (created_by=auth.uid());
-
--- conversation members
-create policy members_select on public.conversation_members for select to authenticated using (public.is_conversation_member(conversation_id));
-create policy members_insert on public.conversation_members for insert to authenticated with check (
-  public.is_conversation_member(conversation_id) or exists(select 1 from public.conversations c where c.id=conversation_id and c.created_by=auth.uid())
-);
-create policy members_delete on public.conversation_members for delete to authenticated using (user_id=auth.uid());
-
--- messages
-create policy messages_select on public.messages for select to authenticated using (public.is_conversation_member(conversation_id));
-create policy messages_insert on public.messages for insert to authenticated with check (
-  sender_id=auth.uid() and public.is_conversation_member(conversation_id)
-);
-create policy messages_update on public.messages for update to authenticated using (sender_id=auth.uid()) with check (sender_id=auth.uid());
-
--- notifications
-create policy notifications_select on public.notifications for select to authenticated using (user_id=auth.uid());
-create policy notifications_update on public.notifications for update to authenticated using (user_id=auth.uid()) with check (user_id=auth.uid());
-create policy notifications_delete on public.notifications for delete to authenticated using (user_id=auth.uid());
-
--- saved
-create policy saved_select on public.saved_posts for select to authenticated using (user_id=auth.uid());
-create policy saved_insert on public.saved_posts for insert to authenticated with check (user_id=auth.uid());
-create policy saved_delete on public.saved_posts for delete to authenticated using (user_id=auth.uid());
-
--- stories
-create policy stories_select on public.stories for select to authenticated using (expires_at > now());
-create policy stories_insert on public.stories for insert to authenticated with check (user_id=auth.uid());
-create policy stories_update on public.stories for update to authenticated using (user_id=auth.uid()) with check (user_id=auth.uid());
-create policy stories_delete on public.stories for delete to authenticated using (user_id=auth.uid());
-
--- marketplace
-create policy marketplace_select on public.marketplace_listings for select to authenticated using (status='active' or seller_id=auth.uid());
-create policy marketplace_insert on public.marketplace_listings for insert to authenticated with check (seller_id=auth.uid());
-create policy marketplace_update on public.marketplace_listings for update to authenticated using (seller_id=auth.uid()) with check (seller_id=auth.uid());
-create policy marketplace_delete on public.marketplace_listings for delete to authenticated using (seller_id=auth.uid());
-
--- groups
-create policy groups_select on public.groups for select to authenticated using (privacy='public' or owner_id=auth.uid() or exists(select 1 from public.group_members gm where gm.group_id=id and gm.user_id=auth.uid()));
-create policy groups_insert on public.groups for insert to authenticated with check (owner_id=auth.uid());
-create policy groups_update on public.groups for update to authenticated using (owner_id=auth.uid()) with check (owner_id=auth.uid());
-create policy groups_delete on public.groups for delete to authenticated using (owner_id=auth.uid());
-
-create policy group_members_select on public.group_members for select to authenticated using (exists(select 1 from public.group_members x where x.group_id=group_id and x.user_id=auth.uid()) or exists(select 1 from public.groups g where g.id=group_id and g.privacy='public'));
-create policy group_members_insert on public.group_members for insert to authenticated with check (user_id=auth.uid() or exists(select 1 from public.groups g where g.id=group_id and g.owner_id=auth.uid()));
-create policy group_members_update on public.group_members for update to authenticated using (exists(select 1 from public.groups g where g.id=group_id and g.owner_id=auth.uid()));
-create policy group_members_delete on public.group_members for delete to authenticated using (user_id=auth.uid() or exists(select 1 from public.groups g where g.id=group_id and g.owner_id=auth.uid()));
-
--- events
-create policy events_select on public.events for select to authenticated using (true);
-create policy events_insert on public.events for insert to authenticated with check (owner_id=auth.uid());
-create policy events_update on public.events for update to authenticated using (owner_id=auth.uid()) with check (owner_id=auth.uid());
-create policy events_delete on public.events for delete to authenticated using (owner_id=auth.uid());
-
-create policy attendees_select on public.event_attendees for select to authenticated using (true);
-create policy attendees_insert on public.event_attendees for insert to authenticated with check (user_id=auth.uid());
-create policy attendees_update on public.event_attendees for update to authenticated using (user_id=auth.uid()) with check (user_id=auth.uid());
-create policy attendees_delete on public.event_attendees for delete to authenticated using (user_id=auth.uid());
-
--- pages
-create policy pages_select on public.pages for select to authenticated using (true);
-create policy pages_insert on public.pages for insert to authenticated with check (owner_id=auth.uid());
-create policy pages_update on public.pages for update to authenticated using (owner_id=auth.uid()) with check (owner_id=auth.uid());
-create policy pages_delete on public.pages for delete to authenticated using (owner_id=auth.uid());
-
-create policy followers_select on public.page_followers for select to authenticated using (true);
-create policy followers_insert on public.page_followers for insert to authenticated with check (user_id=auth.uid());
-create policy followers_delete on public.page_followers for delete to authenticated using (user_id=auth.uid());
-
--- ---------- STORAGE ----------
-insert into storage.buckets (id,name,public)
-values
-  ('avatars','avatars',true),
-  ('covers','covers',true),
-  ('posts','posts',true),
-  ('stories','stories',true),
-  ('marketplace','marketplace',true)
-on conflict (id) do update set public=true;
-
-drop policy if exists "Public media read" on storage.objects;
-create policy "Public media read" on storage.objects
-for select using (bucket_id in ('avatars','covers','posts','stories','marketplace'));
-
-drop policy if exists "Users upload own media" on storage.objects;
-create policy "Users upload own media" on storage.objects
-for insert to authenticated
-with check (
-  bucket_id in ('avatars','covers','posts','stories','marketplace')
-  and (storage.foldername(name))[1] = auth.uid()::text
-);
-
-drop policy if exists "Users update own media" on storage.objects;
-create policy "Users update own media" on storage.objects
-for update to authenticated
-using ((storage.foldername(name))[1] = auth.uid()::text)
-with check ((storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "Users delete own media" on storage.objects;
-create policy "Users delete own media" on storage.objects
-for delete to authenticated
-using ((storage.foldername(name))[1] = auth.uid()::text);
-
--- ---------- REALTIME ----------
-do $$
-begin
-  begin
-    alter publication supabase_realtime add table public.posts;
-  exception when duplicate_object then null;
-  end;
-  begin
-    alter publication supabase_realtime add table public.comments;
-  exception when duplicate_object then null;
-  end;
-  begin
-    alter publication supabase_realtime add table public.reactions;
-  exception when duplicate_object then null;
-  end;
-  begin
-    alter publication supabase_realtime add table public.messages;
-  exception when duplicate_object then null;
-  end;
-  begin
-    alter publication supabase_realtime add table public.notifications;
-  exception when duplicate_object then null;
-  end;
-end $$;
-
--- Helpful grants for browser clients.
-grant usage on schema public to anon, authenticated;
-grant select on all tables in schema public to authenticated;
-grant insert, update, delete on all tables in schema public to authenticated;
+</body>
+</html>
