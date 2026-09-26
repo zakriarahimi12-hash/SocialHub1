@@ -2541,6 +2541,14 @@ client.auth.onAuthStateChange((_event,session)=>{
   if(session) openSite();
   else { document.getElementById("site").classList.add("hidden"); document.getElementById("auth").classList.remove("hidden"); }
 });
+// Close dropdown menus whenever the user clicks outside their menu area.
+document.addEventListener("click",function(event){
+  const target=event.target;
+  if(target.closest(".postmenu-wrap,.comment-menu-wrap,.moremenu")) return;
+  document.querySelectorAll(".postmenu,.comment-menu,.moremenu,.privacy-submenu").forEach(menu=>{
+    menu.classList.add("hidden");
+  });
+});
 const authHash=new URLSearchParams(location.hash.replace(/^#/,""));
 if(authHash.get("error_code")==="otp_expired") document.getElementById("authmsg").textContent="Your email confirmation link expired. Request a new confirmation email.";
 
