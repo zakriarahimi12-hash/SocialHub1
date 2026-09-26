@@ -10,124 +10,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>SocialHub</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" data-socialhub-supabase="1"></script>
+<script src="https://zakriarahimi12-hash.github.io/SocialHub1/blogger-auth.js"></script>
 <script><![CDATA[
-/* SocialHub Blogger bridge: one auth path and one Blogger feed helper. */
-let bloggerJsonpCounter=0;
-function escapeHtml(value){
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-}
-function toast(message){alert(message)}
-
-const SOCIALHUB_URL="https://gkqyaroprqajwoubnsvs.supabase.co";
-const SOCIALHUB_KEY="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
-let socialHubAuthClient=null;
-
-function socialHubSetAuthMessage(text){
-  const el=document.getElementById("authmsg");
-  if(el)el.textContent=text||"";
-}
-function socialHubGetAuthClient(){
-  if(socialHubAuthClient)return socialHubAuthClient;
-  if(window.supabase&&typeof window.supabase.createClient==="function"){
-    socialHubAuthClient=window.supabase.createClient(SOCIALHUB_URL,SOCIALHUB_KEY,{
-      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
-    });
-    return socialHubAuthClient;
-  }
-  return null;
-}
-function socialHubWaitForAuthClient(){
-  const ready=socialHubGetAuthClient();
-  if(ready)return Promise.resolve(ready);
-  return new Promise((resolve,reject)=>{
-    let tries=0;
-    const timer=setInterval(()=>{
-      const client=socialHubGetAuthClient();
-      if(client){clearInterval(timer);resolve(client);return}
-      if(++tries>=80){clearInterval(timer);reject(new Error("SocialHub sign-in service could not be loaded."))}
-    },250);
-  });
-}
-async function socialHubLogin(){
-  try{
-    socialHubSetAuthMessage("Signing in...");
-    const client=await socialHubWaitForAuthClient();
-    const email=(document.getElementById("email")?.value||"").trim();
-    const password=document.getElementById("password")?.value||"";
-    if(!email||!password){socialHubSetAuthMessage("Please enter your email and password.");return}
-    const {error}=await client.auth.signInWithPassword({email,password});
-    if(error)throw error;
-  }catch(error){
-    console.error("SocialHub login:",error);
-    socialHubSetAuthMessage(error.message||"Login failed.");
-  }
-}
-async function socialHubSignup(){
-  try{
-    socialHubSetAuthMessage("Creating account...");
-    const client=await socialHubWaitForAuthClient();
-    const email=(document.getElementById("email")?.value||"").trim();
-    const password=document.getElementById("password")?.value||"";
-    const username=(document.getElementById("username")?.value||"").trim();
-    if(!email||!password||!username){socialHubSetAuthMessage("Please fill in email, password and username.");return}
-    const {data,error}=await client.auth.signUp({
-      email,password,options:{data:{username,full_name:username}}
-    });
-    if(error)throw error;
-    if(data?.user&&data?.session){
-      const {error:profileError}=await client.from("profiles").upsert(
-        {id:data.user.id,username,full_name:username},{onConflict:"id"}
-      );
-      if(profileError)console.warn("Profile creation:",profileError.message);
-    }
-    socialHubSetAuthMessage(data?.session?"Account created.":"Account created. Check your email if confirmation is required.");
-  }catch(error){
-    console.error("SocialHub signup:",error);
-    socialHubSetAuthMessage(error.message||"Account creation failed.");
-  }
-}
-async function socialHubGoogle(){
-  try{
-    socialHubSetAuthMessage("Opening Google sign-in...");
-    const client=await socialHubWaitForAuthClient();
-    const {error}=await client.auth.signInWithOAuth({
-      provider:"google",
-      options:{scopes:"openid email profile",redirectTo:window.location.origin+window.location.pathname}
-    });
-    if(error)throw error;
-  }catch(error){
-    console.error("SocialHub Google:",error);
-    socialHubSetAuthMessage(error.message||"Google sign-in could not be started.");
-  }
-}
-function socialHubBindAuthButtons(){
-  const login=document.getElementById("loginBtn");
-  const signup=document.getElementById("signupBtn");
-  const google=document.getElementById("googleBtn");
-  if(login&&!login.dataset.socialhubBound){
-    login.dataset.socialhubBound="1";
-    login.addEventListener("click",socialHubLogin);
-  }
-  if(signup&&!signup.dataset.socialhubBound){
-    signup.dataset.socialhubBound="1";
-    signup.addEventListener("click",socialHubSignup);
-  }
-  if(google&&!google.dataset.socialhubBound){
-    google.dataset.socialhubBound="1";
-    google.addEventListener("click",socialHubGoogle);
-  }
-}
-window.socialHubLogin=socialHubLogin;
-window.socialHubSignup=socialHubSignup;
-window.socialHubGoogle=socialHubGoogle;
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",socialHubBindAuthButtons,{once:true});
-else socialHubBindAuthButtons();
-
 function normalizeBloggerUrl(value){
   let u=(value||"").trim();
   if(!u)return "";
@@ -201,7 +85,8 @@ function loadBloggerPosts(){
   };
   document.body.appendChild(script);
 }
-]]></script>
+]]>
+</script>
 
 
 
@@ -544,11 +429,11 @@ button{cursor:pointer;border:0}
         <input id="username" class="signup-only-field" placeholder="Choose a username" autocomplete="username" />
       </div>
       <div class="auth-actions">
-        <button id="loginBtn" class="auth-login" type="button" onclick="socialHubLogin()">Log in</button>
-        <button id="signupBtn" class="auth-signup" type="button" onclick="socialHubSignup()">Create account</button>
+        <button id="loginBtn" class="auth-login" type="button" onclick="socialHubBloggerLogin()">Log in</button>
+        <button id="signupBtn" class="auth-signup" type="button" onclick="socialHubBloggerSignup()">Create account</button>
       </div>
       <div class="auth-divider"><span>or continue with</span></div>
-      <button id="googleBtn" class="auth-google" type="button" onclick="socialHubGoogle()"><span class="google-icon">G</span> Continue with Google</button>
+      <button id="googleBtn" class="auth-google" type="button" onclick="socialHubBloggerGoogle()"><span class="google-icon">G</span> Continue with Google</button>
       <p id="authmsg" class="auth-message"></p>
       <div class="auth-note">Secure authentication by Supabase.</div>
     </div>
