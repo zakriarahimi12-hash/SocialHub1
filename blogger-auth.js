@@ -143,23 +143,9 @@ async function google(){
 }
 
 function bind(){
-  const a=document.getElementById("loginBtn");
-  const b=document.getElementById("signupBtn");
-  const g=document.getElementById("googleBtn");
-  if(a&&!a.dataset.socialHubAuth){
-    a.dataset.socialHubAuth="1";
-    a.addEventListener("click",login,false);
-  }
-  if(b&&!b.dataset.socialHubAuth){
-    b.dataset.socialHubAuth="1";
-    b.addEventListener("click",signup,false);
-  }
-  if(g&&!g.dataset.socialHubAuth){
-    g.dataset.socialHubAuth="1";
-    g.addEventListener("click",google,false);
-  }
+  // Blogger buttons call the exported functions directly via onclick.
+  // Do not attach a second click handler here; doing so can submit signup twice.
 }
-
 window.socialHubBloggerLogin=login;
 window.socialHubBloggerSignup=signup;
 window.socialHubBloggerGoogle=google;
