@@ -115,7 +115,7 @@ button{cursor:pointer;border:0}
 
 .danger{background:#e41e3f;color:#fff}
 
-.storyrow{display:flex;gap:10px;overflow:auto}
+.stories-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.facebook-stories{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 5px}.facebook-stories::-webkit-scrollbar{height:6px}.facebook-stories::-webkit-scrollbar-thumb{background:#ccd0d5;border-radius:10px}.story{flex:0 0 120px;width:120px;height:205px;border-radius:12px;padding:0;position:relative;overflow:hidden;background:#e4e6eb;cursor:pointer;border:0;display:block;box-shadow:0 1px 2px rgba(0,0,0,.15)}.story:hover{transform:translateY(-2px)}.story img,.story video{width:100%;height:100%;object-fit:cover;border-radius:12px;background:#111}.story:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 45%,rgba(0,0,0,.72));pointer-events:none}.story span{position:absolute;left:9px;right:7px;bottom:10px;color:#fff;font-size:13px;line-height:1.25;font-weight:700;z-index:2;text-align:left;text-shadow:0 1px 2px #000}.story:before{content:"";position:absolute;z-index:3;top:9px;left:9px;width:38px;height:38px;border-radius:50%;background:#fff;border:3px solid #1877f2;box-shadow:0 1px 3px rgba(0,0,0,.35)}.create-story-card{flex:0 0 120px;width:120px;height:205px;border:0;border-radius:12px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);padding:0;overflow:hidden;cursor:pointer;position:relative}.create-story-photo{height:155px;background:#d8dadf;display:flex;align-items:center;justify-content:center;font-size:30px;color:#1877f2;font-weight:400}.create-story-card span{display:block;padding:13px 6px 0;font-weight:700;color:#1c1e21}.stories-home-card{overflow:hidden}\n.storyrow{display:flex;gap:10px;overflow:auto}
 
 .story{
   min-width:100px;height:150px;border-radius:12px;
@@ -416,14 +416,22 @@ button{cursor:pointer;border:0}
 <section id="home" class="section active">
 
   <div class="card stories-home-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div class="stories-header">
       <div>
-        <div class="menu-title">📖 Stories</div>
-        <div class="muted">Share photos and videos with your community.</div>
+        <div class="menu-title">Stories</div>
+        <div class="muted">Share moments with your community</div>
       </div>
-      <button class="primary" type="button" onclick="openStories(event)">View Stories</button>
+      <button class="action" type="button" onclick="openStories(event)">See all</button>
     </div>
-    <div class="storyrow" id="storyrow"></div>
+
+    <div class="facebook-stories" id="storyrow">
+      <button class="create-story-card" type="button" onclick="document.getElementById('storyMediaInput').click()">
+        <div class="create-story-photo">+</div>
+        <span>Create story</span>
+      </button>
+    </div>
+
+    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)">
   </div>
 
   <div class="card composer">
