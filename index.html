@@ -2338,7 +2338,7 @@ function closeModal(){
 
 function togglePostMenu(id){document.querySelectorAll('.postmenu').forEach(x=>{if(x.id!=='postmenu-'+id)x.classList.add('hidden')});document.getElementById('postmenu-'+id)?.classList.toggle('hidden')}
 async function editPost(id,content){const value=prompt("Edit your post:",content);if(value===null)return;const text=value.trim();if(!text)return;const {error}=await client.from("posts").update({content:text}).eq("id",id).eq("user_id",currentUser.id);if(error)alert(error.message);else loadFeed()}
-function openPrivacyMenu(id,current,viewOnly=false){openModal('<h2>Post privacy</h2><p class="muted">Choose who can see this post.</p><div class="privacy-options"><button onclick="setPostPrivacy(\\''+id+'\\',\\'public\\', '+viewOnly+')">🌎 Public</button><button onclick="setPostPrivacy(\\''+id+'\\',\\'friends\\', '+viewOnly+')">👥 Friends</button><button onclick="setPostPrivacy(\\''+id+'\\',\\'me\\', '+viewOnly+')">🔒 Only me</button></div>')}
+function openPrivacyMenu(id,current,viewOnly=false){openModal(`<h2>Post privacy</h2><p class="muted">Choose who can see this post.</p><div class="privacy-options"><button onclick="setPostPrivacy('${id}','public',${viewOnly})">🌎 Public</button><button onclick="setPostPrivacy('${id}','friends',${viewOnly})">👥 Friends</button><button onclick="setPostPrivacy('${id}','me',${viewOnly})">🔒 Only me</button></div>`)}
 async function setPostPrivacy(id,privacy,viewOnly){if(viewOnly){closeModal();return}const {error}=await client.from("posts").update({privacy}).eq("id",id).eq("user_id",currentUser.id);if(error)alert(error.message);else{closeModal();loadFeed()}}
 
 function toggleMoreMenu(){document.getElementById('moreMenu').classList.toggle('hidden')}
