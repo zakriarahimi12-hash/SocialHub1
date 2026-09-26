@@ -147,11 +147,15 @@ async function uploadProfileImage(type){
 function togglePostMenu(event,id){event.stopPropagation();document.querySelectorAll(".post-menu").forEach(x=>x.style.display="none");document.getElementById("post-menu-"+id).style.display="block"}
 function togglePrivacyMenu(id){event.stopPropagation();document.getElementById("privacy-"+id).classList.toggle("show")}
 async function setPostPrivacy(id,privacy){const {error}=await client.from("posts").update({privacy}).eq("id",id).eq("user_id",user.id);if(error){toast(error.message);return}toast("Privacy updated");showTab("posts")}
-async function editPost(id){const {data,error}=await client.from("posts").select("content").eq("id",id).eq("user_id",user.id).single();if(error){toast(error.message);return}openModal('<div class="edit"><h2>Edit post</h2><label>Post</label><textarea id="editPostText">'+esc(data.content||"")+'</textarea><div class="actions"><button class="primary" onclick="savePostEdit(\\''+id+'\\')">Save changes</button><button class="action" onclick="closeModal()">Cancel</button></div></div>')}
+async function editPost(id){
+ const {data,error}=await client.from("posts").select("content").eq("id",id).eq("user_id",user.id).single();
+ if(error){toast(error.message);return}
+ openModal(`<div class="edit"><h2>Edit post</h2><label>Post</label><textarea id="editPostText">${esc(data.content||"")}</textarea><div class="actions"><button class="primary" onclick="savePostEdit('${id}')">Save changes</button><button class="action" onclick="closeModal()">Cancel</button></div></div>`);
+}
 async function savePostEdit(id){const content=document.getElementById("editPostText").value.trim();if(!content){toast("Post cannot be empty.");return}const {error}=await client.from("posts").update({content}).eq("id",id).eq("user_id",user.id);if(error){toast(error.message);return}closeModal();toast("Post updated");showTab("posts")}
 async function deletePost(id){if(!confirm("Delete this post?"))return;const {error}=await client.from("posts").delete().eq("id",id).eq("user_id",user.id);if(error)toast(error.message);else{toast("Post deleted");showTab("posts")}}
 document.addEventListener("click",e=>{if(!e.target.closest(".post-menu-wrap"))document.querySelectorAll(".post-menu").forEach(x=>x.style.display="none")})
 function goSearch(){const q=document.getElementById("topSearch").value.trim();if(q)location.href="index.html#search="+encodeURIComponent(q)}
-document.getElementById("avatar").addEventListener("click",openAvatarEditor);init();
+window.addEventListener("DOMContentLoaded",()=>{document.getElementById("avatar").addEventListener("click",openAvatarEditor);init()});
 </script>
 </body></html>
