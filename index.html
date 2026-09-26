@@ -1003,11 +1003,9 @@ async function createPost(){
   const content=contentEl ? contentEl.value.trim() : "";
   if(!currentUser){alert("Please log in again before posting.");return}
   if(!content && !selectedPostMedia.length){alert("Write something or add a photo/video first.");return}
-
   if(button){button.disabled=true;button.textContent="Posting..."}
   try{
     let image_url=null, video_url=null;
-
     for(const file of selectedPostMedia){
       const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
       const path=currentUser.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2)+"."+ext;
@@ -1018,11 +1016,20 @@ async function createPost(){
       if(file.type.startsWith("video/")&&!video_url) video_url=data.publicUrl;
     }
 
-    const post={user_id:currentUser.id,content,image_url};
+    let post={user_id:currentUser.id,content};
+    if(image_url) post.image_url=image_url;
     if(video_url) post.video_url=video_url;
 
-    const {error}=await client.from("posts").insert(post);
-    if(error) throw new Error("Post could not be created: "+error.message);
+    let result=await client.from("posts").insert(post);
+    if(result.error && /image_url.*schema cache/i.test(result.error.message)){
+      delete post.image_url;
+      result=await client.from("posts").insert(post);
+    }
+    if(result.error && /video_url.*schema cache/i.test(result.error.message)){
+      delete post.video_url;
+      result=await client.from("posts").insert(post);
+    }
+    if(result.error) throw new Error("Post could not be created: "+result.error.message);
 
     contentEl.value="";
     selectedPostMedia=[];
@@ -1032,9 +1039,7 @@ async function createPost(){
     if(preview) preview.innerHTML="";
     const status=document.getElementById("postMediaStatus");
     if(status) status.textContent="Add photos or videos to your post";
-
     await loadFeed();
-    alert("Post published!");
   }catch(error){
     console.error("createPost error:",error);
     alert(error.message||"Post could not be created.");
