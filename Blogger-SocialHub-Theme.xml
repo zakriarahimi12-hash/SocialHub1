@@ -563,47 +563,90 @@ document.addEventListener("click",function(event){
 ]]></script>
 <div id="auth" class="auth-page">
   <div class="auth-shell">
-    <div class="auth-brand">
-      <div class="auth-logo-mark">S</div>
-      <div>
-        <div class="auth-brand-name">SocialHub</div>
-        <div class="auth-brand-tag">Connect. Share. Belong.</div>
-      </div>
-    </div>
-
+    <div class="auth-brand"><div class="auth-logo-mark">S</div><div><div class="auth-brand-name">SocialHub</div><div class="auth-brand-tag">Connect. Share. Belong.</div></div></div>
     <div class="auth-card">
-      <div class="auth-hero">
-        <h1>Welcome back</h1>
-        <p>Sign in to continue to your SocialHub community.</p>
-      </div>
-
+      <div class="auth-hero"><h1>Welcome back</h1><p>Sign in to continue to SocialHub.</p></div>
       <div class="auth-fields">
         <label>Email</label>
         <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
-
         <label>Password</label>
         <input id="password" type="password" placeholder="Your password" autocomplete="current-password" />
-
-        <label class="signup-only-label">Username <span>(only needed for a new account)</span></label>
+        <label class="signup-only-label">Username <span>(new accounts only)</span></label>
         <input id="username" class="signup-only-field" placeholder="Choose a username" autocomplete="username" />
       </div>
-
       <div class="auth-actions">
-        <button id="loginBtn" class="auth-login" type="button" onclick="socialHubDirectAuth('login')">Log in</button>
-        <button id="signupBtn" class="auth-signup" type="button" onclick="socialHubDirectAuth('signup')">Create account</button>
+        <button id="loginBtn" class="auth-login" type="button">Log in</button>
+        <button id="signupBtn" class="auth-signup" type="button">Create account</button>
       </div>
-
       <div class="auth-divider"><span>or continue with</span></div>
-      <button id="googleBtn" class="auth-google" type="button" onclick="socialHubDirectAuth('google')"><span class="google-icon">G</span> Continue with Google</button>
-
+      <button id="googleBtn" class="auth-google" type="button"><span class="google-icon">G</span> Continue with Google</button>
       <p id="authmsg" class="auth-message"></p>
-      <div class="auth-note">Your account is securely handled by Supabase.</div>
+      <div class="auth-note">Secure authentication by Supabase.</div>
     </div>
-
     <div class="auth-footer">© 2026 SocialHub</div>
   </div>
 </div>
 
+<script><![CDATA[
+(function(){
+  const U="https://gkqyaroprqajwoubnsvs.supabase.co";
+  const K="sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+  const REF="sb-gkqyaroprqajwoubnsvs-auth-token";
+  const msg=t=>{const e=document.getElementById("authmsg");if(e)e.textContent=t||""};
+  const val=id=>(document.getElementById(id)?.value||"").trim();
+  async function api(path,body){
+    const r=await fetch(U+path,{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+K},body:JSON.stringify(body)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(j.error_description||j.msg||j.message||"Authentication failed.");
+    return j;
+  }
+  function saveSession(s){
+    if(!s?.access_token||!s?.refresh_token||!s?.user)return;
+    const expiresIn=Number(s.expires_in||3600);
+    localStorage.setItem(REF,JSON.stringify({access_token:s.access_token,token_type:s.token_type||"bearer",expires_in:expiresIn,expires_at:Math.floor(Date.now()/1000)+expiresIn,refresh_token:s.refresh_token,user:s.user,weak_password:s.weak_password||false}));
+  }
+  async function login(){
+    try{
+      msg("Signing in...");
+      const email=val("email"),password=document.getElementById("password")?.value||"";
+      if(!email||!password){msg("Enter your email and password.");return}
+      const s=await api("/auth/v1/token?grant_type=password",{email,password});
+      saveSession(s);
+      location.reload();
+    }catch(e){console.error(e);msg(e.message||"Login failed.")}
+  }
+  async function signup(){
+    try{
+      msg("Creating account...");
+      const email=val("email"),password=document.getElementById("password")?.value||"",username=val("username");
+      if(!email||!password||!username){msg("Fill in email, password and username.");return}
+      const s=await api("/auth/v1/signup",{email,password,data:{username,full_name:username}});
+      if(s.access_token)saveSession(s);
+      if(s.user&&s.access_token){
+        const r=await fetch(U+"/rest/v1/profiles",{method:"POST",headers:{"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+s.access_token,"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({id:s.user.id,username,full_name:username})});
+        if(!r.ok)console.warn("Profile creation:",await r.text());
+        location.reload();
+      }else msg("Account created. Check your email to confirm the account.");
+    }catch(e){console.error(e);msg(e.message||"Account creation failed.")}
+  }
+  async function google(){
+    try{
+      msg("Opening Google sign-in...");
+      const redirect=location.origin+location.pathname;
+      const r=await fetch(U+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirect),{headers:{apikey:K}});
+      if(r.redirected){location.href=r.url;return}
+      location.href=U+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(redirect);
+    }catch(e){location.href=U+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(location.origin+location.pathname)}
+  }
+  window.socialHubDirectAuth=mode=>mode==="login"?login():mode==="signup"?signup():google();
+  const bind=()=>{
+    document.getElementById("loginBtn")?.addEventListener("click",login);
+    document.getElementById("signupBtn")?.addEventListener("click",signup);
+    document.getElementById("googleBtn")?.addEventListener("click",google);
+  };
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind,{once:true});else bind();
+})();
+]]></script>
 
 <div id="site" class="hidden">
 
