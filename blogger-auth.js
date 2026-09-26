@@ -101,12 +101,22 @@ async function signup(){
       options:{data:{username:username,full_name:username}}
     });
     if(result.error)throw result.error;
-    if(result.data?.user&&result.data?.session){
-      await ensureProfile(client,result.data.user,username);
-      location.reload();
-    }else{
-      msg("Account created. Check your email to confirm your account.");
+    let session=result.data?.session||null;
+    if(!session){
+      const current=await client.auth.getSession();
+      session=current.data?.session||null;
     }
+    if(session?.user){
+      await ensureProfile(client,session.user,username);
+      msg("Account created. Signing you in...");
+      location.reload();
+      return;
+    }
+    if(result.data?.user){
+      msg("Account created, but Supabase requires email confirmation before signing in. If you want instant signup, turn off Email → Confirm Email in Supabase Authentication → Providers.");
+      return;
+    }
+    msg("Account could not be completed.");
   }catch(e){
     console.error("SocialHub Blogger signup:",e);
     msg(e.message||"Account creation failed.");
