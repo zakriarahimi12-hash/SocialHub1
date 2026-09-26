@@ -375,7 +375,14 @@ button{cursor:pointer;border:0}
 
 <section id="home" class="section active">
 
-  <div class="card">
+  <div class="card stories-home-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div class="menu-title">📖 Stories</div>
+        <div class="muted">Share photos and videos with your community.</div>
+      </div>
+      <button class="primary" type="button" onclick="openStories(event)">View Stories</button>
+    </div>
     <div class="storyrow" id="storyrow"></div>
   </div>
 
