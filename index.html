@@ -341,7 +341,7 @@ button{cursor:pointer;border:0}
     <button onclick="show('groups');closeMoreMenu()">👨‍👩‍👧 Groups</button>
     <button onclick="show('pages');closeMoreMenu()">📄 Pages</button>
     <button onclick="show('events');closeMoreMenu()">📅 Events</button>
-    <button onclick="show('stories');closeMoreMenu()">📖 Stories</button>
+    <button onclick="openStories(event);closeMoreMenu()">📖 Stories</button>
     <button onclick="show('gaming');closeMoreMenu()">🎮 Gaming</button>
     <button onclick="show('saved');closeMoreMenu()">🔖 Saved</button>
     <button onclick="show('memories');closeMoreMenu()">🕐 Memories</button>
@@ -754,7 +754,7 @@ button{cursor:pointer;border:0}
     <p class="muted">Connect with your community.</p>
     <div class="right-menu-list">
       <button onclick="show('events')"><span class="ico">📅</span><span class="txt">Events</span></button>
-      <button onclick="show('stories')"><span class="ico">📖</span><span class="txt">Stories</span></button>
+      <button onclick="openStories(event)"><span class="ico">📖</span><span class="txt">Stories</span></button>
       <button onclick="show('reels')"><span class="ico">🎞️</span><span class="txt">Reels</span></button>
       <button onclick="show('gaming')"><span class="ico">🎮</span><span class="txt">Gaming</span></button>
       <button onclick="show('saved')"><span class="ico">🔖</span><span class="txt">Saved</span></button>
@@ -830,6 +830,12 @@ function esc(value){
 
 }
 
+
+function openStories(event){
+  if(event) event.stopPropagation();
+  show("stories");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
 
 function show(id){
 
