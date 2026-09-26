@@ -1258,28 +1258,20 @@ async function loadComments(postId){
 
 
 async function deletePost(id){
-
+  if(!currentUser){alert("Please sign in again.");return}
   if(!confirm("Delete this post?")) return;
-
-  const {
-    error
-  } =
-    await client
-      .from("posts")
-      .delete()
-      .eq("id",id)
-      .eq("user_id",currentUser.id);
-
+  const {data, error}=await client.rpc("delete_my_post",{p_post_id:id});
   if(error){
-
-    alert(error.message);
-
-  }else{
-
-    loadFeed();
-
+    alert("Could not delete the post. Please run the latest schema.sql in Supabase SQL Editor. Details: "+error.message);
+    return;
   }
-
+  if(data!==true){
+    alert("This post could not be deleted. You can only delete your own posts.");
+    return;
+  }
+  const menu=document.getElementById("postmenu-"+id);
+  if(menu) menu.classList.add("hidden");
+  await loadFeed();
 }
 
 
