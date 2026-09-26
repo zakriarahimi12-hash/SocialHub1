@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>SocialHub</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" data-socialhub-supabase="1"></script>
-<script src="https://zakriarahimi12-hash.github.io/SocialHub1/blogger-auth.js?v=20260927-1"></script>
+<script src="https://zakriarahimi12-hash.github.io/SocialHub1/blogger-auth.js?v=20260927-2"></script>
 <script><![CDATA[
 function escapeHtml(value){
   return String(value ?? "")
@@ -1195,7 +1195,6 @@ async function socialHubBloggerSignupMode(){
     msg.textContent=error.message||"Account creation failed.";
   }
   return false;
-}
 }
 
 
