@@ -145,6 +145,20 @@ button{cursor:pointer;border:0}
   border:1px solid #ccd0d5;border-radius:7px
 }
 
+.moremenu{position:fixed;right:18px;top:62px;width:280px;max-height:75vh;overflow:auto;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 10px 35px #0003;padding:10px;z-index:100}
+.moretitle{font-weight:800;font-size:18px;padding:8px 10px;border-bottom:1px solid #eee;margin-bottom:6px}
+.moremenu button{display:block;width:100%;text-align:left;background:#fff;padding:11px;border-radius:9px;font-weight:600}
+.moremenu button:hover{background:#f0f2f5}
+.moremenu.hidden{display:none!important}
+.tabbar{display:flex;gap:6px;overflow:auto;border-top:1px solid #eee;margin-top:14px;padding-top:10px}
+.tabbar button{background:#f0f2f5;padding:9px 13px;border-radius:18px;white-space:nowrap;font-weight:700}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.feature{border:1px solid #e4e6eb;border-radius:12px;padding:14px;background:#fff}
+.feature h3{margin:4px 0 8px}
+.feature p{color:#65676b;margin:0 0 12px}
+.badge{display:inline-block;background:#e41e3f;color:#fff;border-radius:20px;padding:3px 8px;font-size:12px;font-weight:700}
+.mobilebar{display:none}
 @media(max-width:900px){
   .wrap{grid-template-columns:70px minmax(0,1fr)}
   .right{display:none}
@@ -156,6 +170,12 @@ button{cursor:pointer;border:0}
 }
 
 @media(max-width:600px){
+  .moremenu{right:8px;top:58px;width:calc(100vw - 16px)}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .mobilebar{display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;z-index:30;justify-content:space-around;padding:7px}
+  .mobilebar button{background:#fff;padding:7px;font-size:18px}
+  body{padding-bottom:58px}
+
   .top{padding:0 8px}
   .logo{font-size:20px}
   .search{width:120px}
@@ -208,13 +228,36 @@ button{cursor:pointer;border:0}
   >
 
   <div class="topnav">
+    <button title="Home" onclick="show('home')">🏠</button>
+    <button title="Friends" onclick="show('friends')">👥</button>
+    <button title="Messenger" onclick="show('messages')">💬</button>
+    <button title="Notifications" onclick="show('notifications')">🔔</button>
+    <button title="Profile" onclick="show('profile')">👤</button>
+    <button title="More" onclick="toggleMoreMenu()">☰</button>
+  </div>
 
-    <button onclick="show('home')">🏠</button>
-    <button onclick="show('friends')">👥</button>
-    <button onclick="show('messages')">💬</button>
-    <button onclick="show('notifications')">🔔</button>
-    <button onclick="show('profile')">👤</button>
-
+  <div id="moreMenu" class="moremenu hidden">
+    <div class="moretitle">All SocialHub</div>
+    <button onclick="show('home');closeMoreMenu()">🏠 Home</button>
+    <button onclick="show('search');closeMoreMenu()">🔎 Search</button>
+    <button onclick="show('friends');closeMoreMenu()">👥 Friends</button>
+    <button onclick="show('requests');closeMoreMenu()">🤝 Friend requests</button>
+    <button onclick="show('messages');closeMoreMenu()">💬 Messenger</button>
+    <button onclick="show('notifications');closeMoreMenu()">🔔 Notifications</button>
+    <button onclick="show('video');closeMoreMenu()">🎬 Video</button>
+    <button onclick="show('reels');closeMoreMenu()">🎞️ Reels</button>
+    <button onclick="show('marketplace');closeMoreMenu()">🛒 Marketplace</button>
+    <button onclick="show('groups');closeMoreMenu()">👨‍👩‍👧 Groups</button>
+    <button onclick="show('pages');closeMoreMenu()">📄 Pages</button>
+    <button onclick="show('events');closeMoreMenu()">📅 Events</button>
+    <button onclick="show('stories');closeMoreMenu()">📖 Stories</button>
+    <button onclick="show('gaming');closeMoreMenu()">🎮 Gaming</button>
+    <button onclick="show('saved');closeMoreMenu()">🔖 Saved</button>
+    <button onclick="show('memories');closeMoreMenu()">🕐 Memories</button>
+    <button onclick="show('feeds');closeMoreMenu()">📰 Feeds</button>
+    <button onclick="show('live');closeMoreMenu()">🔴 Live</button>
+    <button onclick="show('photos');closeMoreMenu()">📷 Photos</button>
+    <button onclick="show('settings');closeMoreMenu()">⚙️ Settings</button>
   </div>
 
 </header>
@@ -370,71 +413,34 @@ button{cursor:pointer;border:0}
 
 
 <section id="profile" class="section">
-
   <div class="card">
-
-    <div
-      style="height:170px;background:#dfe3e8;border-radius:10px"
-    ></div>
-
-    <div class="row" style="margin-top:-30px">
-
-      <div
-        class="avatar"
-        style="width:80px;height:80px;font-size:25px"
-        id="profileAvatar"
-      >
-        S
-      </div>
-
+    <div style="height:190px;background:linear-gradient(135deg,#dbeafe,#e4e6eb);border-radius:12px"></div>
+    <div class="row" style="margin-top:-34px">
+      <div class="avatar" style="width:88px;height:88px;font-size:28px;border:4px solid #fff" id="profileAvatar">S</div>
       <div>
-
         <h2 id="profileName">Profile</h2>
-
-        <p
-          id="profileUsername"
-          class="muted"
-        ></p>
-
+        <p id="profileUsername" class="muted"></p>
       </div>
-
     </div>
-
     <p id="profileBio"></p>
-
-    <button
-      class="primary"
-      onclick="editProfile()"
-    >
-      Edit profile
-    </button>
-
-    <button
-      class="action"
-      onclick="show('friends')"
-    >
-      Friends
-    </button>
-
-    <button
-      class="action"
-      onclick="show('photos')"
-    >
-      Photos
-    </button>
-
+    <button class="primary" onclick="editProfile()">Edit profile</button>
+    <button class="action" onclick="show('friends')">Friends</button>
+    <button class="action" onclick="show('photos')">Photos</button>
+    <div class="tabbar">
+      <button onclick="show('profile')">Posts</button>
+      <button onclick="show('photos')">Photos</button>
+      <button onclick="show('friends')">Friends</button>
+      <button onclick="openAbout()">About</button>
+      <button onclick="openProfileMedia('Videos')">Videos</button>
+      <button onclick="openProfileMedia('Check-ins')">Check-ins</button>
+      <button onclick="openProfileMedia('Music')">Music</button>
+    </div>
   </div>
-
   <div class="card">
-
     <h3>Posts</h3>
-
     <div id="profilePosts"></div>
-
   </div>
-
 </section>
-
 
 <section id="friends" class="section">
 
@@ -542,55 +548,25 @@ button{cursor:pointer;border:0}
 </section>
 
 
-<section id="video" class="section">
-
-  <div class="card">
-
-    <div class="menu-title">
-      Video
-    </div>
-
-    <p class="muted">
-      Your video hub. Video posts appear in the feed.
-    </p>
-
-  </div>
-
-</section>
+<section id="video" class="section"><div class="card"><div class="menu-title">🎬 Video</div><div class="grid2">
+<div class="feature"><h3>For you</h3><p>Video posts from people and pages you follow.</p><button class="primary" onclick="show('home')">Watch feed</button></div>
+<div class="feature"><h3>Live videos</h3><p>Find live broadcasts from your community.</p><button class="action" onclick="show('live')">Open Live</button></div>
+<div class="feature"><h3>Saved videos</h3><p>Your saved video posts.</p><button class="action" onclick="show('saved')">View saved</button></div>
+<div class="feature"><h3>Reels</h3><p>Short-form videos and clips.</p><button class="action" onclick="show('reels')">Open Reels</button></div>
+</div></div></section>
 
 
-<section id="reels" class="section">
-
-  <div class="card">
-
-    <div class="menu-title">
-      Reels
-    </div>
-
-    <p class="muted">
-      Short-form video area.
-    </p>
-
-  </div>
-
-</section>
+<section id="reels" class="section"><div class="card"><div class="menu-title">🎞️ Reels</div><div class="grid2">
+<div class="feature"><h3>Reels feed</h3><p>Short videos shared by your community.</p><button class="primary" onclick="show('home')">Browse</button></div>
+<div class="feature"><h3>Create a Reel</h3><p>Start a new short-form post.</p><button class="action" onclick="createPost()">Create post</button></div>
+</div></div></section>
 
 
-<section id="gaming" class="section">
-
-  <div class="card">
-
-    <div class="menu-title">
-      Gaming
-    </div>
-
-    <p class="muted">
-      Gaming area for your community.
-    </p>
-
-  </div>
-
-</section>
+<section id="gaming" class="section"><div class="card"><div class="menu-title">🎮 Gaming</div><div class="grid3">
+<div class="feature"><h3>Games</h3><p>Discover games and gaming communities.</p><button class="action" onclick="show('groups')">Find groups</button></div>
+<div class="feature"><h3>Gaming video</h3><p>Watch gaming content.</p><button class="action" onclick="show('video')">Watch</button></div>
+<div class="feature"><h3>Live gaming</h3><p>See live broadcasts.</p><button class="action" onclick="show('live')">Watch Live</button></div>
+</div></div></section>
 
 
 <section id="saved" class="section">
@@ -608,21 +584,7 @@ button{cursor:pointer;border:0}
 </section>
 
 
-<section id="memories" class="section">
-
-  <div class="card">
-
-    <div class="menu-title">
-      Memories
-    </div>
-
-    <p class="muted">
-      Your memories will appear here.
-    </p>
-
-  </div>
-
-</section>
+<section id="memories" class="section"><div class="card"><div class="menu-title">🕐 Memories</div><p class="muted">Posts and moments from your past will appear here as your SocialHub history grows.</p><button class="primary" onclick="loadFeed()">View your posts</button></div></section>
 
 
 <section id="feeds" class="section">
@@ -647,28 +609,7 @@ button{cursor:pointer;border:0}
 </section>
 
 
-<section id="live" class="section">
-
-  <div class="card">
-
-    <div class="menu-title">
-      Live
-    </div>
-
-    <p class="muted">
-      Live streaming requires a streaming provider/backend.
-    </p>
-
-    <button
-      class="primary"
-      onclick="alert('Live streaming needs a streaming provider and backend.')"
-    >
-      Start Live
-    </button>
-
-  </div>
-
-</section>
+<section id="live" class="section"><div class="card"><div class="menu-title">🔴 Live</div><div class="feature"><h3>Go live</h3><p>Prepare a live broadcast for your community. A production streaming service is required for actual camera broadcasting.</p><button class="primary" onclick="alert('Live broadcasting requires a streaming provider. The SocialHub live area is ready for integration.')">Start Live</button></div></div></section>
 
 
 <section id="marketplace" class="section">
@@ -784,41 +725,18 @@ button{cursor:pointer;border:0}
 </section>
 
 
-<section id="photos" class="section">
-
-  <div class="card">
-
-    <div class="menu-title">
-      Photos
-    </div>
-
-    <p class="muted">
-      Your photos will appear here.
-    </p>
-
-  </div>
-
-</section>
+<section id="photos" class="section"><div class="card"><div class="menu-title">📷 Photos</div><div class="grid3" id="photoGrid"><div class="feature"><h3>Your photos</h3><p>Photo uploads and albums can be managed here.</p><button class="primary" onclick="createPost()">Add to post</button></div><div class="feature"><h3>Albums</h3><p>Create and organize photo albums.</p><button class="action" onclick="alert('Album creation is ready for the storage-backed photo module.')">Create album</button></div><div class="feature"><h3>Videos</h3><p>View your uploaded videos.</p><button class="action" onclick="show('video')">View videos</button></div></div></div></section>
 
 
-<section id="settings" class="section">
-
-  <div class="card">
-
-    <div class="menu-title">
-      Settings
-    </div>
-
-    <button
-      class="action"
-      onclick="logout()"
-    >
-      Log out
-    </button>
-
-  </div>
-
-</section>
+<section id="settings" class="section"><div class="card"><div class="menu-title">⚙️ Settings & privacy</div>
+<div class="grid2">
+<div class="feature"><h3>Account</h3><p>Email, username and profile information.</p><button class="action" onclick="editProfile()">Edit profile</button></div>
+<div class="feature"><h3>Password & security</h3><p>Authentication and account security.</p><button class="action" onclick="alert('Use Supabase authentication email flows to change your password securely.')">Security</button></div>
+<div class="feature"><h3>Privacy</h3><p>Control how your profile and content are shared.</p><button class="action" onclick="openSettingsPanel('Privacy')">Privacy</button></div>
+<div class="feature"><h3>Notifications</h3><p>Manage your notification center.</p><button class="action" onclick="show('notifications')">Notifications</button></div>
+<div class="feature"><h3>Blocked people</h3><p>Manage people you do not want to interact with.</p><button class="action" onclick="openSettingsPanel('Blocked people')">Manage</button></div>
+<div class="feature"><h3>Language</h3><p>Choose the language used by the interface.</p><button class="action" onclick="openSettingsPanel('Language')">Language</button></div>
+</div><hr><button class="danger primary" onclick="logout()">Log out</button></div></section>
 
 </main>
 
@@ -840,6 +758,13 @@ button{cursor:pointer;border:0}
 </div>
 </div>
 
+<div class="mobilebar">
+  <button onclick="show('home')">🏠</button>
+  <button onclick="show('friends')">👥</button>
+  <button onclick="show('messages')">💬</button>
+  <button onclick="show('notifications')">🔔</button>
+  <button onclick="show('profile')">👤</button>
+</div>
 
 <div id="modal" class="modal">
 
@@ -2409,6 +2334,13 @@ function closeModal(){
 
 }
 
+
+
+function toggleMoreMenu(){document.getElementById('moreMenu').classList.toggle('hidden')}
+function closeMoreMenu(){document.getElementById('moreMenu').classList.add('hidden')}
+function openAbout(){openModal('<h2>About</h2><p class="muted">Your SocialHub profile information and account details.</p><button class="primary" onclick="closeModal()">Done</button>')}
+function openProfileMedia(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This profile area is ready for SocialHub media and activity data.</p><button class="primary" onclick="closeModal()">Close</button>')}
+function openSettingsPanel(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This settings panel is connected to the SocialHub interface. Detailed preferences can be added to the corresponding Supabase settings tables.</p><button class="primary" onclick="closeModal()">Done</button>')}
 
 async function startChat(){
   const username=document.getElementById("messageUser").value.trim().toLowerCase();
