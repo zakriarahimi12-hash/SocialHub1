@@ -4,7 +4,76 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>SocialHub</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+/* Blogger integration: public Blogger feeds require no secret key. */
+let bloggerJsonpCounter=0;
+function normalizeBloggerUrl(value){
+  let u=(value||'').trim();
+  if(!u)return '';
+  if(!/^https?:\\/\\//i.test(u))u='https://'+u;
+  try{const x=new URL(u);return x.origin}catch(e){return ''}
+}
+function saveBloggerConnection(){
+  const url=normalizeBloggerUrl(document.getElementById('bloggerUrl')?.value);
+  if(!url){toast('Enter a valid Blogger blog URL.');return}
+  localStorage.setItem('socialhub_blogger_url',url);
+  loadBloggerPosts();
+}
+function loadBloggerPosts(){
+  const input=document.getElementById('bloggerUrl');
+  const saved=localStorage.getItem('socialhub_blogger_url')||'';
+  if(input&&!input.value)input.value=saved;
+  const url=normalizeBloggerUrl(input?.value||saved);
+  const status=document.getElementById('bloggerStatus');
+  const box=document.getElementById('bloggerPosts');
+  if(!url){if(status)status.textContent='Connect your public Blogger URL to load posts.';if(box)box.innerHTML='<div class="blogger-empty">No Blogger blog connected yet.</div>';return}
+  if(status)status.textContent='Loading Blogger posts…';
+  if(box)box.innerHTML='';
+  const cb='socialhubBloggerCallback'+(++bloggerJsonpCounter);
+  window[cb]=(data)=>{
+    try{
+      const entries=data?.feed?.entry||[];
+      if(!entries.length){if(status)status.textContent='Connected, but no public posts were found.';if(box)box.innerHTML='<div class="blogger-empty">Your Blogger feed has no public posts yet.</div>';return}
+      localStorage.setItem('socialhub_blogger_url',url);
+      if(status)status.textContent='Connected to '+url;
+      box.innerHTML=entries.slice(0,12).map((entry)=>{
+        const title=entry.title?.$t||'Untitled';
+        const link=(entry.link||[]).find(l=>l.rel==='alternate')?.href||url;
+        const published=entry.published?.$t||entry.updated?.$t||'';
+        const date=published?new Date(published).toLocaleString():''; 
+        const raw=entry.content?.$t||entry.summary?.$t||'';
+        const temp=document.createElement('div');temp.innerHTML=raw;
+        const img=temp.querySelector('img')?.src||'';
+        const textContent=(temp.textContent||'').trim().replace(/\\s+/g,' ').slice(0,260);
+        return '<article class="blogger-post">'+
+          '<h3><a href="'+escapeHtml(link)+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a></h3>'+
+          (date?'<div class="postmeta">'+escapeHtml(date)+'</div>':'')+
+          (img?'<img src="'+escapeHtml(img)+'" alt="">':'')+
+          (textContent?'<p>'+escapeHtml(textContent)+(textContent.length>=260?'…':'')+'</p>':'')+
+          '<a class="action" href="'+escapeHtml(link)+'" target="_blank" rel="noopener">Read on Blogger</a>'+
+        '</article>';
+      }).join('');
+    }catch(err){
+      if(status)status.textContent='Blogger feed could not be displayed.';
+      if(box)box.innerHTML='<div class="blogger-empty">The Blogger response was not in the expected format.</div>';
+    }finally{
+      delete window[cb];
+      const node=document.getElementById(cb);
+      if(node)node.remove();
+    }
+  };
+  const script=document.createElement('script');
+  script.id=cb;
+  script.src=url.replace(/\\/$/,'')+'/feeds/posts/default?alt=json-in-script&max-results=12&callback='+cb;
+  script.onerror=()=>{
+    delete window[cb];
+    script.remove();
+    if(status)status.textContent='Could not connect to this Blogger feed. Make sure the blog is public and the URL is correct.';
+    if(box)box.innerHTML='<div class="blogger-empty">Blogger connection failed. Check the blog URL and try again.</div>';
+  };
+  document.body.appendChild(script);
+}
+</script>
 
 <style>
 *{box-sizing:border-box}
@@ -288,7 +357,7 @@ button{cursor:pointer;border:0}
 .feature{border:1px solid #e4e6eb;border-radius:12px;padding:14px;background:#fff}
 .feature h3{margin:4px 0 8px}
 .feature p{color:#65676b;margin:0 0 12px}
-.badge{display:inline-block;background:#e41e3f;color:#fff;border-radius:20px;padding:3px 8px;font-size:12px;font-weight:700}
+.badge{display:inline-block;background:#e41e3f;color:#fff;border-radius:20px;padding:3px 8px;font-size:12px;font-weight:700}.blogger-grid{display:grid;gap:12px}.blogger-post{border:1px solid #e4e6eb;border-radius:12px;padding:14px;background:#fff}.blogger-post h3{margin:0 0 6px}.blogger-post h3 a{color:#1c1e21;text-decoration:none}.blogger-post h3 a:hover{color:#1877f2}.blogger-post .postmeta{margin-bottom:8px}.blogger-post img{max-width:100%;height:auto;border-radius:10px;margin-top:8px}.blogger-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.blogger-url{flex:1;min-width:220px;padding:11px;border:1px solid #ccd0d5;border-radius:8px}.blogger-status{margin-top:8px}.blogger-empty{text-align:center;padding:28px 12px;color:#65676b}
 .mobilebar{display:none}
 @media(max-width:900px){
   .wrap{grid-template-columns:70px minmax(0,1fr)}
@@ -409,6 +478,7 @@ button{cursor:pointer;border:0}
   <button onclick="show('marketplace')"><span class="ico">🛒</span><span class="txt">Marketplace</span></button>
   <button onclick="show('groups')"><span class="ico">👨‍👩‍👧</span><span class="txt">Groups</span></button>
   <button onclick="show('pages')"><span class="ico">📄</span><span class="txt">Pages</span></button>
+  <button onclick="show('blogger');loadBloggerPosts()"><span class="ico">📝</span><span class="txt">Blogger</span></button>
 </aside>
 
 
@@ -795,6 +865,18 @@ button{cursor:pointer;border:0}
 
 <section id="photos" class="section"><div class="card"><div class="menu-title">📷 Photos</div><div class="grid3" id="photoGrid"><div class="feature"><h3>Your photos</h3><p>Photo uploads and albums can be managed here.</p><button class="primary" onclick="createPost()">Add to post</button></div><div class="feature"><h3>Albums</h3><p>Create and organize photo albums.</p><button class="action" onclick="alert('Album creation is ready for the storage-backed photo module.')">Create album</button></div><div class="feature"><h3>Videos</h3><p>View your uploaded videos.</p><button class="action" onclick="show('video')">View videos</button></div></div></div></section>
 
+
+<section id="blogger" class="section"><div class="card">
+<div class="menu-title">📝 Blogger</div>
+<p class="muted">Connect a public Blogger blog and show its latest posts inside SocialHub.</p>
+<div class="blogger-actions">
+<input id="bloggerUrl" class="blogger-url" type="url" placeholder="https://yourblog.blogspot.com">
+<button class="primary" type="button" onclick="saveBloggerConnection()">Connect</button>
+<button class="action" type="button" onclick="loadBloggerPosts()">Refresh</button>
+</div>
+<div id="bloggerStatus" class="blogger-status muted"></div>
+<div id="bloggerPosts" class="blogger-grid" style="margin-top:14px"></div>
+</div></section>
 
 <section id="settings" class="section"><div class="card"><div class="menu-title">⚙️ Settings & privacy</div>
 <div class="grid2">
