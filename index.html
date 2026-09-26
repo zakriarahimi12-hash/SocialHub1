@@ -1065,19 +1065,19 @@ async function loadFeed(){
             </div>
 
             <div class="postmenu-wrap">
-              <button class="action" onclick="togglePostMenu('\${p.id}')">⋯</button>
-              <div id="postmenu-\${p.id}" class="postmenu hidden">
-                \${postMenuHtml(p)}
+              <button class="action" onclick="togglePostMenu('${p.id}')">⋯</button>
+              <div id="postmenu-${p.id}" class="postmenu hidden">
+                ${postMenuHtml(p)}
               </div>
             </div>
 
           </div>
 
           <div class="postbody" style="margin-top:12px">
-            \${esc(p.content)}
-            \${(p.image_url||p.video_url)?\`<div class="post-media">
-              \${p.image_url?\`<img src="\${esc(p.image_url)}" alt="Post photo" loading="lazy">\`:""}
-              \${p.video_url?\`<video src="\${esc(p.video_url)}" controls playsinline preload="metadata"></video>\`:""}
+            ${esc(p.content)}
+            ${(p.image_url||p.video_url)?\`<div class="post-media">
+              ${p.image_url?\`<img src="${esc(p.image_url)}" alt="Post photo" loading="lazy">\`:""}
+              ${p.video_url?\`<video src="${esc(p.video_url)}" controls playsinline preload="metadata"></video>\`:""}
             </div>\`:""}
           </div>
 
@@ -1254,8 +1254,8 @@ async function loadComments(postId){
 
   el.innerHTML = (data || []).map(c => \`
     <div class="comment" style="position:relative">
-      <div style="padding-right:42px"><b>\${esc(pm[c.user_id]?.full_name || "User")}</b><div>\${esc(c.content)}</div></div>
-      \${c.user_id===currentUser.id ? \`<div class="comment-menu-wrap"><button class="action" onclick="toggleCommentMenu('\${c.id}')">⋯</button><div id="comment-menu-\${c.id}" class="comment-menu hidden"><button onclick="editComment('\${c.id}',\${JSON.stringify(c.content)})">✏️ Edit</button><button onclick="deleteComment('\${c.id}','\${postId}')">🗑️ Delete</button></div></div>\` : ""}
+      <div style="padding-right:42px"><b>${esc(pm[c.user_id]?.full_name || "User")}</b><div>${esc(c.content)}</div></div>
+      ${c.user_id===currentUser.id ? \`<div class="comment-menu-wrap"><button class="action" onclick="toggleCommentMenu('${c.id}')">⋯</button><div id="comment-menu-${c.id}" class="comment-menu hidden"><button onclick="editComment('${c.id}',${JSON.stringify(c.content)})">✏️ Edit</button><button onclick="deleteComment('${c.id}','${postId}')">🗑️ Delete</button></div></div>\` : ""}
     </div>\`).join("");
 
 }
