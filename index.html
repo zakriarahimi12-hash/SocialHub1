@@ -29,9 +29,9 @@ button{cursor:pointer;border:0}
 
 .wrap{
   display:grid;
-  grid-template-columns:500px minmax(400px,680px) 250px;
+  grid-template-columns:220px minmax(400px,680px) 220px;
   gap:18px;
-  max-width:1510px;
+  max-width:1180px;
   margin:18px auto;
   padding:0 12px
 }
@@ -45,10 +45,6 @@ button{cursor:pointer;border:0}
   position:sticky;
   top:78px;
   height:max-content;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:4px 10px;
-  align-content:start;
 }
 .side button{
   display:block;
@@ -59,7 +55,26 @@ button{cursor:pointer;border:0}
 }
 .side .ico{display:inline-block;width:28px;font-size:19px}
 .side .ico{display:inline-block;width:28px;font-size:19px}
-.side h4{margin:10px 8px;color:#65676b}
+.side h4{margin:10px 8px;color:#65676b}.right{
+  position:sticky;
+  top:78px;
+  height:max-content;
+}
+.right button{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  text-align:left;
+  font-weight:600;
+  margin:2px 0;
+  background:transparent;
+  border-radius:10px;
+  padding:10px 13px;
+}
+.right button:hover{background:#f0f2f5}
+.right .ico{display:inline-block;width:28px;font-size:19px}
+
 
 .composer textarea{
   width:100%;resize:none;border:1px solid #ddd;background:#fff;
@@ -317,107 +332,16 @@ button{cursor:pointer;border:0}
 <div class="wrap">
 
 <aside class="side">
-
-  <button onclick="show('home')">
-    <span class="ico">🏠</span>
-    <span class="txt">Home</span>
-  </button>
-
-  <button onclick="show('search')">
-    <span class="ico">🔍</span>
-    <span class="txt">Search</span>
-  </button>
-
-  <button onclick="show('friends')">
-    <span class="ico">👥</span>
-    <span class="txt">Friends</span>
-  </button>
-
-  <button onclick="show('requests')">
-    <span class="ico">🤝</span>
-    <span class="txt">Friend requests</span>
-  </button>
-
-  <button onclick="show('messages')">
-    <span class="ico">💬</span>
-    <span class="txt">Messenger</span>
-  </button>
-
-  <button onclick="show('notifications')">
-    <span class="ico">🔔</span>
-    <span class="txt">Notifications</span>
-  </button>
-
-  <button onclick="show('video')">
-    <span class="ico">🎬</span>
-    <span class="txt">Video</span>
-  </button>
-
-  <button onclick="show('marketplace')">
-    <span class="ico">🛒</span>
-    <span class="txt">Marketplace</span>
-  </button>
-
-  <button onclick="show('groups')">
-    <span class="ico">👨‍👩‍👧</span>
-    <span class="txt">Groups</span>
-  </button>
-
-  <button onclick="show('pages')">
-    <span class="ico">📄</span>
-    <span class="txt">Pages</span>
-  </button>
-
-  <button onclick="show('events')">
-    <span class="ico">📅</span>
-    <span class="txt">Events</span>
-  </button>
-
-  <button onclick="show('stories')">
-    <span class="ico">📖</span>
-    <span class="txt">Stories</span>
-  </button>
-
-  <button onclick="show('reels')">
-    <span class="ico">🎞️</span>
-    <span class="txt">Reels</span>
-  </button>
-
-  <button onclick="show('gaming')">
-    <span class="ico">🎮</span>
-    <span class="txt">Gaming</span>
-  </button>
-
-  <button onclick="show('saved')">
-    <span class="ico">🔖</span>
-    <span class="txt">Saved</span>
-  </button>
-
-  <button onclick="show('memories')">
-    <span class="ico">🕐</span>
-    <span class="txt">Memories</span>
-  </button>
-
-  <button onclick="show('feeds')">
-    <span class="ico">📰</span>
-    <span class="txt">Feeds</span>
-  </button>
-
-  <button onclick="show('live')">
-    <span class="ico">🔴</span>
-    <span class="txt">Live</span>
-  </button>
-
-  <button onclick="show('settings')">
-    <span class="ico">⚙️</span>
-    <span class="txt">Settings</span>
-  </button>
-
-  <button onclick="logout()">
-    <span class="ico">🚪</span>
-    <span class="txt">Log out</span>
-  </button>
-
+  <button onclick="show('home')"><span class="ico">🏠</span><span class="txt">Home</span></button>
+  <button onclick="show('search')"><span class="ico">🔍</span><span class="txt">Search</span></button>
+  <button onclick="show('friends')"><span class="ico">👥</span><span class="txt">Friends</span></button>
+  <button onclick="show('requests')"><span class="ico">🤝</span><span class="txt">Friend requests</span></button>
+  <button onclick="show('messages')"><span class="ico">💬</span><span class="txt">Messenger</span></button>
+  <button onclick="show('notifications')"><span class="ico">🔔</span><span class="txt">Notifications</span></button>
+  <button onclick="show('video')"><span class="ico">🎬</span><span class="txt">Video</span></button>
+  <button onclick="show('marketplace')"><span class="ico">🛒</span><span class="txt">Marketplace</span></button>
+  <button onclick="show('groups')"><span class="ico">👨‍👩‍👧</span><span class="txt">Groups</span></button>
+  <button onclick="show('pages')"><span class="ico">📄</span><span class="txt">Pages</span></button>
 </aside>
 
 
@@ -798,17 +722,16 @@ button{cursor:pointer;border:0}
 
 
 <aside class="right">
-
-  <div class="card">
-
-    <h3>SocialHub</h3>
-
-    <p class="muted">
-      Connect with your community.
-    </p>
-
-  </div>
-
+  <button onclick="show('events')"><span class="ico">📅</span><span class="txt">Events</span></button>
+  <button onclick="show('stories')"><span class="ico">📖</span><span class="txt">Stories</span></button>
+  <button onclick="show('reels')"><span class="ico">🎞️</span><span class="txt">Reels</span></button>
+  <button onclick="show('gaming')"><span class="ico">🎮</span><span class="txt">Gaming</span></button>
+  <button onclick="show('saved')"><span class="ico">🔖</span><span class="txt">Saved</span></button>
+  <button onclick="show('memories')"><span class="ico">🕐</span><span class="txt">Memories</span></button>
+  <button onclick="show('feeds')"><span class="ico">📰</span><span class="txt">Feeds</span></button>
+  <button onclick="show('live')"><span class="ico">🔴</span><span class="txt">Live</span></button>
+  <button onclick="show('settings')"><span class="ico">⚙️</span><span class="txt">Settings</span></button>
+  <button onclick="logout()"><span class="ico">🚪</span><span class="txt">Log out</span></button>
 </aside>
 
 </div>
