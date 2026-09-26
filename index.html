@@ -145,7 +145,7 @@ button{cursor:pointer;border:0}
   border:1px solid #ccd0d5;border-radius:7px
 }
 
-.postmenu-wrap{position:relative}.postmenu{position:absolute;right:0;top:42px;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 25px #0002;min-width:170px;z-index:20;padding:6px}.postmenu button{display:block;width:100%;text-align:left;background:#fff;padding:10px;border-radius:7px}.postmenu button:hover{background:#f0f2f5}.postmenu.hidden{display:none!important}.privacy-options{display:grid;gap:8px}.privacy-options button{padding:12px;text-align:left;background:#f0f2f5;border-radius:8px}.privacy-options button:hover{background:#e4e6eb}.moremenu{position:fixed;right:18px;top:62px;width:280px;max-height:75vh;overflow:auto;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 10px 35px #0003;padding:10px;z-index:100}
+.postmenu-wrap{position:relative}.postmenu{position:absolute;right:0;top:42px;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 25px #0002;min-width:170px;z-index:20;padding:6px}.postmenu button{display:block;width:100%;text-align:left;background:#fff;padding:10px;border-radius:7px}.postmenu button:hover{background:#f0f2f5}.postmenu.hidden{display:none!important}.post-submenu-wrap{position:relative}.post-submenu-wrap>button{display:flex!important;justify-content:space-between;align-items:center}.privacy-submenu{position:absolute;right:100%;top:0;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 25px #0002;min-width:170px;padding:6px}.privacy-submenu button{display:block;width:100%;text-align:left;background:#fff;padding:10px;border-radius:7px}.privacy-submenu button:hover{background:#f0f2f5}.privacy-submenu.hidden{display:none!important}.privacy-options{display:grid;gap:8px}.privacy-options button{padding:12px;text-align:left;background:#f0f2f5;border-radius:8px}.privacy-options button:hover{background:#e4e6eb}.moremenu{position:fixed;right:18px;top:62px;width:280px;max-height:75vh;overflow:auto;background:#fff;border:1px solid #ddd;border-radius:14px;box-shadow:0 10px 35px #0003;padding:10px;z-index:100}
 .moretitle{font-weight:800;font-size:18px;padding:8px 10px;border-bottom:1px solid #eee;margin-bottom:6px}
 .moremenu button{display:block;width:100%;text-align:left;background:#fff;padding:11px;border-radius:9px;font-weight:600}
 .moremenu button:hover{background:#f0f2f5}
@@ -1086,7 +1086,18 @@ async function loadFeed(){
             <div class="postmenu-wrap">
               <button class="action" onclick="togglePostMenu('${p.id}')">⋯</button>
               <div id="postmenu-${p.id}" class="postmenu hidden">
-                '+(p.user_id===currentUser.id ? '<button onclick="editPost(\\''+p.id+'\\',JSON.stringify(p.content))">✏️ Edit</button><button onclick="deletePost(\\''+p.id+'\\')">🗑️ Delete</button><button onclick="openPrivacyMenu(\\''+p.id+'\\',\\''+(p.privacy||"public")+'\\')">🔒 Privacy</button>' : '<button onclick="openPrivacyMenu(\\''+p.id+'\\',\\''+(p.privacy||"public")+'\\',true)">🔒 Privacy</button>')+'
+                ${p.user_id===currentUser.id ? `
+                  <button onclick="editPost('${p.id}',${JSON.stringify(p.content)})">✏️ Edit</button>
+                  <button onclick="deletePost('${p.id}')">🗑️ Delete</button>
+                  <div class="post-submenu-wrap">
+                    <button onclick="togglePrivacySubmenu('${p.id}')">🔒 Privacy <span>›</span></button>
+                    <div id="privacy-submenu-${p.id}" class="privacy-submenu hidden">
+                      <button onclick="setPostPrivacy('${p.id}','public',false)">🌎 Public</button>
+                      <button onclick="setPostPrivacy('${p.id}','friends',false)">👥 Friends</button>
+                      <button onclick="setPostPrivacy('${p.id}','me',false)">🔒 Only me</button>
+                    </div>
+                  </div>
+                ` : '' }
               </div>
             </div>
 
@@ -2336,6 +2347,7 @@ function closeModal(){
 
 
 
+function togglePrivacySubmenu(id){document.querySelectorAll('.privacy-submenu').forEach(x=>{if(x.id!=='privacy-submenu-'+id)x.classList.add('hidden')});document.getElementById('privacy-submenu-'+id)?.classList.toggle('hidden')}
 function togglePostMenu(id){document.querySelectorAll('.postmenu').forEach(x=>{if(x.id!=='postmenu-'+id)x.classList.add('hidden')});document.getElementById('postmenu-'+id)?.classList.toggle('hidden')}
 async function editPost(id,content){const value=prompt("Edit your post:",content);if(value===null)return;const text=value.trim();if(!text)return;const {error}=await client.from("posts").update({content:text}).eq("id",id).eq("user_id",currentUser.id);if(error)alert(error.message);else loadFeed()}
 function openPrivacyMenu(id,current,viewOnly=false){openModal(`<h2>Post privacy</h2><p class="muted">Choose who can see this post.</p><div class="privacy-options"><button onclick="setPostPrivacy('${id}','public',${viewOnly})">🌎 Public</button><button onclick="setPostPrivacy('${id}','friends',${viewOnly})">👥 Friends</button><button onclick="setPostPrivacy('${id}','me',${viewOnly})">🔒 Only me</button></div>`)}
