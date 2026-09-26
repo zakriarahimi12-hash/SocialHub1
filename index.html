@@ -971,45 +971,26 @@ async function logout(){
 
 
 async function createPost(){
-
-  const content =
-    document
-      .getElementById("postContent")
-      .value
-      .trim();
-
-  if(!content){
-
-    alert("Write something first.");
-
-    return;
-
+  const content=document.getElementById("postContent").value.trim();
+  if(!content && !selectedPostMedia.length){alert("Write something or add a photo/video first.");return}
+  let image_url=null, video_url=null;
+  for(const file of selectedPostMedia){
+    const ext=file.name.split(".").pop().toLowerCase();
+    const path=currentUser.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2)+"."+ext;
+    const {error}=await client.storage.from("posts").upload(path,file,{upsert:false});
+    if(error){alert("Media upload failed: "+error.message);return}
+    const {data}=client.storage.from("posts").getPublicUrl(path);
+    if(file.type.startsWith("image/")&&!image_url) image_url=data.publicUrl;
+    if(file.type.startsWith("video/")&&!video_url) video_url=data.publicUrl;
   }
-
-  const {
-    error
-  } =
-    await client
-      .from("posts")
-      .insert({
-        user_id:currentUser.id,
-        content
-      });
-
-  if(error){
-
-    alert(error.message);
-
-    return;
-
-  }
-
-  document
-    .getElementById("postContent")
-    .value = "";
-
+  const {error}=await client.from("posts").insert({user_id:currentUser.id,content,image_url,video_url});
+  if(error){alert(error.message);return}
+  document.getElementById("postContent").value="";
+  selectedPostMedia=[];
+  document.getElementById("postMediaInput").value="";
+  document.getElementById("postMediaPreview").innerHTML="";
+  document.getElementById("postMediaStatus").textContent="Add photos or videos to your post";
   loadFeed();
-
 }
 
 
