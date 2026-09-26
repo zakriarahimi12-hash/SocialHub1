@@ -96,15 +96,53 @@ button{cursor:pointer;border:0}
 .postactions button{padding:10px;background:#fff}
 .postactions button:hover{background:#f0f2f5}
 
-.comment{
-  background:#f0f2f5;border-radius:16px;
-  padding:8px 12px;margin:6px 0
+.composer,
+.composer textarea,
+.composer .post-media,
+.comment,
+.commentbox,
+.commentbox input{
+  background:#fff !important;
 }
 
-.commentbox{display:flex;gap:6px;margin-top:8px}
- .commentbox input{
-  flex:1;border:1px solid #ddd;background:#fff;
-  border-radius:18px;padding:9px
+.composer{
+  background:#fff !important;
+}
+
+.composer textarea{
+  width:100%;
+  resize:none;
+  border:1px solid #ddd;
+  background:#fff !important;
+  color:#1c1e21;
+  border-radius:22px;
+  padding:12px 16px;
+  min-height:50px;
+  box-sizing:border-box;
+}
+
+.comment{
+  border:1px solid #eee;
+  border-radius:16px;
+  padding:8px 12px;
+  margin:6px 0;
+}
+
+.commentbox{
+  display:flex;
+  gap:6px;
+  margin-top:8px;
+  background:#fff !important;
+}
+
+.commentbox input{
+  flex:1;
+  border:1px solid #ddd;
+  background:#fff !important;
+  color:#1c1e21;
+  border-radius:18px;
+  padding:9px;
+  box-sizing:border-box;
 }
 
 .hidden{display:none!important}
