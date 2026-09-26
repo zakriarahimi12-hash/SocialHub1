@@ -364,7 +364,7 @@ button{cursor:pointer;border:0}
 
 .hidden{display:none!important}
 
-.auth{max-width:430px;margin:70px auto}
+.auth{max-width:430px;margin:70px auto;position:relative;z-index:1000;pointer-events:auto}.auth input,.auth button{position:relative;z-index:1001;pointer-events:auto}.auth button{cursor:pointer;touch-action:manipulation}
 
 .auth input{
   width:100%;padding:13px;margin:6px 0;
