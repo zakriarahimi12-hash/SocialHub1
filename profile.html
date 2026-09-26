@@ -9,7 +9,7 @@
 *{box-sizing:border-box}body{margin:0;background:#f0f2f5;color:#1c1e21;font-family:Arial,Helvetica,sans-serif}button,input,textarea{font:inherit}button{cursor:pointer;border:0}
 .top{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;gap:12px;padding:0 18px;position:sticky;top:0;z-index:10}.logo{font-size:24px;font-weight:800;color:#1877f2}.search{background:#f0f2f5;border:0;border-radius:22px;padding:10px 15px;width:240px}.back{margin-left:auto;background:#f0f2f5;padding:10px 14px;border-radius:9px;font-weight:700}
 .wrap{max-width:1050px;margin:20px auto;padding:0 12px}.card{background:#fff;border-radius:12px;margin-bottom:16px;padding:18px;box-shadow:0 1px 2px #0001}
-.cover{height:300px;border-radius:12px;background:linear-gradient(135deg,#1877f2,#8ab4f8);position:relative;background-size:cover;background-position:center}.cover button{position:absolute;right:15px;bottom:15px;background:#fff;padding:10px 14px;border-radius:8px;font-weight:700}
+.cover{height:300px;border-radius:12px;background:linear-gradient(135deg,#1877f2,#8ab4f8);position:relative;background-size:cover;background-position:center}.cover button{position:absolute;right:15px;bottom:15px;background:#fff;padding:10px 14px;border-radius:8px;font-weight:700}.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.media-choice{border:2px solid transparent;border-radius:10px;overflow:hidden;background:#f0f2f5;padding:0}.media-choice:hover{border-color:#1877f2}.media-choice img{width:100%;height:120px;object-fit:cover;display:block}.media-choice span{display:block;padding:7px;font-size:12px;font-weight:700}.picker-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .profileHead{display:flex;align-items:end;gap:18px;margin-top:-55px;padding:0 25px}.avatar{width:130px;height:130px;border-radius:50%;background:#ddd;border:5px solid #fff;display:grid;place-items:center;font-size:42px;font-weight:800;overflow:hidden;background-size:cover;background-position:center}.headText{padding-bottom:10px}.headText h1{margin:0;font-size:30px}.muted{color:#65676b}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.primary{background:#1877f2;color:#fff;padding:11px 18px;border-radius:8px;font-weight:700}.action{background:#e4e6eb;padding:11px 18px;border-radius:8px;font-weight:700}.tabs{display:flex;gap:5px;overflow:auto;border-top:1px solid #ddd;margin-top:18px;padding-top:8px}.tabs button{background:#fff;padding:12px 18px;font-weight:700;white-space:nowrap}.tabs button:hover{background:#f0f2f5}.layout{display:grid;grid-template-columns:360px 1fr;gap:16px}.detail{padding:12px 0;border-bottom:1px solid #eee}.detail:last-child{border:0}.post{border-bottom:1px solid #eee;padding:15px 0}.post:last-child{border:0}.edit{max-width:650px}.edit label{display:block;font-weight:700;margin-top:12px}.edit input,.edit textarea{width:100%;padding:12px;border:1px solid #ccd0d5;border-radius:8px;margin-top:5px}.edit textarea{min-height:100px;resize:vertical}.hidden{display:none!important}.notice{padding:12px;border-radius:9px;background:#e7f3ff;margin-bottom:12px}.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:20}.modal.show{display:flex}.modalbox{background:#fff;border-radius:12px;width:min(650px,94vw);max-height:90vh;overflow:auto;padding:22px}.toast{position:fixed;right:18px;bottom:18px;background:#1c1e21;color:#fff;padding:12px 16px;border-radius:9px;display:none;z-index:30}
 @media(max-width:750px){.search{width:140px}.layout{grid-template-columns:1fr}.cover{height:220px}.profileHead{align-items:center;flex-direction:column;margin-top:-65px;text-align:center}.avatar{width:115px;height:115px}.headText h1{font-size:25px}}
 </style>
@@ -73,8 +73,34 @@ async function saveProfile(){
  const obj={full_name:document.getElementById("eName").value.trim(),username:document.getElementById("eUsername").value.trim(),bio:document.getElementById("eBio").value.trim(),website:document.getElementById("eWebsite").value.trim(),location:document.getElementById("eLocation").value.trim()};
  const {error}=await client.from("profiles").update(obj).eq("id",user.id);if(error){toast(error.message);return}closeModal();await loadProfile();showTab("posts");toast("Profile updated");
 }
-function openCoverEditor(){document.getElementById("coverFileInput").click()}
-function openAvatarEditor(){document.getElementById("avatarFileInput").click()}
+function openCoverEditor(){openImageChooser("cover")}
+function openAvatarEditor(){openImageChooser("avatar")}
+function openImageChooser(type){
+ const label=type==="cover"?"Cover photo":"Profile photo";
+ openModal('<h2>'+label+'</h2><p class="muted">Choose how you want to set your '+label.toLowerCase()+'.</p><div class="picker-actions"><button class="primary" onclick="triggerImageUpload(\''+type+'\')">⬆️ Upload image</button><button class="action" onclick="loadUploadedImages(\''+type+'\')">🖼️ Use uploaded image</button><button class="action" onclick="closeModal()">Cancel</button></div><div id="uploadedImages" class="media-grid"></div>');
+}
+function triggerImageUpload(type){closeModal();document.getElementById(type==="cover"?"coverFileInput":"avatarFileInput").click()}
+async function loadUploadedImages(type){
+ const bucket=type==="cover"?"covers":"avatars";
+ const box=document.getElementById("uploadedImages");
+ if(!box)return;
+ box.innerHTML="<p class='muted'>Loading uploaded images...</p>";
+ const {data,error}=await client.storage.from(bucket).list(user.id,{limit:60,sortBy:{column:"created_at",order:"desc"}});
+ if(error){box.innerHTML="<p class='muted'>Could not load uploaded images: "+esc(error.message)+"</p>";return}
+ const files=(data||[]).filter(x=>x.name&&x.name!=="."&&x.name!=="..");
+ if(!files.length){box.innerHTML="<p class='muted'>No uploaded "+(type==="cover"?"cover":"profile")+" images yet. Upload one first.</p>";return}
+ box.innerHTML=files.map(f=>{
+   const path=user.id+"/"+f.name;
+   const url=client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+   return '<button type="button" class="media-choice" onclick="useUploadedImage(\''+esc(url)+'\',\''+type+'\')"><img src="'+esc(url)+'" alt="Uploaded image"><span>Use this image</span></button>';
+ }).join("");
+}
+async function useUploadedImage(url,type){
+ const field=type==="cover"?"cover_url":"avatar_url";
+ const {error}=await client.from("profiles").update({[field]:url}).eq("id",user.id);
+ if(error){toast("Could not set image: "+error.message);return}
+ closeModal();await loadProfile();toast(type==="cover"?"Cover photo updated":"Profile photo updated");
+}
 async function uploadProfileImage(type){
  const input=document.getElementById(type==="cover"?"coverFileInput":"avatarFileInput");
  const file=input.files&&input.files[0];
