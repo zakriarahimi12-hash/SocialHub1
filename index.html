@@ -217,6 +217,46 @@ button{cursor:pointer;border:0}
   font-size:20px;font-weight:700;margin:4px 0 15px
 }
 
+
+.story{
+  min-width:100px;height:150px;border-radius:12px;
+  background:#e4e6eb;padding:10px;display:flex;
+  flex-direction:column;justify-content:flex-end;
+  gap:6px;overflow:hidden;font-weight:700;
+  cursor:pointer;position:relative;
+  border:2px solid transparent;
+}
+.story:hover{border-color:#1877f2;transform:translateY(-2px)}
+.story img,.story video{
+  width:100%;height:105px;object-fit:cover;border-radius:8px;
+  background:#000
+}
+.story-viewer{
+  position:fixed;inset:0;background:rgba(0,0,0,.86);
+  display:none;align-items:center;justify-content:center;
+  z-index:200;
+}
+.story-viewer.show{display:flex}
+.story-viewer-box{
+  width:min(760px,94vw);height:min(88vh,760px);
+  position:relative;display:flex;align-items:center;
+  justify-content:center;
+}
+.story-viewer-media{
+  max-width:100%;max-height:82vh;
+  border-radius:12px;object-fit:contain;background:#000;
+}
+.story-viewer-close{
+  position:absolute;right:0;top:-44px;
+  width:40px;height:40px;border-radius:50%;
+  background:#fff;font-size:24px;font-weight:700;
+}
+.story-viewer-info{
+  position:absolute;left:12px;bottom:12px;right:12px;
+  color:#fff;text-shadow:0 1px 3px #000;
+  font-weight:700;pointer-events:none;
+}
+
 .modal{
   position:fixed;inset:0;background:#0008;
   display:none;align-items:center;justify-content:center;
@@ -780,6 +820,15 @@ button{cursor:pointer;border:0}
 </aside>
 
 </div>
+</div>
+
+
+<div id="storyViewer" class="story-viewer" onclick="if(event.target===this)closeStoryViewer()">
+  <div class="story-viewer-box">
+    <button class="story-viewer-close" type="button" onclick="closeStoryViewer()">×</button>
+    <div id="storyViewerContent"></div>
+    <div id="storyViewerInfo" class="story-viewer-info"></div>
+  </div>
 </div>
 
 <div class="mobilebar">
@@ -1879,6 +1928,33 @@ async function loadSaved(){
 }
 
 
+
+function openStoryViewer(encodedUrl,type,encodedUser,encodedCaption){
+  const url=decodeURIComponent(encodedUrl || "");
+  const user=decodeURIComponent(encodedUser || "");
+  const caption=decodeURIComponent(encodedCaption || "");
+  if(!url)return;
+  const viewer=document.getElementById("storyViewer");
+  const content=document.getElementById("storyViewerContent");
+  const info=document.getElementById("storyViewerInfo");
+  if(!viewer || !content)return;
+  if(type==="video"){
+    content.innerHTML='<video class="story-viewer-media" src="'+esc(url)+'" controls autoplay playsinline></video>';
+  }else{
+    content.innerHTML='<img class="story-viewer-media" src="'+esc(url)+'" alt="Story">';
+  }
+  if(info) info.textContent="@"+user+(caption ? " — "+caption : "");
+  viewer.classList.add("show");
+  document.body.style.overflow="hidden";
+}
+function closeStoryViewer(){
+  const viewer=document.getElementById("storyViewer");
+  const content=document.getElementById("storyViewerContent");
+  if(viewer)viewer.classList.remove("show");
+  if(content)content.innerHTML="";
+  document.body.style.overflow="";
+}
+
 async function loadStories(){
 
   const {data,error} = await client.from("stories")
@@ -1896,16 +1972,23 @@ async function loadStories(){
   const pm=Object.fromEntries((ps||[]).map(p=>[p.id,p]));
 
   const html=(data||[]).map(s=>{
-    let media="";
-    if(s.image_url) media=`<img src="${esc(s.image_url)}" alt="Story image">`;
-    else if(s.video_url) media=`<video src="${esc(s.video_url)}" controls playsinline></video>`;
+    const username=pm[s.user_id]?.username || "user";
+    const url=s.image_url || s.video_url || "";
+    const type=s.image_url ? "image" : "video";
+    const media=s.image_url
+      ? `<img src="${esc(s.image_url)}" alt="Story image">`
+      : s.video_url
+        ? `<video src="${esc(s.video_url)}" muted playsinline></video>`
+        : "";
+    const encodedUrl=encodeURIComponent(url);
+    const encodedUser=encodeURIComponent(username);
+    const encodedCaption=encodeURIComponent(s.caption || "");
     return `
-      <div class="story">
+      <div class="story" role="button" tabindex="0"
+        onclick="openStoryViewer('${encodedUrl}','${type}','${encodedUser}','${encodedCaption}')"
+        onkeydown="if(event.key==='Enter' || event.key===' ')openStoryViewer('${encodedUrl}','${type}','${encodedUser}','${encodedCaption}')">
         ${media}
-        <span>
-          @${esc(pm[s.user_id]?.username || "user")}
-          ${s.caption ? `<br>${esc(s.caption)}` : ""}
-        </span>
+        <span>@${esc(username)}${s.caption ? `<br>${esc(s.caption)}` : ""}</span>
       </div>`;
   }).join("");
 
