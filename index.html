@@ -120,7 +120,12 @@ button{cursor:pointer;border:0}
 .story{
   min-width:100px;height:150px;border-radius:12px;
   background:#e4e6eb;padding:10px;display:flex;
-  align-items:end;font-weight:700
+  flex-direction:column;justify-content:flex-end;
+  gap:6px;overflow:hidden;font-weight:700
+}
+.story img,.story video{
+  width:100%;height:105px;object-fit:cover;border-radius:8px;
+  background:#000
 }
 
 .posthead{
@@ -711,10 +716,11 @@ button{cursor:pointer;border:0}
 
     <button
       class="primary"
-      onclick="createStory()"
+      onclick="document.getElementById('storyMediaInput').click()"
     >
-      Create story
+      ➕ Add photo or video
     </button>
+    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)">
 
     <div
       id="storiesList"
@@ -1857,106 +1863,79 @@ async function loadSaved(){
 
 async function loadStories(){
 
-  const {
-    data
-  } =
-    await client
-      .from("stories")
-      .select(
-        "id,user_id,caption,created_at"
-      )
-      .gt(
-        "expires_at",
-        new Date().toISOString()
-      )
-      .order(
-        "created_at",
-        {ascending:false}
-      );
+  const {data,error} = await client.from("stories")
+    .select("id,user_id,caption,image_url,video_url,created_at")
+    .gt("expires_at",new Date().toISOString())
+    .order("created_at",{ascending:false});
 
-  const ids =
-    [...new Set(
-      (data || []).map(x => x.user_id)
-    )];
+  if(error){ console.error("loadStories error:",error); return; }
 
-  const {
-    data:ps
-  } =
-    ids.length
-      ? await client
-          .from("profiles")
-          .select("id,username")
-          .in("id",ids)
-      : {data:[]};
+  const ids=[...new Set((data||[]).map(x=>x.user_id))];
+  const {data:ps}=ids.length
+    ? await client.from("profiles").select("id,username").in("id",ids)
+    : {data:[]};
 
-  const pm =
-    Object.fromEntries(
-      (ps || []).map(p => [p.id,p])
-    );
+  const pm=Object.fromEntries((ps||[]).map(p=>[p.id,p]));
 
-  const html =
-    (data || []).map(s => `
-
+  const html=(data||[]).map(s=>{
+    let media="";
+    if(s.image_url) media=`<img src="${esc(s.image_url)}" alt="Story image">`;
+    else if(s.video_url) media=`<video src="${esc(s.video_url)}" controls playsinline></video>`;
+    return `
       <div class="story">
-
+        ${media}
         <span>
-
-          @${esc(
-            pm[s.user_id]?.username || "user"
-          )}
-
-          <br>
-
-          ${esc(s.caption)}
-
+          @${esc(pm[s.user_id]?.username || "user")}
+          ${s.caption ? `<br>${esc(s.caption)}` : ""}
         </span>
+      </div>`;
+  }).join("");
 
-      </div>
-
-    `).join("");
-
-  document.getElementById("storyrow").innerHTML =
-    html || '<div class="story">No stories</div>';
-
-  const sl =
-    document.getElementById("storiesList");
-
-  if(sl)
-    sl.innerHTML =
-      html || "No active stories.";
-
+  document.getElementById("storyrow").innerHTML=html || '<div class="story">No stories</div>';
+  const sl=document.getElementById("storiesList");
+  if(sl) sl.innerHTML=html || "No active stories.";
 }
 
+async function createStory(event){
 
-async function createStory(){
+  const input=document.getElementById("storyMediaInput");
+  const file=event?.target?.files?.[0] || null;
 
-  const caption =
-    prompt("Story text:");
-
-  if(!caption) return;
-
-  const {
-    error
-  } =
-    await client
-      .from("stories")
-      .insert({
-        user_id:currentUser.id,
-        caption
-      });
-
-  if(error){
-
-    alert(error.message);
-
-  }else{
-
-    loadStories();
-
+  if(!currentUser){
+    alert("Please log in again before creating a story.");
+    if(input) input.value="";
+    return;
   }
+  if(!file){ if(input) input.value=""; return; }
 
+  try{
+    const caption=prompt("Story text (optional):") || "";
+    if(!file.type.startsWith("image/") && !file.type.startsWith("video/"))
+      throw new Error("Please choose an image or video.");
+
+    const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+    const path=currentUser.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2)+"."+ext;
+
+    const {error:uploadError}=await client.storage.from("stories").upload(path,file,{upsert:false});
+    if(uploadError) throw new Error("Story upload failed: "+uploadError.message);
+
+    const {data:urlData}=client.storage.from("stories").getPublicUrl(path);
+    const story={user_id:currentUser.id,caption:caption};
+
+    if(file.type.startsWith("image/")) story.image_url=urlData.publicUrl;
+    else story.video_url=urlData.publicUrl;
+
+    const {error}=await client.from("stories").insert(story);
+    if(error) throw new Error(error.message);
+
+    await loadStories();
+  }catch(error){
+    console.error("createStory error:",error);
+    alert("Story could not be created: "+(error.message||"Unknown error"));
+  }finally{
+    if(input) input.value="";
+  }
 }
-
 
 async function createListing(){
 
