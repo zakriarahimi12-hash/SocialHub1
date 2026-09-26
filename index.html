@@ -1,10 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Social Hub</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialHub</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+    }
+
+    .box {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .post {
+      border-top: 1px solid #ddd;
+      padding: 15px 0;
+    }
+
+    #app {
+      display: none;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Welcome to Social Hub</h1>
-  <p>Our social platform is coming soon!</p>
+
+<div class="box" id="auth">
+  <h1>SocialHub</h1>
+
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <input id="username" placeholder="Username">
+
+  <button onclick="signup()">Create account</button>
+  <button onclick="login()">Log in</button>
+
+  <p id="message"></p>
+</div>
+
+<div class="box" id="app">
+  <h1>SocialHub</h1>
+
+  <button onclick="logout()">Log out</button>
+
+  <textarea id="postContent" placeholder="What's happening?"></textarea>
+  <button onclick="createPost()">Post</button>
+
+  <h2>Feed</h2>
+  <div id="feed"></div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://gkqyaroprqajwoubnsvs.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
+
+const client = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+async function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value;
+
+  const { error } = await client.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        username: username
+      }
+    }
+  });
+
+  document.getElementById("message").textContent =
+    error ? error.message : "Account created. Check your email.";
+}
+
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    document.getElementById("message").textContent = error.message;
+  } else {
+    showApp();
+  }
+}
+
+async function logout() {
+  await client.auth.signOut();
+  location.reload();
+}
+
+async function createPost() {
+  const { data: { user } } = await client.auth.getUser();
+
+  const content =
+    document.getElementById("postContent").value.trim();
+
+  if (!user || !content) return;
+
+  const { error } = await client
+    .from("posts")
+    .insert({
+      user_id: user.id,
+      content: content
+    });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    document.getElementById("postContent").value = "";
+    loadFeed();
+  }
+}
+
+async function loadFeed() {
+  const { data, error } = await client
+    .from("posts")
+    .select("id, content, created_at, profiles(username)")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    document.getElementById("feed").textContent =
+      error.message;
+    return;
+  }
+
+  document.getElementById("feed").innerHTML =
+    data.map(post => `
+      <div class="post">
+        <b>@${post.profiles?.username || "user"}</b>
+        <p>${escapeHtml(post.content)}</p>
+      </div>
+    `).join("");
+}
+
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, function(m) {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[m];
+  });
+}
+
+async function showApp() {
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  loadFeed();
+}
+
+client.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    showApp();
+  }
+});
+</script>
+
 </body>
 </html>
