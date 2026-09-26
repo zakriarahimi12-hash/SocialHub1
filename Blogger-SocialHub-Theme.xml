@@ -1133,10 +1133,14 @@ async function socialHubAuthSubmit(event){
   return false;
 }
 
+document.addEventListener("DOMContentLoaded",function(){
+  const auth=document.getElementById("auth");
+  if(auth && !auth.classList.contains("hidden")) socialHubBloggerShowLogin();
+},{once:true});
+
 async function socialHubBloggerSignupMode(){
   const msg=document.getElementById("authmsg");
   try{
-    if(event) event.preventDefault();
     const email=document.getElementById("email").value.trim();
     const password=document.getElementById("password").value;
     const username=document.getElementById("username").value.trim();
