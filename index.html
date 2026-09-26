@@ -152,7 +152,7 @@ async function createPost() {
 }
 
 async function loadFeed() {
-  const { data, error } = await client
+  const { data: posts, error } = await client
     .from("posts")
     .select("id, content, created_at, user_id")
     .order("created_at", {
@@ -165,17 +165,48 @@ async function loadFeed() {
     return;
   }
 
+  if (!posts || posts.length === 0) {
+    document.getElementById("feed").innerHTML =
+      "<p>No posts yet.</p>";
+    return;
+  }
+
+  const userIds = [
+    ...new Set(posts.map(post => post.user_id))
+  ];
+
+  const { data: profiles, error: profileError } =
+    await client
+      .from("profiles")
+      .select("id, username")
+      .in("id", userIds);
+
+  if (profileError) {
+    document.getElementById("feed").textContent =
+      profileError.message;
+    return;
+  }
+
+  const profileMap = {};
+
+  (profiles || []).forEach(profile => {
+    profileMap[profile.id] = profile.username;
+  });
+
   document.getElementById("feed").innerHTML =
-    data.map(post => `
+    posts.map(post => `
       <div class="post">
-        <b>@user</b>
+        <b>@${escapeHtml(
+          profileMap[post.user_id] || "user"
+        )}</b>
+
         <p>${escapeHtml(post.content)}</p>
       </div>
     `).join("");
 }
 
 function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, function(m) {
+  return String(text).replace(/[&<>"']/g, function(m) {
     return {
       "&": "&amp;",
       "<": "&lt;",
