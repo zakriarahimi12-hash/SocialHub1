@@ -709,24 +709,29 @@ button{cursor:pointer;border:0}
 <section id="stories" class="section">
 
   <div class="card">
+    <div class="menu-title">📖 Stories</div>
+    <p class="muted">Share a photo or video that disappears after 24 hours.</p>
 
-    <div class="menu-title">
-      Stories
+    <div class="row" style="margin-bottom:12px">
+      <button
+        class="primary"
+        type="button"
+        onclick="document.getElementById('storyMediaInput').click()"
+      >
+        ➕ Add photo or video
+      </button>
+      <button
+        class="action"
+        type="button"
+        onclick="show('home')"
+      >
+        ← Back to Home
+      </button>
     </div>
 
-    <button
-      class="primary"
-      onclick="document.getElementById('storyMediaInput').click()"
-    >
-      ➕ Add photo or video
-    </button>
     <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)">
 
-    <div
-      id="storiesList"
-      class="storyrow"
-    ></div>
-
+    <div id="storiesList" class="storyrow"></div>
   </div>
 
 </section>
