@@ -987,13 +987,40 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
 
-const client =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
+let client = null;
 let currentUser = null;
+let supabaseReadyPromise = null;
+
+function initSupabase(){
+  if(window.supabase && typeof window.supabase.createClient === "function"){
+    if(!client) client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    return true;
+  }
+  return false;
+}
+
+function ensureSupabaseReady(){
+  if(initSupabase()) return Promise.resolve(client);
+  if(supabaseReadyPromise) return supabaseReadyPromise;
+  supabaseReadyPromise=new Promise((resolve,reject)=>{
+    const existing=document.querySelector('script[data-socialhub-supabase]');
+    if(existing){
+      existing.addEventListener("load",()=>initSupabase()?resolve(client):reject(new Error("Supabase library did not initialize.")),{once:true});
+      existing.addEventListener("error",()=>reject(new Error("Supabase library could not be loaded.")),{once:true});
+      return;
+    }
+    const s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    s.async=true;
+    s.dataset.socialhubSupabase="1";
+    s.onload=()=>initSupabase()?resolve(client):reject(new Error("Supabase library did not initialize."));
+    s.onerror=()=>reject(new Error("Supabase library could not be loaded in Blogger."));
+    document.head.appendChild(s);
+  });
+  return supabaseReadyPromise;
+}
+
+ensureSupabaseReady().catch(error=>console.error("Supabase startup error:",error));
 
 
 function esc(value){
@@ -1061,6 +1088,7 @@ function openSite(){
 
 
 async function signup(){
+  try{await ensureSupabaseReady()}catch(error){const msg=document.getElementById("authmsg");if(msg)msg.textContent=error.message||"SocialHub is still loading. Please try again.";return}
 
   const email =
     document.getElementById("email").value.trim();
@@ -1133,6 +1161,7 @@ async function ensureGoogleProfile(user){
 }
 
 async function loginWithGoogle(){
+  try{await ensureSupabaseReady()}catch(error){const msg=document.getElementById("authmsg");if(msg)msg.textContent=error.message||"SocialHub is still loading. Please try again.";return}
   const msg=document.getElementById("authmsg");
   if(msg) msg.textContent="Opening Google sign-in...";
   try{
@@ -1146,6 +1175,7 @@ async function loginWithGoogle(){
 
 
 async function login(){
+  try{await ensureSupabaseReady()}catch(error){const msg=document.getElementById("authmsg");if(msg)msg.textContent=error.message||"SocialHub is still loading. Please try again.";return}
 
   const email =
     document.getElementById("email").value.trim();
@@ -2753,33 +2783,35 @@ async function sendMessage(cid){
 }
 
 
-client.auth
-  .getSession()
-  .then(async ({data}) => {
-
+ensureSupabaseReady()
+  .then(()=>client.auth.getSession())
+  .then(async ({data})=>{
     if(data.session){
-
-      currentUser =
-        data.session.user;
+      currentUser=data.session.user;
       openSite();
       setTimeout(()=>ensureGoogleProfile(currentUser).catch(error=>console.warn("Profile sync error:",error)),0);
-
     }
-
   })
-  .catch(error=>console.error("Session restore error:",error));
+  .catch(error=>{
+    console.error("Session restore error:",error);
+    const msg=document.getElementById("authmsg");
+    if(msg) msg.textContent="SocialHub is still loading. Please wait a moment and try again.";
+  });
 
-
-client.auth.onAuthStateChange((_event,session)=>{
-  currentUser=session?.user||null;
-  if(session){
-    openSite();
-    setTimeout(()=>ensureGoogleProfile(session.user).catch(error=>console.warn("Profile sync error:",error)),0);
-  }else{
-    document.getElementById("site").classList.add("hidden");
-    document.getElementById("auth").classList.remove("hidden");
-  }
-});
+ensureSupabaseReady()
+  .then(()=>{
+    client.auth.onAuthStateChange((_event,session)=>{
+      currentUser=session?.user||null;
+      if(session){
+        openSite();
+        setTimeout(()=>ensureGoogleProfile(session.user).catch(error=>console.warn("Profile sync error:",error)),0);
+      }else{
+        document.getElementById("site").classList.add("hidden");
+        document.getElementById("auth").classList.remove("hidden");
+      }
+    });
+  })
+  .catch(error=>console.error("Auth startup error:",error));
 // Close dropdown menus whenever the user clicks outside their menu area.
 document.addEventListener("click",function(event){
   const target=event.target;
