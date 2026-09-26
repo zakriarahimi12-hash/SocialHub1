@@ -5,11 +5,86 @@
  xmlns:data='http://www.google.com/2005/gml/data'
  xmlns:expr='http://www.google.com/2005/gml/expr'>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>SocialHub</title>
-___SCRIPT_0___
-___SCRIPT_1___
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script><![CDATA[
+
+/* Blogger integration: public Blogger feeds require no secret key. */
+let bloggerJsonpCounter=0;
+function normalizeBloggerUrl(value){
+  let u=(value||'').trim();
+  if(!u)return '';
+  if(!/^https?:\\/\\//i.test(u))u='https://'+u;
+  try{const x=new URL(u);return x.origin}catch(e){return ''}
+}
+function saveBloggerConnection(){
+  const url=normalizeBloggerUrl(document.getElementById('bloggerUrl')?.value);
+  if(!url){toast('Enter a valid Blogger blog URL.');return}
+  localStorage.setItem('socialhub_blogger_url',url);
+  loadBloggerPosts();
+}
+function loadBloggerPosts(){
+  const input=document.getElementById('bloggerUrl');
+  const saved=localStorage.getItem('socialhub_blogger_url')||'https://rahimi32145.blogspot.com';
+  if(input&amp;&amp;!input.value)input.value=saved;
+  const url=normalizeBloggerUrl(input?.value||saved);
+  const status=document.getElementById('bloggerStatus');
+  const box=document.getElementById('bloggerPosts');
+  if(!url){if(status)status.textContent='Connect your public Blogger URL to load posts.';if(box)box.innerHTML='<div class="blogger-empty">No Blogger blog connected yet.</div>';return}
+  if(status)status.textContent='Loading Blogger posts…';
+  if(box)box.innerHTML='';
+  const cb='socialhubBloggerCallback'+(++bloggerJsonpCounter);
+  window[cb]=(data)=>{
+    try{
+      const entries=data?.feed?.entry||[];
+      if(!entries.length){if(status)status.textContent='Connected, but no public posts were found.';if(box)box.innerHTML='<div class="blogger-empty">Your Blogger feed has no public posts yet.</div>';return}
+      localStorage.setItem('socialhub_blogger_url',url);
+      if(status)status.textContent='Connected to '+url;
+      box.innerHTML=entries.slice(0,12).map((entry)=>{
+        const title=entry.title?.$t||'Untitled';
+        const link=(entry.link||[]).find(l=>l.rel==='alternate')?.href||url;
+        const published=entry.published?.$t||entry.updated?.$t||'';
+        const date=published?new Date(published).toLocaleString():''; 
+        const raw=entry.content?.$t||entry.summary?.$t||'';
+        const temp=document.createElement('div');temp.innerHTML=raw;
+        const img=temp.querySelector('img')?.src||'';
+        const textContent=(temp.textContent||'').trim().replace(/\\s+/g,' ').slice(0,260);
+        return '<article class="blogger-post">'+
+          '<h3><a href="'+escapeHtml(link)+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a></h3>'+
+          (date?'<div class="postmeta">'+escapeHtml(date)+'</div>':'')+
+          (img?'<img src="'+escapeHtml(img)+'" alt="">':'')+
+          (textContent?'<p>'+escapeHtml(textContent)+(textContent.length>=260?'…':'')+'</p>':'')+
+          '<a class="action" href="'+escapeHtml(link)+'" target="_blank" rel="noopener">Read on Blogger</a>'+
+        '</article>';
+      }).join('');
+    }catch(err){
+      if(status)status.textContent='Blogger feed could not be displayed.';
+      if(box)box.innerHTML='<div class="blogger-empty">The Blogger response was not in the expected format.</div>';
+    }finally{
+      delete window[cb];
+      const node=document.getElementById(cb);
+      if(node)node.remove();
+    }
+  };
+  const script=document.createElement('script');
+  script.id=cb;
+  script.src=url.replace(/\\/$/,'')+'/feeds/posts/default?alt=json-in-script&amp;max-results=12&amp;callback='+cb;
+  script.onerror=()=>{
+    delete window[cb];
+    script.remove();
+    if(status)status.textContent='Could not connect to this Blogger feed. Make sure the blog is public and the URL is correct.';
+    if(box)box.innerHTML='<div class="blogger-empty">Blogger connection failed. Check the blog URL and try again.</div>';
+  };
+  document.body.appendChild(script);
+}
+
+]]></script>
+
+
+
 <b:skin><![CDATA[
 
 *{box-sizing:border-box}
@@ -329,79 +404,6 @@ button{cursor:pointer;border:0}
 }
 
 ]]></b:skin>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script><![CDATA[
-
-/* Blogger integration: public Blogger feeds require no secret key. */
-let bloggerJsonpCounter=0;
-function normalizeBloggerUrl(value){
-  let u=(value||'').trim();
-  if(!u)return '';
-  if(!/^https?:\\/\\//i.test(u))u='https://'+u;
-  try{const x=new URL(u);return x.origin}catch(e){return ''}
-}
-function saveBloggerConnection(){
-  const url=normalizeBloggerUrl(document.getElementById('bloggerUrl')?.value);
-  if(!url){toast('Enter a valid Blogger blog URL.');return}
-  localStorage.setItem('socialhub_blogger_url',url);
-  loadBloggerPosts();
-}
-function loadBloggerPosts(){
-  const input=document.getElementById('bloggerUrl');
-  const saved=localStorage.getItem('socialhub_blogger_url')||'https://rahimi32145.blogspot.com';
-  if(input&&!input.value)input.value=saved;
-  const url=normalizeBloggerUrl(input?.value||saved);
-  const status=document.getElementById('bloggerStatus');
-  const box=document.getElementById('bloggerPosts');
-  if(!url){if(status)status.textContent='Connect your public Blogger URL to load posts.';if(box)box.innerHTML='<div class="blogger-empty">No Blogger blog connected yet.</div>';return}
-  if(status)status.textContent='Loading Blogger posts…';
-  if(box)box.innerHTML='';
-  const cb='socialhubBloggerCallback'+(++bloggerJsonpCounter);
-  window[cb]=(data)=>{
-    try{
-      const entries=data?.feed?.entry||[];
-      if(!entries.length){if(status)status.textContent='Connected, but no public posts were found.';if(box)box.innerHTML='<div class="blogger-empty">Your Blogger feed has no public posts yet.</div>';return}
-      localStorage.setItem('socialhub_blogger_url',url);
-      if(status)status.textContent='Connected to '+url;
-      box.innerHTML=entries.slice(0,12).map((entry)=>{
-        const title=entry.title?.$t||'Untitled';
-        const link=(entry.link||[]).find(l=>l.rel==='alternate')?.href||url;
-        const published=entry.published?.$t||entry.updated?.$t||'';
-        const date=published?new Date(published).toLocaleString():''; 
-        const raw=entry.content?.$t||entry.summary?.$t||'';
-        const temp=document.createElement('div');temp.innerHTML=raw;
-        const img=temp.querySelector('img')?.src||'';
-        const textContent=(temp.textContent||'').trim().replace(/\\s+/g,' ').slice(0,260);
-        return '<article class="blogger-post">'+
-          '<h3><a href="'+escapeHtml(link)+'" target="_blank" rel="noopener">'+escapeHtml(title)+'</a></h3>'+
-          (date?'<div class="postmeta">'+escapeHtml(date)+'</div>':'')+
-          (img?'<img src="'+escapeHtml(img)+'" alt="">':'')+
-          (textContent?'<p>'+escapeHtml(textContent)+(textContent.length>=260?'…':'')+'</p>':'')+
-          '<a class="action" href="'+escapeHtml(link)+'" target="_blank" rel="noopener">Read on Blogger</a>'+
-        '</article>';
-      }).join('');
-    }catch(err){
-      if(status)status.textContent='Blogger feed could not be displayed.';
-      if(box)box.innerHTML='<div class="blogger-empty">The Blogger response was not in the expected format.</div>';
-    }finally{
-      delete window[cb];
-      const node=document.getElementById(cb);
-      if(node)node.remove();
-    }
-  };
-  const script=document.createElement('script');
-  script.id=cb;
-  script.src=url.replace(/\\/$/,'')+'/feeds/posts/default?alt=json-in-script&max-results=12&callback='+cb;
-  script.onerror=()=>{
-    delete window[cb];
-    script.remove();
-    if(status)status.textContent='Could not connect to this Blogger feed. Make sure the blog is public and the URL is correct.';
-    if(box)box.innerHTML='<div class="blogger-empty">Blogger connection failed. Check the blog URL and try again.</div>';
-  };
-  document.body.appendChild(script);
-}
-
-]]></script>
 </head>
 <body>
 
@@ -413,9 +415,9 @@ function loadBloggerPosts(){
     Connect with people and share what matters.
   </p>
 
-  <input id="email" type="email" placeholder="Email" />
-  <input id="password" type="password" placeholder="Password" />
-  <input id="username" placeholder="Username (for new account)" />
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <input id="username" placeholder="Username (for new account)">
 
   <button class="primary" onclick="signup()">Create account</button>
   <button class="action" onclick="login()">Log in</button>
@@ -435,7 +437,7 @@ function loadBloggerPosts(){
     id="searchInput"
     placeholder="Search SocialHub"
     onkeydown="if(event.key==='Enter')searchAll()"
-   />
+  >
 
   <div class="topnav">
     <button title="Home" onclick="show('home')">🏠</button>
@@ -512,12 +514,12 @@ function loadBloggerPosts(){
       </div>
     </div>
 
-    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)" />
+    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)">
   </div>
 
   <div class="card composer">
     <div id="postMediaStatus" class="muted" style="margin:8px 0">Add photos or videos to your post</div>
-    <input id="postMediaInput" type="file" accept="image/*,video/*" multiple hidden onchange="handlePostMedia(event)" />
+    <input id="postMediaInput" type="file" accept="image/*,video/*" multiple hidden onchange="handlePostMedia(event)">
     <div id="postMediaPreview" class="post-media"></div>
 
     <textarea
@@ -634,7 +636,7 @@ function loadBloggerPosts(){
       <input
         id="messageUser"
         placeholder="Friend user ID"
-       />
+      >
 
       <button
         class="primary"
@@ -681,7 +683,7 @@ function loadBloggerPosts(){
       style="width:100%"
       placeholder="Search username..."
       onkeydown="if(event.key==='Enter')searchAll()"
-     />
+    >
 
     <div id="searchResults"></div>
 
@@ -865,7 +867,7 @@ function loadBloggerPosts(){
       </button>
     </div>
 
-    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)" />
+    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden onchange="createStory(event)">
 
     <div id="storiesList" class="storyrow"></div>
   </div>
@@ -880,7 +882,7 @@ function loadBloggerPosts(){
 <div class="menu-title">📝 Blogger</div>
 <p class="muted">Connect a public Blogger blog and show its latest posts inside SocialHub.</p>
 <div class="blogger-actions">
-<input id="bloggerUrl" class="blogger-url" type="url" placeholder="https://yourblog.blogspot.com" />
+<input id="bloggerUrl" class="blogger-url" type="url" placeholder="https://yourblog.blogspot.com">
 <button class="primary" type="button" onclick="saveBloggerConnection()">Connect</button>
 <button class="action" type="button" onclick="loadBloggerPosts()">Refresh</button>
 </div>
@@ -888,15 +890,15 @@ function loadBloggerPosts(){
 <div id="bloggerPosts" class="blogger-grid" style="margin-top:14px"></div>
 </div></section>
 
-<section id="settings" class="section"><div class="card"><div class="menu-title">⚙️ Settings &amp; privacy</div>
+<section id="settings" class="section"><div class="card"><div class="menu-title">⚙️ Settings & privacy</div>
 <div class="grid2">
 <div class="feature"><h3>Account</h3><p>Email, username and profile information.</p><button class="action" onclick="location.href='profile.html?v=20260926'">Edit profile</button></div>
-<div class="feature"><h3>Password &amp; security</h3><p>Authentication and account security.</p><button class="action" onclick="alert('Use Supabase authentication email flows to change your password securely.')">Security</button></div>
+<div class="feature"><h3>Password & security</h3><p>Authentication and account security.</p><button class="action" onclick="alert('Use Supabase authentication email flows to change your password securely.')">Security</button></div>
 <div class="feature"><h3>Privacy</h3><p>Control how your profile and content are shared.</p><button class="action" onclick="openSettingsPanel('Privacy')">Privacy</button></div>
 <div class="feature"><h3>Notifications</h3><p>Manage your notification center.</p><button class="action" onclick="show('notifications')">Notifications</button></div>
 <div class="feature"><h3>Blocked people</h3><p>Manage people you do not want to interact with.</p><button class="action" onclick="openSettingsPanel('Blocked people')">Manage</button></div>
 <div class="feature"><h3>Language</h3><p>Choose the language used by the interface.</p><button class="action" onclick="openSettingsPanel('Language')">Language</button></div>
-</div><hr /><button class="danger primary" onclick="logout()">Log out</button></div></section>
+</div><hr><button class="danger primary" onclick="logout()">Log out</button></div></section>
 
 </main>
 
@@ -962,9 +964,6 @@ function loadBloggerPosts(){
   </div>
 
 </div>
-
-
-___SCRIPT_0___
 
 
 <script><![CDATA[
@@ -2717,6 +2716,8 @@ const authHash=new URLSearchParams(location.hash.replace(/^#/,""));
 if(authHash.get("error_code")==="otp_expired") document.getElementById("authmsg").textContent="Your email confirmation link expired. Request a new confirmation email.";
 
 ]]></script>
+
+
 <b:section id='bloggerHidden' class='hidden' maxwidgets='1' showaddelement='no'>
   <b:widget id='HTML99' type='HTML' title='' locked='true' version='2'>
     <b:includable id='main'></b:includable>
