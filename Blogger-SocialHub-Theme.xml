@@ -2906,6 +2906,30 @@ ensureSupabaseReady()
     });
   })
   .catch(error=>console.error("Auth startup error:",error));
+// Blogger Preview can wrap the theme in a cross-origin iframe whose parent owns the click-trap.
+// A parent click-trap cannot be removed from inside this document, so use the user's
+// first real click to leave Preview and open the published SocialHub page.
+(function escapeBloggerPreviewOnUserClick(){
+  try{
+    if(window.top===window.self)return;
+    const ref=(document.referrer||"").toLowerCase();
+    if(!/(^|\.)blogger\.com(\/|$)|(^|\.)blogspot\.com(\/|$)/i.test(ref))return;
+    let escaped=false;
+    const escape=()=>{
+      if(escaped)return;
+      escaped=true;
+      try{
+        window.top.location.href="https://rahimi32145.blogspot.com/";
+      }catch(error){
+        console.warn("SocialHub Blogger Preview escape:",error);
+      }
+    };
+    document.addEventListener("click",escape,true);
+    document.addEventListener("touchend",escape,true);
+  }catch(error){
+    console.warn("SocialHub Blogger Preview detection:",error);
+  }
+})();
 // Blogger Preview may place the page inside a cross-origin iframe.
 // Do not try to read or navigate window.top here: the preview shell owns
 // the click-trap outside this document. The published blog remains in the
