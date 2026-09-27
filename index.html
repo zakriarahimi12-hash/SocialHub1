@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SocialHub</title>
+<title>SocialHub — Connect</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
@@ -405,6 +405,71 @@ button{cursor:pointer;border:0}
   .card{border-radius:8px}
   .postactions{grid-template-columns:repeat(4,1fr)}
 }
+
+/* ===== SocialHub X-style visual system ===== */
+:root{
+  --x-black:#0f1419;--x-text:#0f1419;--x-muted:#536471;--x-border:#eff3f4;
+  --x-bg:#fff;--x-soft:#f7f9f9;--x-blue:#1d9bf0;
+}
+html,body{background:var(--x-bg)!important;color:var(--x-text)!important}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important}
+.top{height:64px!important;background:rgba(255,255,255,.96)!important;border-bottom:1px solid var(--x-border)!important;backdrop-filter:blur(10px);padding:0 18px!important;position:sticky!important;top:0!important;z-index:100!important}
+.logo{color:var(--x-black)!important;font-size:28px!important;font-weight:800!important;letter-spacing:-1px}
+.search{background:var(--x-soft)!important;border:1px solid transparent!important;color:var(--x-text)!important;border-radius:999px!important;height:42px!important}
+.search:focus{background:#fff!important;border-color:var(--x-blue)!important;outline:none}
+.topnav{gap:2px!important}
+.topnav button{border-radius:999px!important;font-size:22px!important;padding:10px 13px!important}
+.topnav button:hover,.side button:hover,.right button:hover{background:var(--x-soft)!important}
+.wrap{grid-template-columns:250px minmax(0,680px) 300px!important;max-width:1265px!important;gap:0!important;margin:0 auto!important;padding:0!important}
+.side{top:64px!important;padding:18px 14px!important;border-right:1px solid var(--x-border);min-height:calc(100vh - 64px)}
+.side button{font-size:19px!important;padding:12px 15px!important;border-radius:999px!important;font-weight:600!important}
+.side .profile-nav{border-bottom:0!important;margin-bottom:8px!important}
+.side h4{color:var(--x-muted)!important;font-size:13px!important;text-transform:uppercase;letter-spacing:.05em}
+.side .ico,.right .ico{font-size:21px!important}
+.right{top:64px!important;padding:14px 16px!important;border-left:1px solid var(--x-border);min-height:calc(100vh - 64px)}
+.right .card{background:var(--x-soft)!important;border:0!important;box-shadow:none!important}
+.right button{border-radius:999px!important}
+.card{background:#fff!important;border-radius:0!important;box-shadow:none!important;border-bottom:1px solid var(--x-border)!important;padding:18px!important;margin:0!important}
+.composer{border-bottom:1px solid var(--x-border)!important}
+.composer textarea{border:0!important;background:#fff!important;border-radius:0!important;padding:8px 0!important;font-size:20px!important;min-height:70px!important;outline:none!important}
+.primary{background:var(--x-black)!important;color:#fff!important;border-radius:999px!important;padding:10px 20px!important;font-weight:700!important}
+.action{background:transparent!important;border:1px solid var(--x-border)!important;border-radius:999px!important}
+.action:hover{background:var(--x-soft)!important}
+.posthead{align-items:flex-start!important}
+.avatar{width:44px!important;height:44px!important;border-radius:50%!important;background:#d8e3ea!important}
+.postbody{font-size:16px!important;line-height:1.45!important;margin-top:4px}
+.postmeta,.muted{color:var(--x-muted)!important}
+.postactions{border:0!important;margin-top:12px!important;grid-template-columns:repeat(4,1fr)!important}
+.postactions button{background:transparent!important;color:var(--x-muted)!important;border-radius:999px!important;padding:8px!important}
+.postactions button:hover{background:#e8f5fd!important;color:var(--x-blue)!important}
+.comment{background:var(--x-soft)!important;border:0!important;border-radius:16px!important}
+.commentbox input{background:var(--x-soft)!important;border:0!important}
+.stories-home-card{border-bottom:1px solid var(--x-border)!important}
+.facebook-stories{padding-bottom:4px}
+.story{border-radius:14px!important}
+.moremenu,.modalbox,.postmenu,.comment-menu,.privacy-submenu{border:1px solid var(--x-border)!important;box-shadow:0 8px 28px rgba(0,0,0,.12)!important;border-radius:16px!important}
+.moremenu button,.postmenu button,.comment-menu button,.privacy-submenu button{border-radius:10px!important}
+.blogger-post{border:1px solid var(--x-border)!important;border-radius:16px!important}
+.blogger-post h3 a{color:var(--x-text)!important}
+.blogger-post h3 a:hover{color:var(--x-blue)!important}
+.badge{background:var(--x-blue)!important}
+.section{background:#fff!important}
+.mobilebar{border-top:1px solid var(--x-border)!important}
+@media(max-width:900px){
+ .wrap{grid-template-columns:72px minmax(0,1fr)!important}
+ .side{padding:14px 8px!important}
+ .right{display:none!important}
+}
+@media(max-width:600px){
+ .top{height:56px!important}
+ .logo{font-size:24px!important}
+ .search{width:140px!important}
+ .side{display:none!important}
+ .wrap{display:block!important}
+ .card{padding:15px!important}
+ .mobilebar{background:#fff!important}
+}
+
 </style>
 </head>
 
