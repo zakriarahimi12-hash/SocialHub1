@@ -338,6 +338,7 @@ button{cursor:pointer;border:0}
 .modal{pointer-events:none;z-index:19000}
 .modal.show{pointer-events:auto}
 #auth.hidden,#storyViewer,#modal{pointer-events:none!important}
+#blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap{display:none!important;visibility:hidden!important;pointer-events:none!important;z-index:-1!important}
 #site{pointer-events:auto!important;position:relative;z-index:10}
 #site .top,#site .wrap,#site .mobilebar{pointer-events:auto!important;position:relative;z-index:10000}
 .story-viewer.show{display:flex}
@@ -2902,6 +2903,18 @@ ensureSupabaseReady()
     });
   })
   .catch(error=>console.error("Auth startup error:",error));
+// Blogger can inject an invisible blogger-clickTrap that blocks every mouse click.
+(function disableBloggerClickTrap(){
+  const removeTrap=()=>{
+    document.querySelectorAll("#blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap").forEach(el=>{
+      el.style.setProperty("display","none","important");
+      el.style.setProperty("pointer-events","none","important");
+      el.remove();
+    });
+  };
+  removeTrap();
+  new MutationObserver(removeTrap).observe(document.documentElement,{childList:true,subtree:true});
+})();
 // Keep the signed-in SocialHub UI above any inactive Blogger/theme layers.
 document.documentElement.style.pointerEvents="auto";
 document.body.style.pointerEvents="auto";
