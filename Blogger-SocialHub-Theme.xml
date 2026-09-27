@@ -2072,29 +2072,53 @@ async function loadNotifications(){
 async function searchAll(){
   const input=document.getElementById("searchPage")||document.getElementById("searchInput");
   const q=(input?.value||"").trim();
-  if(!q)return;
   show("search");
   const pageInput=document.getElementById("searchPage");
   if(pageInput)pageInput.value=q;
   const results=document.getElementById("searchResults");
   if(!results)return;
-  results.innerHTML="<div class=\"card\">Searching...</div>";
+  results.innerHTML="<div class=\"card\">Searching people...</div>";
   try{
-    const term="%"+q.replace(/[%_]/g,"\\$&")+"%";
-    const [byUsername,byName]=await Promise.all([
-      client.from("profiles").select("id,username,full_name,bio").ilike("username",term).limit(30),
-      client.from("profiles").select("id,username,full_name,bio").ilike("full_name",term).limit(30)
-    ]);
-    if(byUsername.error)throw byUsername.error;
-    if(byName.error)throw byName.error;
-    const merged=[...(byUsername.data||[]),...(byName.data||[])];
-    const unique=Array.from(new Map(merged.map(p=>[p.id,p])).values()).slice(0,30);
-    results.innerHTML=unique.map(p=>
-      "<div class=\"card\"><b>"+esc(p.full_name||"SocialHub user")+"</b><br>@"+esc(p.username||"user")+"<p>"+esc(p.bio||"")+"</p><button class=\"primary\" onclick=\"sendFriend(\'"+esc(p.id)+"\')\">Add friend</button></div>"
-    ).join("")||"No users found.";
+    const {data,error}=await client
+      .from("profiles")
+      .select("id,username,full_name,bio")
+      .limit(2000);
+    if(error)throw error;
+
+    const needle=q.toLocaleLowerCase().replace(/^@/,"").trim();
+    let people=(data||[]).filter(p=>p.id!==currentUser?.id);
+    if(needle){
+      people=people.filter(p=>{
+        const username=String(p.username||"").toLocaleLowerCase();
+        const name=String(p.full_name||"").toLocaleLowerCase();
+        const bio=String(p.bio||"").toLocaleLowerCase();
+        return username.includes(needle)||name.includes(needle)||bio.includes(needle);
+      });
+      people.sort((a,b)=>{
+        const score=p=>{
+          const u=String(p.username||"").toLocaleLowerCase();
+          const n=String(p.full_name||"").toLocaleLowerCase();
+          return (u===needle?0:1)+(n===needle?0:1)+(u.startsWith(needle)?0:1);
+        };
+        return score(a)-score(b) ||
+          String(a.username||"").localeCompare(String(b.username||"")) ||
+          String(a.full_name||"").localeCompare(String(b.full_name||""));
+      });
+    }else{
+      people.sort((a,b)=>String(a.username||"").localeCompare(String(b.username||"")));
+    }
+
+    const shown=people.slice(0,50);
+    if(!shown.length){
+      results.innerHTML="<div class=\"card\"><b>No people found.</b><p class=\"muted\">Try their username or full name.</p></div>";
+      return;
+    }
+    results.innerHTML=shown.map(p=>
+      "<div class=\"card\"><b>"+esc(p.full_name||"SocialHub user")+"</b><br>@"+esc(p.username||"user")+"<p>"+esc(p.bio||"")+"</p><button class=\"primary\" onclick=\"sendFriend('"+String(p.id).replace(/'/g,"\\'")+"')\">Add friend</button></div>"
+    ).join("");
   }catch(error){
     console.error("searchAll error:",error);
-    results.innerHTML="<div class=\"card\">Search could not be completed. Please try again.</div>";
+    results.innerHTML="<div class=\"card\">People search could not be completed. Please try again.</div>";
   }
 }
 
