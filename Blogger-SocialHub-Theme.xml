@@ -896,10 +896,10 @@ button{cursor:pointer;border:0}
 <div id="bloggerPosts" class="blogger-grid" style="margin-top:14px"></div>
 </div></section>
 
-<section id="settings" class="section"><div class="card"><div class="menu-title">⚙️ Settings & privacy</div>
+<section id="settings" class="section"><div class="card"><div class="menu-title">⚙️ Settings &amp; privacy</div>
 <div class="grid2">
 <div class="feature"><h3>Account</h3><p>Email, username and profile information.</p><button class="action" onclick="location.href='profile.html?v=20260926'">Edit profile</button></div>
-<div class="feature"><h3>Password & security</h3><p>Authentication and account security.</p><button class="action" onclick="alert('Use Supabase authentication email flows to change your password securely.')">Security</button></div>
+<div class="feature"><h3>Password &amp; security</h3><p>Authentication and account security.</p><button class="action" onclick="alert('Use Supabase authentication email flows to change your password securely.')">Security</button></div>
 <div class="feature"><h3>Privacy</h3><p>Control how your profile and content are shared.</p><button class="action" onclick="openSettingsPanel('Privacy')">Privacy</button></div>
 <div class="feature"><h3>Notifications</h3><p>Manage your notification center.</p><button class="action" onclick="show('notifications')">Notifications</button></div>
 <div class="feature"><h3>Blocked people</h3><p>Manage people you do not want to interact with.</p><button class="action" onclick="openSettingsPanel('Blocked people')">Manage</button></div>
