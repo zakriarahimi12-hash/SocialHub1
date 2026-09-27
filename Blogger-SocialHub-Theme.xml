@@ -167,6 +167,7 @@ function loadBloggerPosts(){
 
   <div class="topnav">
     <button title="Home" onclick="show('home')">🏠</button>
+    <button title="Messenger" onclick="show('messages')">💬</button>
     <button title="Profile" onclick="location.href='profile.html?v=20260926'">👤</button>
   </div>
 
