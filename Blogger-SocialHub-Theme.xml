@@ -328,8 +328,14 @@ button{cursor:pointer;border:0}
 .story-viewer{
   position:fixed;inset:0;background:rgba(0,0,0,.86);
   display:none;align-items:center;justify-content:center;
-  z-index:200;
+  z-index:200;pointer-events:none;
 }
+.story-viewer.show{pointer-events:auto}
+.modal{pointer-events:none}
+.modal.show{pointer-events:auto}
+#auth.hidden,#storyViewer,#modal{pointer-events:none!important}
+#site{pointer-events:auto!important;position:relative;z-index:10}
+#site .top,#site .wrap,#site .mobilebar{pointer-events:auto!important}
 .story-viewer.show{display:flex}
 .story-viewer-box{
   width:min(760px,94vw);height:min(88vh,760px);
@@ -1086,7 +1092,11 @@ function show(id){
 
 function openSite(){
   const auth=document.getElementById("auth");
+  const storyViewer=document.getElementById("storyViewer");
+  const modal=document.getElementById("modal");
   const site=document.getElementById("site");
+  if(storyViewer) storyViewer.classList.remove("show");
+  if(modal) modal.classList.remove("show");
   if(auth){
     auth.classList.add("hidden");
     auth.style.display="none";
