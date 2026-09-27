@@ -408,7 +408,7 @@ button{cursor:pointer;border:0}
   .card{border-radius:8px}
   .postactions{grid-template-columns:repeat(4,1fr)}
 }
-]]>
+
 /* ===== SocialHub X-style visual system ===== */
 :root{
   --x-black:#0f1419;--x-text:#0f1419;--x-muted:#536471;--x-border:#eff3f4;
@@ -473,7 +473,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
  .mobilebar{background:#fff!important}
 }
 
-</b:skin>
+]]></b:skin>
 </head>
 
 <body>
@@ -2821,30 +2821,49 @@ async function sendMessage(cid){
 }
 
 
-if(client) client.auth
-  .getSession()
-  .then(async ({data}) => {
+async function restoreSocialHubSession(){
+  if(!client){
+    document.getElementById("site")?.classList.remove("hidden");
+    document.getElementById("auth")?.classList.add("hidden");
+    return;
+  }
 
-    if(data.session){
+  try{
+    const {data,error}=await client.auth.getSession();
+    if(error) throw error;
 
-      currentUser =
-        data.session.user;
+    if(data?.session?.user){
+      currentUser=data.session.user;
+      document.getElementById("auth")?.classList.add("hidden");
+      document.getElementById("site")?.classList.remove("hidden");
       openSite();
       setTimeout(()=>ensureGoogleProfile(currentUser).catch(error=>console.warn("Profile sync error:",error)),0);
-
+    }else{
+      document.getElementById("site")?.classList.add("hidden");
+      document.getElementById("auth")?.classList.remove("hidden");
     }
-
-  })
-  .catch(error=>console.error("Session restore error:",error));
-
-
-openSite();
-    setTimeout(()=>ensureGoogleProfile(session.user).catch(error=>console.warn("Profile sync error:",error)),0);
-  }else{
-    document.getElementById("site").classList.remove("hidden"); document.getElementById("auth").classList.add("hidden");
+  }catch(error){
+    console.error("Session restore error:",error);
+    document.getElementById("site")?.classList.add("hidden");
+    document.getElementById("auth")?.classList.remove("hidden");
   }
-});
-openSite();
+}
+
+if(client){
+  client.auth.onAuthStateChange((event,session)=>{
+    if(session?.user){
+      currentUser=session.user;
+      document.getElementById("auth")?.classList.add("hidden");
+      document.getElementById("site")?.classList.remove("hidden");
+    }else if(event==="SIGNED_OUT"){
+      currentUser=null;
+      document.getElementById("site")?.classList.add("hidden");
+      document.getElementById("auth")?.classList.remove("hidden");
+    }
+  });
+}
+
+restoreSocialHubSession();
 
 // Close dropdown menus whenever the user clicks outside their menu area.
 document.addEventListener("click",function(event){
