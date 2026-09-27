@@ -2906,6 +2906,14 @@ ensureSupabaseReady()
     });
   })
   .catch(error=>console.error("Auth startup error:",error));
+// If Blogger is rendering SocialHub inside its preview iframe, escape the preview shell.
+(function escapeBloggerPreviewShell(){
+  try{
+    if(window.top!==window.self && /blogger\.com|blogspot\.com/i.test(window.top.location.hostname||"")){
+      window.top.location.href=window.location.href;
+    }
+  }catch(e){}
+})();
 // Isolate the signed-in SocialHub app from Blogger's page-level interaction layers.
 (function isolateSocialHub(){
   const apply=()=>{
