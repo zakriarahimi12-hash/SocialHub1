@@ -498,9 +498,6 @@ button{cursor:pointer;border:0}
 
   <div class="topnav">
     <button title="Home" onclick="show('home')">🏠</button>
-    <button title="Friends" onclick="show('friends')">👥</button>
-    <button title="Messenger" onclick="show('messages')">💬</button>
-    <button title="Notifications" onclick="show('notifications')">🔔</button>
     <button title="Profile" onclick="location.href='profile.html?v=20260926'">👤</button>
   </div>
 
@@ -513,9 +510,6 @@ button{cursor:pointer;border:0}
   <button class="profile-nav" onclick="location.href='profile.html?v=20260926'"><span class="ico">👤</span><span class="txt">Profile</span></button>
   <button onclick="show('home')"><span class="ico">🏠</span><span class="txt">Home</span></button>
   <button onclick="show('friends')"><span class="ico">👥</span><span class="txt">Friends</span></button>
-  <button onclick="show('requests')"><span class="ico">🤝</span><span class="txt">Friend requests</span></button>
-  <button onclick="show('messages')"><span class="ico">💬</span><span class="txt">Messenger</span></button>
-  <button onclick="show('notifications')"><span class="ico">🔔</span><span class="txt">Notifications</span></button>
 </aside>
 
 
