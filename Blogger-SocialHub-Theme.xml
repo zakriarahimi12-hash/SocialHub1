@@ -2555,10 +2555,17 @@ ensureSupabaseReady()
       if(el!==site && el.id!=="auth"){
         el.style.setProperty("pointer-events","none","important");
         el.style.setProperty("z-index","-1","important");
+        el.querySelectorAll("*").forEach(child=>{
+          child.style.setProperty("pointer-events","none","important");
+        });
       }
     });
     site.style.setProperty("pointer-events","auto","important");
     site.style.setProperty("z-index","2147483000","important");
+    site.querySelectorAll("button,a,input,textarea,select,[role='button']").forEach(el=>{
+      el.style.setProperty("pointer-events","auto","important");
+      el.style.setProperty("touch-action","manipulation","important");
+    });
   };
   apply();
   new MutationObserver(apply).observe(document.body,{childList:true,subtree:false});
