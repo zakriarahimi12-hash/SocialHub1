@@ -1028,7 +1028,14 @@ const SUPABASE_KEY =
 
 const client =
   window.supabase && typeof window.supabase.createClient === "function"
-    ? window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+    ? window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true,
+          storageKey:"socialhub-auth"
+        }
+      })
     : null;
 
 let currentUser = null;
