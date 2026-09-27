@@ -1055,12 +1055,20 @@ class AppsScriptQuery{
   catch(reject){return this.execute().catch(reject)}
   async execute(){try{const x=await appsScriptRequest("query",{query:{...this.payload,op:this.actionType}});return {data:x.data??null,error:null,count:x.count??null}}catch(error){return {data:null,error}}}
 }
+const appsScriptMediaUrls={};
 const client={
   from(table){return new AppsScriptQuery(table)},
   rpc(name,params={}){return appsScriptRequest("rpc",{name,params}).then(x=>({data:x.data??null,error:null})).catch(error=>({data:null,error}))},
   storage:{from(bucket){return {
-    upload:async(path,file)=>{try{const base64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(",")[1]||"");r.onerror=reject;r.readAsDataURL(file)});const data=await appsScriptRequest("upload",{bucket,path,base64,contentType:file.type||"application/octet-stream"});return {data,error:null}}catch(error){return {data:null,error}}},
-    getPublicUrl(path){return {data:{publicUrl:APPS_SCRIPT_URL+"?action=file&path="+encodeURIComponent(path)}}}
+    upload:async(path,file)=>{try{
+      const base64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(",")[1]||"");r.onerror=reject;r.readAsDataURL(file)});
+      const data=await appsScriptRequest("upload",{bucket,path,base64,contentType:file.type||"application/octet-stream"});
+      const media=data.data||data;
+      const url=media.publicUrl||media.url||media.downloadUrl||media.webViewUrl||"";
+      if(url)appsScriptMediaUrls[bucket+"/"+path]=url;
+      return {data:media,error:null}
+    }catch(error){return {data:null,error}}},
+    getPublicUrl(path){const cached=appsScriptMediaUrls[path]||appsScriptMediaUrls[decodeURIComponent(path)]||"";return {data:{publicUrl:cached||APPS_SCRIPT_URL+"?action=file&path="+encodeURIComponent(path)}}}
   }},
   auth:{
     async getSession(){if(!socialHubToken)return {data:{session:null},error:null};try{const x=await appsScriptRequest("session",{});return {data:{session:x.user?{user:x.user}:null},error:null}}catch(e){localStorage.removeItem("socialhub-appscript-token");socialHubToken="";return {data:{session:null},error:null}}},
@@ -2062,55 +2070,33 @@ async function loadNotifications(){
 
 
 async function searchAll(){
-
-  const q =
-    (
-      document.getElementById("searchPage")?.value ||
-      document.getElementById("searchInput").value
-    ).trim();
-
-  if(!q) return;
-
+  const input=document.getElementById("searchPage")||document.getElementById("searchInput");
+  const q=(input?.value||"").trim();
+  if(!q)return;
   show("search");
-
-  document.getElementById("searchPage").value =
-    q;
-
-  const {
-    data
-  } =
-    await client
-      .from("profiles")
-      .select("id,username,full_name,bio")
-      .ilike("username","%" + q + "%")
-      .limit(30);
-
-  document.getElementById("searchResults").innerHTML =
-    (data || []).map(p => `
-
-      <div class="card">
-
-        <b>${esc(p.full_name)}</b>
-
-        <br>
-
-        @${esc(p.username || "user")}
-
-        <p>${esc(p.bio || "")}</p>
-
-        <button
-          class="primary"
-          onclick="sendFriend('${p.id}')"
-        >
-          Add friend
-        </button>
-
-      </div>
-
-    `).join("") || "No users found.";
-
+  const pageInput=document.getElementById("searchPage");
+  if(pageInput)pageInput.value=q;
+  const results=document.getElementById("searchResults");
+  if(!results)return;
+  results.innerHTML="<div class=\"card\">Searching...</div>";
+  try{
+    const term="%"+q.replace(/[%_]/g,"\\$&")+"%";
+    const [byUsername,byName]=await Promise.all([
+      client.from("profiles").select("id,username,full_name,bio").ilike("username",term).limit(30),
+      client.from("profiles").select("id,username,full_name,bio").ilike("full_name",term).limit(30)
+    ]);
+    if(byUsername.error)throw byUsername.error;
+    if(byName.error)throw byName.error;
+    const merged=[...(byUsername.data||[]),...(byName.data||[])];
+    const unique=Array.from(new Map(merged.map(p=>[p.id,p])).values()).slice(0,30);
+    results.innerHTML=unique.map(p=>
+      "<div class=\"card\"><b>"+esc(p.full_name||"SocialHub user")+"</b><br>@"+esc(p.username||"user")+"<p>"+esc(p.bio||"")+"</p><button class=\"primary\" onclick=\"sendFriend(\'"+esc(p.id)+"\')\">Add friend</button></div>"
+    ).join("")||"No users found.";
+  }catch(error){
+    console.error("searchAll error:",error);
+    results.innerHTML="<div class=\"card\">Search could not be completed. Please try again.</div>";
+  }
 }
-
 
 async function loadSaved(){
 
