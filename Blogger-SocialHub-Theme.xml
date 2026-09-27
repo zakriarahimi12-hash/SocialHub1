@@ -167,7 +167,12 @@ function loadBloggerPosts(){
 
   <div class="topnav">
     <button title="Home" onclick="show('home')">🏠</button>
+    <button title="Friends" onclick="show('friends')">👥</button>
+    <button title="Friend requests" onclick="show('requests')">🤝</button>
     <button title="Messenger" onclick="show('messages')">💬</button>
+    <button title="Notifications" onclick="show('notifications')">🔔</button>
+    <button title="Video" onclick="show('video')">🎬</button>
+    <button title="Stories" onclick="show('stories')">📖</button>
     <button title="Profile" onclick="location.href='profile.html?v=20260926'">👤</button>
   </div>
 
@@ -179,7 +184,12 @@ function loadBloggerPosts(){
 <aside class="side">
   <button class="profile-nav" onclick="location.href='profile.html?v=20260926'"><span class="ico">👤</span><span class="txt">Profile</span></button>
   <button onclick="show('home')"><span class="ico">🏠</span><span class="txt">Home</span></button>
-  <button onclick="show('friends')"><span class="ico">👥</span><span class="txt">Friends</span></button>
+  <button onclick="show('feeds')"><span class="ico">📰</span><span class="txt">Feeds</span></button>
+  <button onclick="show('search')"><span class="ico">🔎</span><span class="txt">Search</span></button>
+  <button onclick="show('marketplace')"><span class="ico">🛍️</span><span class="txt">Marketplace</span></button>
+  <button onclick="show('groups')"><span class="ico">👨‍👩‍👧</span><span class="txt">Groups</span></button>
+  <button onclick="show('pages')"><span class="ico">📄</span><span class="txt">Pages</span></button>
+  <button onclick="show('blogger')"><span class="ico">✍️</span><span class="txt">Blogger</span></button>
 </aside>
 
 
@@ -594,9 +604,16 @@ function loadBloggerPosts(){
 
 <aside class="right">
   <div class="card">
-    <h3>SocialHub</h3>
-    <p class="muted">Connect with your community.</p>
+    <h3>Explore</h3>
+    <p class="muted">Everything in SocialHub.</p>
     <div class="right-menu-list">
+      <button onclick="show('live')"><span class="ico">🔴</span><span class="txt">Live</span></button>
+      <button onclick="show('memories')"><span class="ico">🕰️</span><span class="txt">Memories</span></button>
+      <button onclick="show('saved')"><span class="ico">🔖</span><span class="txt">Saved</span></button>
+      <button onclick="show('gaming')"><span class="ico">🎮</span><span class="txt">Gaming</span></button>
+      <button onclick="show('events')"><span class="ico">📅</span><span class="txt">Events</span></button>
+      <button onclick="show('reels')"><span class="ico">🎞️</span><span class="txt">Reels</span></button>
+      <button onclick="show('photos')"><span class="ico">🖼️</span><span class="txt">Photos</span></button>
       <button onclick="show('settings')"><span class="ico">⚙️</span><span class="txt">Settings</span></button>
       <button onclick="logout()"><span class="ico">🚪</span><span class="txt">Log out</span></button>
     </div>
@@ -616,11 +633,13 @@ function loadBloggerPosts(){
 </div>
 
 <div class="mobilebar">
-  <button onclick="show('home')">🏠</button>
-  <button onclick="show('friends')">👥</button>
-  <button onclick="show('messages')">💬</button>
-  <button onclick="show('notifications')">🔔</button>
-  <button onclick="location.href='profile.html?v=20260926'">👤</button>
+  <button onclick="show('home')" title="Home">🏠</button>
+  <button onclick="show('friends')" title="Friends">👥</button>
+  <button onclick="show('messages')" title="Messenger">💬</button>
+  <button onclick="show('notifications')" title="Notifications">🔔</button>
+  <button onclick="show('search')" title="Search">🔎</button>
+  <button onclick="show('stories')" title="Stories">📖</button>
+  <button onclick="location.href='profile.html?v=20260926'" title="Profile">👤</button>
 </div>
 
 <div id="modal" class="modal">
