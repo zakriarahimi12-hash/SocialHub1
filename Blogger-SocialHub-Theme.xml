@@ -1019,7 +1019,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 
 <script><![CDATA[
 
-const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbz9R2BULdbT_aKCvRVBool52ae7sJFbTASR47yQ7WeLngmfmlvfARLOEJMFgHIKV91e-w/exec";
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbzuYjt_NHVchuL5aZoUGtEQqW_-eg4B2ovDxdhAGda6HV0e9zynPBfMriGeyfTYvF4bcg/exec";
 let currentUser=null;
 let socialHubToken=localStorage.getItem("socialhub-appscript-token")||"";
 async function appsScriptRequest(action,payload={}){
