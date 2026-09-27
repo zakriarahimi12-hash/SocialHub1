@@ -432,7 +432,7 @@ button{cursor:pointer;border:0}
         <h1 id="authTitle">Welcome back</h1>
         <p id="authSubtitle">Sign in to continue to SocialHub.</p>
       </div>
-      <form id="socialHubAuthForm" class="auth-fields">
+      <form id="socialHubAuthForm" class="auth-fields" onsubmit="return socialHubAuthSubmit(event)">
         <label>Email</label>
         <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required="required" />
         <label>Password</label>
@@ -455,13 +455,13 @@ button{cursor:pointer;border:0}
         </div>
         <div class="auth-actions">
           <button id="loginBtn" class="auth-login" type="submit">Log in</button>
-          <button id="signupBtn" class="auth-signup hidden" type="button">Create account</button>
+          <button id="signupBtn" class="auth-signup hidden" type="button" onclick="return socialHubBloggerSignupMode()">Create account</button>
         </div>
       </form>
-      <button id="switchSignupBtn" class="auth-switch" type="button">Create a new account</button>
-      <button id="switchLoginBtn" class="auth-switch hidden" type="button">Already have an account? Log in</button>
+      <button id="switchSignupBtn" class="auth-switch" type="button" onclick="return socialHubBloggerShowSignup()">Create a new account</button>
+      <button id="switchLoginBtn" class="auth-switch hidden" type="button" onclick="return socialHubBloggerShowLogin()">Already have an account? Log in</button>
       <div class="auth-divider"><span>or continue with</span></div>
-      <button id="googleBtn" class="auth-google" type="button"><span class="google-icon">G</span> Continue with Google</button>
+      <button id="googleBtn" class="auth-google" type="button" onclick="return socialHubBloggerGoogle()"><span class="google-icon">G</span> Continue with Google</button>
       <p id="authmsg" class="auth-message"></p>
       <div class="auth-note">Secure authentication by Supabase.</div>
     </div>
