@@ -285,7 +285,7 @@ button{cursor:pointer;border:0}
 
 .hidden{display:none!important}
 
-.auth{max-width:430px;margin:70px auto;position:relative;z-index:1000;pointer-events:auto;display:none}
+.auth{max-width:430px;margin:70px auto;position:relative;z-index:1000;pointer-events:auto;display:none!important}
 .auth input,.auth button{position:relative;z-index:1001;pointer-events:auto}
 
 .auth input{
@@ -2814,11 +2814,10 @@ if(client) client.auth.onAuthStateChange((_event,session)=>{
     openSite();
     setTimeout(()=>ensureGoogleProfile(session.user).catch(error=>console.warn("Profile sync error:",error)),0);
   }else{
-    document.getElementById("site").classList.add("hidden");
-    document.getElementById("auth").classList.remove("hidden");
+    document.getElementById("site").classList.remove("hidden"); document.getElementById("auth").classList.add("hidden");
   }
 });
-// Close dropdown menus whenever the user clicks outside their menu area.
+openSite();\n\n// Close dropdown menus whenever the user clicks outside their menu area.
 document.addEventListener("click",function(event){
   const target=event.target;
   if(target.closest(".postmenu-wrap,.comment-menu-wrap,.moremenu,.topnav")) return;
