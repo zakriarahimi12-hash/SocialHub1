@@ -2813,10 +2813,6 @@ if(authHash.get("error_code")==="otp_expired") document.getElementById("authmsg"
 
 ]]></script>
 
-</body>
-</html></script>
-
-
 <b:section id='bloggerHidden' class='hidden' maxwidgets='1' showaddelement='no'><b:widget id='HTML99' type='HTML' title='' locked='true' version='2'><b:includable id='main'></b:includable></b:widget></b:section>
 </body>
 </html>
