@@ -105,7 +105,7 @@ html,body{min-height:100%;overflow-x:hidden}
 #site{position:relative;z-index:10!important;pointer-events:auto!important}
 #site button,#site a,#site input,#site textarea,#site select,#site [role="button"]{pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer}
 #site input,#site textarea,#site select{cursor:text}
-body>*:not(#site):not(#auth){pointer-events:none!important}
+body>*:not(#site):not(#auth):not(#storyViewer):not(#modal){pointer-events:none!important}
 #blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-1!important}@media(max-width:1050px){.wrap{grid-template-columns:160px minmax(0,1fr)}.right{display:none}}@media(max-width:760px){.top{height:62px;padding:0 11px;gap:8px}.logo{font-size:21px}.search{width:135px}.topnav button{font-size:0;padding:9px}.topnav button:first-letter{font-size:18px}.wrap{display:block;margin:12px auto;padding:0 9px}.side{display:flex;position:static;overflow:auto;gap:4px;margin-bottom:12px;padding:4px;border:1px solid var(--line);border-radius:15px;background:#ffffffcc}.side button{min-width:max-content;width:auto}.right{display:none}.mobilebar{display:none!important}}]]></b:skin>
 </head>
 <body>
@@ -2578,7 +2578,7 @@ ensureSupabaseReady()
     const auth=document.getElementById("auth");
     if(!site) return;
     Array.from(document.body.children).forEach(el=>{
-      if(el!==site && el!==auth){
+      if(el!==site && el!==auth && el.id!=="storyViewer" && el.id!=="modal"){
         el.style.setProperty("pointer-events","none","important");
       }
     });
