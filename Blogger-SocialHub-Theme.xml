@@ -423,8 +423,8 @@ button{cursor:pointer;border:0}
   <input id="password" type="password" placeholder="Password" />
   <input id="username" placeholder="Username (for new account)" />
 
-  <button class="primary" onclick="signup()">Create account</button>
-  <button class="action" onclick="login()">Log in</button>
+  <button class="primary" type="button" onclick="signup()">Create account</button>
+  <button class="action" type="button" onclick="login()">Log in</button>
   <div class="auth-divider"><span>or</span></div>
   <button class="google-btn" type="button" onclick="loginWithGoogle()">Continue with Google</button>
 
@@ -981,12 +981,18 @@ const SUPABASE_KEY =
   "sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
 
 const client =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  window.supabase && typeof window.supabase.createClient === "function"
+    ? window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)
+    : null;
 
 let currentUser = null;
+
+function requireClient(){
+  if(client) return client;
+  const msg=document.getElementById("authmsg");
+  if(msg) msg.textContent="SocialHub authentication could not load. Please refresh the page and try again.";
+  return null;
+}
 
 
 function esc(value){
@@ -1055,6 +1061,9 @@ function openSite(){
 
 async function signup(){
 
+  const sb=requireClient();
+  if(!sb) return;
+
   const email =
     document.getElementById("email").value.trim();
 
@@ -1080,7 +1089,7 @@ async function signup(){
     data,
     error
   } =
-    await client.auth.signUp({
+    await sb.auth.signUp({
       email,
       password
     });
@@ -1097,7 +1106,7 @@ async function signup(){
   let session = data.session || null;
 
   if(!session){
-    const current = await client.auth.getSession();
+    const current = await sb.auth.getSession();
     session = current.data?.session || null;
   }
 
@@ -1147,10 +1156,13 @@ async function ensureGoogleProfile(user){
 
 async function loginWithGoogle(){
 
+  const sb=requireClient();
+  if(!sb) return;
+
   const msg=document.getElementById("authmsg");
   if(msg) msg.textContent="Opening Google sign-in...";
   try{
-    const {error}=await client.auth.signInWithOAuth({
+    const {error}=await sb.auth.signInWithOAuth({
       provider:"google",
       options:{
         scopes:"openid email profile",
@@ -1167,6 +1179,9 @@ async function loginWithGoogle(){
 
 async function login(){
 
+  const sb=requireClient();
+  if(!sb) return;
+
   const email =
     document.getElementById("email").value.trim();
 
@@ -1180,7 +1195,7 @@ async function login(){
     data,
     error
   } =
-    await client.auth.signInWithPassword({
+    await sb.auth.signInWithPassword({
       email,
       password
     });
@@ -1204,7 +1219,9 @@ async function login(){
 
 async function logout(){
 
-  await client.auth.signOut();
+  const sb=requireClient();
+  if(!sb) return;
+  await sb.auth.signOut();
 
   currentUser = null;
 
@@ -2773,7 +2790,7 @@ async function sendMessage(cid){
 }
 
 
-client.auth
+if(client) client.auth
   .getSession()
   .then(async ({data}) => {
 
@@ -2790,7 +2807,7 @@ client.auth
   .catch(error=>console.error("Session restore error:",error));
 
 
-client.auth.onAuthStateChange((_event,session)=>{
+if(client) client.auth.onAuthStateChange((_event,session)=>{
   currentUser=session?.user||null;
   if(session){
     openSite();
