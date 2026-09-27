@@ -2,8 +2,8 @@
 <!DOCTYPE html>
 <html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr' lang='en'>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>SocialHub</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script><![CDATA[
@@ -419,9 +419,9 @@ button{cursor:pointer;border:0}
     Connect with people and share what matters.
   </p>
 
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <input id="username" placeholder="Username (for new account)">
+  <input id="email" type="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Password" />
+  <input id="username" placeholder="Username (for new account)" />
 
   <button class="primary" onclick="signup()">Create account</button>
   <button class="action" onclick="login()">Log in</button>
@@ -443,7 +443,7 @@ button{cursor:pointer;border:0}
     id="searchInput"
     placeholder="Search SocialHub"
     onkeydown="if(event.key==='Enter')searchAll()"
-  >
+   />
 
   <div class="topnav">
     <button title="Home" onclick="show('home')">🏠</button>
@@ -520,12 +520,12 @@ button{cursor:pointer;border:0}
       </div>
     </div>
 
-    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden="hidden" onchange="createStory(event)">
+    <input id="storyMediaInput" type="file" accept="image/*,video/*" hidden="hidden" onchange="createStory(event)" />
   </div>
 
   <div class="card composer">
     <div id="postMediaStatus" class="muted" style="margin:8px 0">Add photos or videos to your post</div>
-    <input id="postMediaInput" type="file" accept="image/*,video/*" multiple="multiple" hidden="hidden" onchange="handlePostMedia(event)">
+    <input id="postMediaInput" type="file" accept="image/*,video/*" multiple="multiple" hidden="hidden" onchange="handlePostMedia(event)" />
     <div id="postMediaPreview" class="post-media"></div>
 
     <textarea
@@ -642,7 +642,7 @@ button{cursor:pointer;border:0}
       <input
         id="messageUser"
         placeholder="Friend user ID"
-      >
+       />
 
       <button
         class="primary"
@@ -689,7 +689,7 @@ button{cursor:pointer;border:0}
       style="width:100%"
       placeholder="Search username..."
       onkeydown="if(event.key==='Enter')searchAll()"
-    >
+     />
 
     <div id="searchResults"></div>
 
@@ -873,7 +873,7 @@ button{cursor:pointer;border:0}
       </button>
     </div>
 
-    <input id="storyMediaInputStories" type="file" accept="image/*,video/*" hidden="hidden" onchange="createStory(event)">
+    <input id="storyMediaInputStories" type="file" accept="image/*,video/*" hidden="hidden" onchange="createStory(event)" />
 
     <div id="storiesList" class="storyrow"></div>
   </div>
@@ -888,7 +888,7 @@ button{cursor:pointer;border:0}
 <div class="menu-title">📝 Blogger</div>
 <p class="muted">Connect a public Blogger blog and show its latest posts inside SocialHub.</p>
 <div class="blogger-actions">
-<input id="bloggerUrl" class="blogger-url" type="url" placeholder="https://yourblog.blogspot.com">
+<input id="bloggerUrl" class="blogger-url" type="url" placeholder="https://yourblog.blogspot.com" />
 <button class="primary" type="button" onclick="saveBloggerConnection()">Connect</button>
 <button class="action" type="button" onclick="loadBloggerPosts()">Refresh</button>
 </div>
@@ -904,7 +904,7 @@ button{cursor:pointer;border:0}
 <div class="feature"><h3>Notifications</h3><p>Manage your notification center.</p><button class="action" onclick="show('notifications')">Notifications</button></div>
 <div class="feature"><h3>Blocked people</h3><p>Manage people you do not want to interact with.</p><button class="action" onclick="openSettingsPanel('Blocked people')">Manage</button></div>
 <div class="feature"><h3>Language</h3><p>Choose the language used by the interface.</p><button class="action" onclick="openSettingsPanel('Language')">Language</button></div>
-</div><hr><button class="danger primary" onclick="logout()">Log out</button></div></section>
+</div><hr /><button class="danger primary" onclick="logout()">Log out</button></div></section>
 
 </main>
 
