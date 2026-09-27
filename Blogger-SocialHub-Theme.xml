@@ -2906,28 +2906,18 @@ ensureSupabaseReady()
     });
   })
   .catch(error=>console.error("Auth startup error:",error));
-// Blogger Preview can wrap the theme in a cross-origin iframe whose parent owns the click-trap.
-// A parent click-trap cannot be removed from inside this document, so use the user's
-// first real click to leave Preview and open the published SocialHub page.
-(function escapeBloggerPreviewOnUserClick(){
+// Blogger Preview wraps the theme in a cross-origin iframe and its parent may own
+// the click-trap. The iframe cannot remove that parent element, so leave Preview
+// automatically when this document is framed. The public blog itself is top-level.
+(function escapeBloggerPreview(){
   try{
     if(window.top===window.self)return;
     const ref=(document.referrer||"").toLowerCase();
-    if(!/(^|\.)blogger\.com(\/|$)|(^|\.)blogspot\.com(\/|$)/i.test(ref))return;
-    let escaped=false;
-    const escape=()=>{
-      if(escaped)return;
-      escaped=true;
-      try{
-        window.top.location.href="https://rahimi32145.blogspot.com/";
-      }catch(error){
-        console.warn("SocialHub Blogger Preview escape:",error);
-      }
-    };
-    document.addEventListener("click",escape,true);
-    document.addEventListener("touchend",escape,true);
+    const fromBlogger=/(^|\.)blogger\.com(\/|$)|(^|\.)blogspot\.com(\/|$)/i.test(ref);
+    if(!fromBlogger)return;
+    window.top.location.href="https://rahimi32145.blogspot.com/";
   }catch(error){
-    console.warn("SocialHub Blogger Preview detection:",error);
+    console.warn("SocialHub Blogger Preview escape:",error);
   }
 })();
 // Blogger Preview may place the page inside a cross-origin iframe.
