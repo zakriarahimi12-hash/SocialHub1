@@ -285,7 +285,7 @@ button{cursor:pointer;border:0}
 
 .hidden{display:none!important}
 
-.auth{max-width:430px;margin:70px auto;position:relative;z-index:1000;pointer-events:auto}
+.auth{max-width:430px;margin:70px auto;position:relative;z-index:1000;pointer-events:auto;display:none}
 .auth input,.auth button{position:relative;z-index:1001;pointer-events:auto}
 
 .auth input{
@@ -413,7 +413,7 @@ button{cursor:pointer;border:0}
 
 <body>
 
-<div id="auth" class="auth card">
+<div id="auth" class="auth card hidden">
   <h1 class="logo">SocialHub</h1>
 
   <p class="muted">
@@ -433,7 +433,7 @@ button{cursor:pointer;border:0}
 </div>
 
 
-<div id="site" class="hidden">
+<div id="site">
 
 <header class="top">
 
