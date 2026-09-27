@@ -341,7 +341,7 @@ button{cursor:pointer;border:0}
 .modal{pointer-events:none;z-index:19000}
 .modal.show{pointer-events:auto}
 #auth.hidden,#storyViewer,#modal{pointer-events:none!important}
-#blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap{display:none!important;visibility:hidden!important;pointer-events:none!important;z-index:-1!important}
+#blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-2147483648!important}
 #site{pointer-events:auto!important;position:relative;z-index:10}
 #site .top,#site .wrap,#site .mobilebar{pointer-events:auto!important;position:relative;z-index:10000}
 .story-viewer.show{display:flex}
@@ -2906,14 +2906,10 @@ ensureSupabaseReady()
     });
   })
   .catch(error=>console.error("Auth startup error:",error));
-// If Blogger is rendering SocialHub inside its preview iframe, escape the preview shell.
-(function escapeBloggerPreviewShell(){
-  try{
-    if(window.top!==window.self && /blogger\.com|blogspot\.com/i.test(window.top.location.hostname||"")){
-      window.top.location.href=window.location.href;
-    }
-  }catch(e){}
-})();
+// Blogger Preview may place the page inside a cross-origin iframe.
+// Do not try to read or navigate window.top here: the preview shell owns
+// the click-trap outside this document. The published blog remains in the
+// same document and is handled normally by the interaction rules below.
 // Isolate the signed-in SocialHub app from Blogger's page-level interaction layers.
 (function isolateSocialHub(){
   const apply=()=>{
