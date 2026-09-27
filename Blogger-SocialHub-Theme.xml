@@ -100,7 +100,13 @@ function loadBloggerPosts(){
 
 
 <b:skin><![CDATA[
-/* SocialHub Aurora redesign */:root{--bg:#f5f6fb;--card:#fff;--ink:#151827;--muted:#7b8092;--line:#e7e9f0;--brand:#6557f5;--brand2:#9a6cff;--soft:#f0efff;--shadow:0 10px 30px rgba(24,28,52,.07)}body{margin:0;background:linear-gradient(135deg,#f7f8fc,#f1f0ff 45%,#eefaf7);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}.top{height:68px;display:flex;align-items:center;gap:18px;padding:0 28px;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10000}.logo{font-size:25px;font-weight:950;letter-spacing:-1px;background:linear-gradient(135deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}.search{width:280px;border:0;border-radius:15px;background:#f0f1f6;padding:11px 15px;outline:none}.search:focus{box-shadow:0 0 0 4px #6557f51a;background:#fff}.topnav{display:flex;gap:4px;margin-left:auto}.topnav button{padding:10px 12px;border-radius:12px;background:transparent;color:#555b70;font-weight:750}.topnav button:hover{background:var(--soft);color:var(--brand)}.wrap{max-width:1220px;margin:22px auto;padding:0 18px;display:grid;grid-template-columns:185px minmax(430px,680px) 235px;gap:22px}.card{background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}.side{position:sticky;top:90px;height:max-content}.side button{display:flex;align-items:center;gap:8px;width:100%;padding:12px;border-radius:13px;background:transparent;color:#565c70;font-weight:750;text-align:left}.side button:hover{background:#fff;color:var(--brand);box-shadow:var(--shadow)}.side .profile-nav{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:9px}.right{position:sticky;top:90px;height:max-content}.right-menu-list button{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border-radius:12px;background:transparent;color:#565c70;font-weight:700;text-align:left}.right-menu-list button:hover{background:#f3f2fb;color:var(--brand)}.section{display:none}.section.active{display:block}.menu-title{font-size:22px;font-weight:900;letter-spacing:-.5px}.muted{color:var(--muted)}.composer textarea{width:100%;min-height:82px;border:1px solid var(--line);border-radius:17px;background:#f8f9fc!important;padding:14px;resize:none;outline:none}.composer textarea:focus{background:#fff!important;box-shadow:0 0 0 4px #6557f512}.action{background:#f0f1f6;color:#555b70;border-radius:11px;padding:10px 13px;font-weight:750}.action:hover{background:var(--soft);color:var(--brand)}.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:11px;padding:11px 17px;font-weight:800}.postactions button{background:#fff;color:#62687a;font-weight:750;padding:12px}.postactions button:hover{background:var(--soft);color:var(--brand)}.story,.create-story-card{width:116px;min-width:116px;height:180px;border-radius:17px;overflow:hidden}.story img,.story video{width:100%;height:100%;object-fit:cover;border-radius:17px}.create-story-card{background:linear-gradient(145deg,#eceaff,#dcfaf1);border:1px solid var(--line)}.feature{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px}.auth-page{background:radial-gradient(circle at 15% 5%,#e6e2ff,transparent 35%),linear-gradient(135deg,#f8f9fc,#eafaf5)}.auth-card{border:1px solid var(--line);border-radius:24px;box-shadow:0 25px 70px rgba(24,28,52,.12)}.auth-logo-mark,.auth-login{background:linear-gradient(135deg,var(--brand),var(--brand2))}.hidden{display:none!important}#site{position:relative;z-index:2147483000!important;pointer-events:auto!important}#site *{pointer-events:auto!important}body>*:not(#site):not(#auth){pointer-events:none!important;z-index:-1!important}#blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap{display:none!important;pointer-events:none!important;z-index:-2147483648!important}@media(max-width:1050px){.wrap{grid-template-columns:160px minmax(0,1fr)}.right{display:none}}@media(max-width:760px){.top{height:62px;padding:0 11px;gap:8px}.logo{font-size:21px}.search{width:135px}.topnav button{font-size:0;padding:9px}.topnav button:first-letter{font-size:18px}.wrap{display:block;margin:12px auto;padding:0 9px}.side{display:flex;position:static;overflow:auto;gap:4px;margin-bottom:12px;padding:4px;border:1px solid var(--line);border-radius:15px;background:#ffffffcc}.side button{min-width:max-content;width:auto}.right{display:none}.mobilebar{display:none!important}}]]></b:skin>
+/* SocialHub Aurora redesign */:root{--bg:#f5f6fb;--card:#fff;--ink:#151827;--muted:#7b8092;--line:#e7e9f0;--brand:#6557f5;--brand2:#9a6cff;--soft:#f0efff;--shadow:0 10px 30px rgba(24,28,52,.07)}body{margin:0;background:linear-gradient(135deg,#f7f8fc,#f1f0ff 45%,#eefaf7);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}.top{height:68px;display:flex;align-items:center;gap:18px;padding:0 28px;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10000}.logo{font-size:25px;font-weight:950;letter-spacing:-1px;background:linear-gradient(135deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}.search{width:280px;border:0;border-radius:15px;background:#f0f1f6;padding:11px 15px;outline:none}.search:focus{box-shadow:0 0 0 4px #6557f51a;background:#fff}.topnav{display:flex;gap:4px;margin-left:auto}.topnav button{padding:10px 12px;border-radius:12px;background:transparent;color:#555b70;font-weight:750}.topnav button:hover{background:var(--soft);color:var(--brand)}.wrap{max-width:1220px;margin:22px auto;padding:0 18px;display:grid;grid-template-columns:185px minmax(430px,680px) 235px;gap:22px}.card{background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}.side{position:sticky;top:90px;height:max-content}.side button{display:flex;align-items:center;gap:8px;width:100%;padding:12px;border-radius:13px;background:transparent;color:#565c70;font-weight:750;text-align:left}.side button:hover{background:#fff;color:var(--brand);box-shadow:var(--shadow)}.side .profile-nav{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:9px}.right{position:sticky;top:90px;height:max-content}.right-menu-list button{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border-radius:12px;background:transparent;color:#565c70;font-weight:700;text-align:left}.right-menu-list button:hover{background:#f3f2fb;color:var(--brand)}.section{display:none}.section.active{display:block}.menu-title{font-size:22px;font-weight:900;letter-spacing:-.5px}.muted{color:var(--muted)}.composer textarea{width:100%;min-height:82px;border:1px solid var(--line);border-radius:17px;background:#f8f9fc!important;padding:14px;resize:none;outline:none}.composer textarea:focus{background:#fff!important;box-shadow:0 0 0 4px #6557f512}.action{background:#f0f1f6;color:#555b70;border-radius:11px;padding:10px 13px;font-weight:750}.action:hover{background:var(--soft);color:var(--brand)}.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:11px;padding:11px 17px;font-weight:800}.postactions button{background:#fff;color:#62687a;font-weight:750;padding:12px}.postactions button:hover{background:var(--soft);color:var(--brand)}.story,.create-story-card{width:116px;min-width:116px;height:180px;border-radius:17px;overflow:hidden}.story img,.story video{width:100%;height:100%;object-fit:cover;border-radius:17px}.create-story-card{background:linear-gradient(145deg,#eceaff,#dcfaf1);border:1px solid var(--line)}.feature{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px}.auth-page{background:radial-gradient(circle at 15% 5%,#e6e2ff,transparent 35%),linear-gradient(135deg,#f8f9fc,#eafaf5)}.auth-card{border:1px solid var(--line);border-radius:24px;box-shadow:0 25px 70px rgba(24,28,52,.12)}.auth-logo-mark,.auth-login{background:linear-gradient(135deg,var(--brand),var(--brand2))}.hidden{display:none!important}
+html,body{min-height:100%;overflow-x:hidden}
+#site{position:relative;z-index:10!important;pointer-events:auto!important}
+#site button,#site a,#site input,#site textarea,#site select,#site [role="button"]{pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer}
+#site input,#site textarea,#site select{cursor:text}
+body>*:not(#site):not(#auth){pointer-events:none!important}
+#blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-1!important}@media(max-width:1050px){.wrap{grid-template-columns:160px minmax(0,1fr)}.right{display:none}}@media(max-width:760px){.top{height:62px;padding:0 11px;gap:8px}.logo{font-size:21px}.search{width:135px}.topnav button{font-size:0;padding:9px}.topnav button:first-letter{font-size:18px}.wrap{display:block;margin:12px auto;padding:0 9px}.side{display:flex;position:static;overflow:auto;gap:4px;margin-bottom:12px;padding:4px;border:1px solid var(--line);border-radius:15px;background:#ffffffcc}.side button{min-width:max-content;width:auto}.right{display:none}.mobilebar{display:none!important}}]]></b:skin>
 </head>
 <body>
 
@@ -2565,22 +2571,18 @@ ensureSupabaseReady()
 // Do not try to read or navigate window.top here: the preview shell owns
 // the click-trap outside this document. The published blog remains in the
 // same document and is handled normally by the interaction rules below.
-// Isolate the signed-in SocialHub app from Blogger's page-level interaction layers.
+// Keep Blogger-owned nodes out of the SocialHub hit-testing layer.
 (function isolateSocialHub(){
   const apply=()=>{
     const site=document.getElementById("site");
-    if(!site || site.classList.contains("hidden")) return;
+    const auth=document.getElementById("auth");
+    if(!site) return;
     Array.from(document.body.children).forEach(el=>{
-      if(el!==site && el.id!=="auth"){
+      if(el!==site && el!==auth){
         el.style.setProperty("pointer-events","none","important");
-        el.style.setProperty("z-index","-1","important");
-        el.querySelectorAll("*").forEach(child=>{
-          child.style.setProperty("pointer-events","none","important");
-        });
       }
     });
     site.style.setProperty("pointer-events","auto","important");
-    site.style.setProperty("z-index","2147483000","important");
     site.querySelectorAll("button,a,input,textarea,select,[role='button']").forEach(el=>{
       el.style.setProperty("pointer-events","auto","important");
       el.style.setProperty("touch-action","manipulation","important");
@@ -2601,12 +2603,7 @@ ensureSupabaseReady()
   removeTrap();
   new MutationObserver(removeTrap).observe(document.documentElement,{childList:true,subtree:true});
 })();
-// Interaction hardening for the published Blogger document.
-// SocialHub controls use their normal browser click/tap events. We only neutralize
-// Blogger's known click-trap nodes; we do not synthesize duplicate clicks.
-document.documentElement.style.pointerEvents="auto";
-document.body.style.pointerEvents="auto";
-
+// Final interaction guard: preserve native browser events and make all app controls hit-testable.
 (function hardenSocialHubInteractions(){
   const prepare=()=>{
     const site=document.getElementById("site");
@@ -2615,26 +2612,22 @@ document.body.style.pointerEvents="auto";
     site.querySelectorAll("button,a,input,textarea,select,[role='button']").forEach(el=>{
       el.style.setProperty("pointer-events","auto","important");
       el.style.setProperty("touch-action","manipulation","important");
-      if(el.tagName==="BUTTON" || el.getAttribute("role")==="button"){
-        el.style.setProperty("cursor","pointer","important");
-      }
     });
   };
   prepare();
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",prepare,{once:true});
-  }
-  new MutationObserver(prepare).observe(document.documentElement,{childList:true,subtree:true});
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",prepare,{once:true});
+  new MutationObserver(prepare).observe(document.getElementById("site")||document.documentElement,{childList:true,subtree:true});
 })();
 
-// // Close dropdown menus whenever the user clicks outside their menu area.
+// Keep menu dismissal from interfering with SocialHub controls.
 document.addEventListener("click",function(event){
   const target=event.target;
+  if(!target || !target.closest) return;
   if(target.closest(".postmenu-wrap,.comment-menu-wrap,.moremenu,.topnav")) return;
   document.querySelectorAll(".postmenu,.comment-menu,.moremenu,.privacy-submenu").forEach(menu=>{
     menu.classList.add("hidden");
   });
-});
+},false);
 const authHash=new URLSearchParams(location.hash.replace(/^#/,""));
 if(authHash.get("error_code")==="otp_expired") document.getElementById("authmsg").textContent="Your email confirmation link expired. Request a new confirmation email.";
 
