@@ -2914,6 +2914,38 @@ document.addEventListener("click",function(event){
     }
   }
 },true);
+// Emergency click bridge for Blogger/theme layers: if an invisible layer captures a click,
+ // route that click to the actual SocialHub control underneath it.
+(function(){
+  let forwarding=false;
+  document.addEventListener("click",function(event){
+    if(forwarding) return;
+    const site=document.getElementById("site");
+    if(!site || site.classList.contains("hidden")) return;
+    if(event.target && event.target.closest && event.target.closest("#site")) return;
+    const x=event.clientX, y=event.clientY;
+    if(!Number.isFinite(x) || !Number.isFinite(y)) return;
+    const stack=document.elementsFromPoint(x,y);
+    const target=stack.find(el=>{
+      if(!el || !el.closest) return false;
+      const inside=el.closest("#site");
+      if(!inside) return false;
+      return el.matches("button,a,input,textarea,select,[role='button']") ||
+             el.closest("button,a,[role='button']");
+    });
+    if(!target) return;
+    const control=target.matches("button,a,input,textarea,select,[role='button']")
+      ? target
+      : target.closest("button,a,[role='button']");
+    if(!control) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    forwarding=true;
+    try{ control.click(); }catch(error){ console.error("SocialHub click bridge:",error); }
+    setTimeout(()=>{forwarding=false;},0);
+  },true);
+})();
+
 // Close dropdown menus whenever the user clicks outside their menu area.
 document.addEventListener("click",function(event){
   const target=event.target;
