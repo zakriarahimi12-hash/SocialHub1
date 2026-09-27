@@ -2080,26 +2080,31 @@ async function searchAll(){
   results.innerHTML="<div class=\"card\">Searching people...</div>";
   try{
     const needle=q.toLocaleLowerCase().replace(/^@/,"").trim();
-    const {data,error}=await client.from("profiles").select("id,username,full_name,bio").limit(2000);
+    const {data,error}=await client.from("profiles").select("*").limit(10000);
     if(error)throw error;
-    let people=(Array.isArray(data)?data:[]).filter(p=>p.id!==currentUser?.id);
+    let people=Array.isArray(data)?data:[];
     if(needle){
       people=people.filter(p=>{
         const u=String(p.username||"").toLocaleLowerCase();
         const n=String(p.full_name||"").toLocaleLowerCase();
         const b=String(p.bio||"").toLocaleLowerCase();
-        return u.includes(needle)||n.includes(needle)||b.includes(needle);
+        const e=String(p.email||"").toLocaleLowerCase();
+        return u.includes(needle)||n.includes(needle)||b.includes(needle)||e.includes(needle);
       });
     }
-    people.sort((a,b)=>String(a.username||"").localeCompare(String(b.username||"")));
+    people.sort((x,y)=>{
+      const xu=String(x.username||"").toLocaleLowerCase();
+      const yu=String(y.username||"").toLocaleLowerCase();
+      return xu.localeCompare(yu);
+    });
     const shown=people.slice(0,50);
     if(!shown.length){
-      results.innerHTML="<div class=\"card\"><b>No people found.</b><p class=\"muted\">No matching username or name.</p></div>";
+      results.innerHTML="<div class=\"card\"><b>No people found.</b><p class=\"muted\">Try a username, full name, or email.</p></div>";
       return;
     }
     results.innerHTML=shown.map(p=>{
       const id=String(p.id||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-      return "<div class=\"card\"><b>"+esc(p.full_name||p.username||"SocialHub user")+"</b><br>@"+esc(p.username||"user")+"<p>"+esc(p.bio||"")+"</p><button class=\"primary\" onclick=\"sendFriend('"+id+"')\">Add friend</button></div>";
+      return "<div class=\"card\"><div class=\"row\"><div class=\"avatar\">"+esc((p.full_name||p.username||"U").charAt(0).toUpperCase())+"</div><div><b>"+esc(p.full_name||p.username||"SocialHub user")+"</b><br><span class=\"muted\">@"+esc(p.username||"user")+"</span></div></div><p>"+esc(p.bio||"")+"</p>"+(p.id===currentUser?.id?"<span class=\"muted\">You</span>":"<button class=\"primary\" onclick=\"sendFriend('"+id+"')\">Add friend</button>")+"</div>";
     }).join("");
   }catch(error){
     console.error("searchAll error:",error);
