@@ -1257,21 +1257,13 @@ async function login(){
 
 
 async function logout(){
-
   const sb=requireClient();
   if(!sb) return;
-  await sb.auth.signOut();
-
-  currentUser = null;
-
-  document
-    .getElementById("site")
-    .classList.add("hidden");
-
-  document
-    .getElementById("auth")
-    .classList.remove("hidden");
-
+  const {error}=await sb.auth.signOut();
+  if(error){ alert(error.message); return; }
+  currentUser=null;
+  alert("You are logged out.");
+  location.reload();
 }
 
 
@@ -2852,7 +2844,9 @@ openSite();
     document.getElementById("site").classList.remove("hidden"); document.getElementById("auth").classList.add("hidden");
   }
 });
-openSite();\n\n// Close dropdown menus whenever the user clicks outside their menu area.
+openSite();
+
+// Close dropdown menus whenever the user clicks outside their menu area.
 document.addEventListener("click",function(event){
   const target=event.target;
   if(target.closest(".postmenu-wrap,.comment-menu-wrap,.moremenu,.topnav")) return;
