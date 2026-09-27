@@ -5,7 +5,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>SocialHub — Connect</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script><![CDATA[
 
 /* Blogger integration: public Blogger feeds require no secret key. */
@@ -1020,32 +1019,59 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 
 <script><![CDATA[
 
-const SUPABASE_URL =
-  "https://gkqyaroprqajwoubnsvs.supabase.co";
-
-const SUPABASE_KEY =
-  "sb_publishable_R7vD8tuifiaNOAhOSQdAyw_Ie4OHa7f";
-
-const client =
-  window.supabase && typeof window.supabase.createClient === "function"
-    ? window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
-        auth:{
-          persistSession:true,
-          autoRefreshToken:true,
-          detectSessionInUrl:true,
-          storageKey:"socialhub-auth"
-        }
-      })
-    : null;
-
-let currentUser = null;
-
-function requireClient(){
-  if(client) return client;
-  const msg=document.getElementById("authmsg");
-  if(msg) msg.textContent="SocialHub authentication could not load. Please refresh the page and try again.";
-  return null;
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbz9R2BULdbT_aKCvRVBool52ae7sJFbTASR47yQ7WeLngmfmlvfARLOEJMFgHIKV91e-w/exec";
+let currentUser=null;
+let socialHubToken=localStorage.getItem("socialhub-appscript-token")||"";
+async function appsScriptRequest(action,payload={}){
+  const body={action,...payload};
+  if(socialHubToken)body.token=socialHubToken;
+  const res=await fetch(APPS_SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
+  const text=await res.text();let data;
+  try{data=JSON.parse(text)}catch(e){throw new Error("Apps Script returned an invalid response.")};
+  if(!data.ok)throw new Error(data.error||"Apps Script request failed.");
+  return data;
 }
+class AppsScriptQuery{
+  constructor(table){this.table=table;this.actionType="select";this.payload={table,filters:[],columns:"*",single:false};}
+  select(columns="*"){this.actionType="select";this.payload.columns=columns;return this}
+  eq(column,value){this.payload.filters.push({op:"eq",column,value});return this}
+  neq(column,value){this.payload.filters.push({op:"neq",column,value});return this}
+  in(column,values){this.payload.filters.push({op:"in",column,values});return this}
+  or(expression){this.payload.filters.push({op:"or",expression});return this}
+  gt(column,value){this.payload.filters.push({op:"gt",column,value});return this}
+  gte(column,value){this.payload.filters.push({op:"gte",column,value});return this}
+  lt(column,value){this.payload.filters.push({op:"lt",column,value});return this}
+  lte(column,value){this.payload.filters.push({op:"lte",column,value});return this}
+  ilike(column,value){this.payload.filters.push({op:"ilike",column,value});return this}
+  order(column,opts={}){this.payload.order={column,ascending:opts.ascending!==false};return this}
+  limit(value){this.payload.limit=value;return this}
+  single(){this.payload.single=true;return this}
+  maybeSingle(){this.payload.single=true;this.payload.maybeSingle=true;return this}
+  insert(row){this.actionType="insert";this.payload.rows=Array.isArray(row)?row:[row];return this}
+  upsert(row){this.actionType="upsert";this.payload.rows=Array.isArray(row)?row:[row];return this}
+  update(row){this.actionType="update";this.payload.values=row;return this}
+  delete(){this.actionType="delete";return this}
+  then(resolve,reject){return this.execute().then(resolve,reject)}
+  catch(reject){return this.execute().catch(reject)}
+  async execute(){try{const x=await appsScriptRequest("query",{query:{...this.payload,op:this.actionType}});return {data:x.data??null,error:null,count:x.count??null}}catch(error){return {data:null,error}}}
+}
+const client={
+  from(table){return new AppsScriptQuery(table)},
+  rpc(name,params={}){return appsScriptRequest("rpc",{name,params}).then(x=>({data:x.data??null,error:null})).catch(error=>({data:null,error}))},
+  storage:{from(bucket){return {
+    upload:async(path,file)=>{try{const base64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(",")[1]||"");r.onerror=reject;r.readAsDataURL(file)});const data=await appsScriptRequest("upload",{bucket,path,base64,contentType:file.type||"application/octet-stream"});return {data,error:null}}catch(error){return {data:null,error}}},
+    getPublicUrl(path){return {data:{publicUrl:APPS_SCRIPT_URL+"?action=file&path="+encodeURIComponent(path)}}}
+  }},
+  auth:{
+    async getSession(){if(!socialHubToken)return {data:{session:null},error:null};try{const x=await appsScriptRequest("session",{});return {data:{session:x.user?{user:x.user}:null},error:null}}catch(e){localStorage.removeItem("socialhub-appscript-token");socialHubToken="";return {data:{session:null},error:null}}},
+    async signUp({email,password}){try{const x=await appsScriptRequest("signup",{email,password});socialHubToken=x.token||"";if(socialHubToken)localStorage.setItem("socialhub-appscript-token",socialHubToken);return {data:{user:x.user,session:x.token?{user:x.user}:null},error:null}}catch(error){return {data:null,error}}},
+    async signInWithPassword({email,password}){try{const x=await appsScriptRequest("login",{email,password});socialHubToken=x.token||"";if(socialHubToken)localStorage.setItem("socialhub-appscript-token",socialHubToken);return {data:{user:x.user,session:{user:x.user}},error:null}}catch(error){return {data:null,error}}},
+    async signOut(){try{await appsScriptRequest("logout",{})}catch(e){}localStorage.removeItem("socialhub-appscript-token");socialHubToken="";return {error:null}},
+    async updateUser({data}){return {data:{user:currentUser},error:null}},
+    onAuthStateChange(){return {data:{subscription:{unsubscribe(){}}}}}
+  }
+};
+function requireClient(){return client;}
 
 
 function esc(value){
@@ -2829,22 +2855,14 @@ async function sendMessage(cid){
 
 
 async function restoreSocialHubSession(){
-  if(!client){
-    document.getElementById("site")?.classList.remove("hidden");
-    document.getElementById("auth")?.classList.add("hidden");
-    return;
-  }
-
   try{
     const {data,error}=await client.auth.getSession();
-    if(error) throw error;
-
+    if(error)throw error;
     if(data?.session?.user){
       currentUser=data.session.user;
       document.getElementById("auth")?.classList.add("hidden");
       document.getElementById("site")?.classList.remove("hidden");
       openSite();
-      setTimeout(()=>ensureGoogleProfile(currentUser).catch(error=>console.warn("Profile sync error:",error)),0);
     }else{
       document.getElementById("site")?.classList.add("hidden");
       document.getElementById("auth")?.classList.remove("hidden");
@@ -2855,21 +2873,6 @@ async function restoreSocialHubSession(){
     document.getElementById("auth")?.classList.remove("hidden");
   }
 }
-
-if(client){
-  client.auth.onAuthStateChange((event,session)=>{
-    if(session?.user){
-      currentUser=session.user;
-      document.getElementById("auth")?.classList.add("hidden");
-      document.getElementById("site")?.classList.remove("hidden");
-    }else if(event==="SIGNED_OUT"){
-      currentUser=null;
-      document.getElementById("site")?.classList.add("hidden");
-      document.getElementById("auth")?.classList.remove("hidden");
-    }
-  });
-}
-
 restoreSocialHubSession();
 
 // Close dropdown menus whenever the user clicks outside their menu area.
