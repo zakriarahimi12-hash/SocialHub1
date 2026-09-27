@@ -508,23 +508,13 @@ button{cursor:pointer;border:0}
   <div id="moreMenu" class="moremenu hidden">
     <div class="moretitle">All SocialHub</div>
     <button onclick="show('home');closeMoreMenu()">🏠 Home</button>
-    <button onclick="show('search');closeMoreMenu()">🔎 Search</button>
     <button onclick="show('friends');closeMoreMenu()">👥 Friends</button>
     <button onclick="show('requests');closeMoreMenu()">🤝 Friend requests</button>
     <button onclick="show('messages');closeMoreMenu()">💬 Messenger</button>
     <button onclick="show('notifications');closeMoreMenu()">🔔 Notifications</button>
     <button onclick="show('video');closeMoreMenu()">🎬 Video</button>
     <button onclick="show('reels');closeMoreMenu()">🎞️ Reels</button>
-    <button onclick="show('marketplace');closeMoreMenu()">🛒 Marketplace</button>
-    <button onclick="show('groups');closeMoreMenu()">👨‍👩‍👧 Groups</button>
-    <button onclick="show('pages');closeMoreMenu()">📄 Pages</button>
-    <button onclick="show('events');closeMoreMenu()">📅 Events</button>
     <button onclick="openStories(event);closeMoreMenu()">📖 Stories</button>
-    <button onclick="show('gaming');closeMoreMenu()">🎮 Gaming</button>
-    <button onclick="show('saved');closeMoreMenu()">🔖 Saved</button>
-    <button onclick="show('memories');closeMoreMenu()">🕐 Memories</button>
-    <button onclick="show('feeds');closeMoreMenu()">📰 Feeds</button>
-    <button onclick="show('live');closeMoreMenu()">🔴 Live</button>
     <button onclick="show('photos');closeMoreMenu()">📷 Photos</button>
     <button onclick="show('settings');closeMoreMenu()">⚙️ Settings</button>
   </div>
@@ -538,16 +528,11 @@ button{cursor:pointer;border:0}
   <button class="profile-nav" onclick="location.href='profile.html?v=20260926'"><span class="ico">👤</span><span class="txt">Profile</span></button>
   <button onclick="show('home')"><span class="ico">🏠</span><span class="txt">Home</span></button>
   <button onclick="show('zrai')"><span class="ico">✨</span><span class="txt">ZR AI</span></button>
-  <button onclick="show('search')"><span class="ico">🔍</span><span class="txt">Search</span></button>
   <button onclick="show('friends')"><span class="ico">👥</span><span class="txt">Friends</span></button>
   <button onclick="show('requests')"><span class="ico">🤝</span><span class="txt">Friend requests</span></button>
   <button onclick="show('messages')"><span class="ico">💬</span><span class="txt">Messenger</span></button>
   <button onclick="show('notifications')"><span class="ico">🔔</span><span class="txt">Notifications</span></button>
   <button onclick="show('video')"><span class="ico">🎬</span><span class="txt">Video</span></button>
-  <button onclick="show('marketplace')"><span class="ico">🛒</span><span class="txt">Marketplace</span></button>
-  <button onclick="show('groups')"><span class="ico">👨‍👩‍👧</span><span class="txt">Groups</span></button>
-  <button onclick="show('pages')"><span class="ico">📄</span><span class="txt">Pages</span></button>
-  <button onclick="show('blogger');loadBloggerPosts()"><span class="ico">📝</span><span class="txt">Blogger</span></button>
 </aside>
 
 
@@ -965,14 +950,8 @@ button{cursor:pointer;border:0}
     <h3>SocialHub</h3>
     <p class="muted">Connect with your community.</p>
     <div class="right-menu-list">
-      <button onclick="show('events')"><span class="ico">📅</span><span class="txt">Events</span></button>
       <button onclick="openStories(event)"><span class="ico">📖</span><span class="txt">Stories</span></button>
       <button onclick="show('reels')"><span class="ico">🎞️</span><span class="txt">Reels</span></button>
-      <button onclick="show('gaming')"><span class="ico">🎮</span><span class="txt">Gaming</span></button>
-      <button onclick="show('saved')"><span class="ico">🔖</span><span class="txt">Saved</span></button>
-      <button onclick="show('memories')"><span class="ico">🕐</span><span class="txt">Memories</span></button>
-      <button onclick="show('feeds')"><span class="ico">📰</span><span class="txt">Feeds</span></button>
-      <button onclick="show('live')"><span class="ico">🔴</span><span class="txt">Live</span></button>
       <button onclick="show('settings')"><span class="ico">⚙️</span><span class="txt">Settings</span></button>
       <button onclick="logout()"><span class="ico">🚪</span><span class="txt">Log out</span></button>
     </div>
