@@ -2619,11 +2619,9 @@ ensureSupabaseReady()
   new MutationObserver(prepare).observe(document.getElementById("site")||document.documentElement,{childList:true,subtree:true});
 })();
 
-// Native interaction layer: wire SocialHub controls with real event listeners instead of relying on inline onclick execution.
+// Native interaction layer: wire simple SocialHub controls with real event listeners instead of relying on inline onclick execution.
 (function installSocialHubInteractionLayer(){
-  const run=(el,event)=>{
-    const raw=(el.getAttribute("onclick")||"").trim();
-    if(!raw)return false;
+  const run=(raw,event)=>{
     try{
       let m;
       if((m=raw.match(/^show\\(['"]([^'"]+)['"]\\)$/))) return show(m[1]);
@@ -2633,20 +2631,21 @@ ensureSupabaseReady()
       if((m=raw.match(/^([A-Za-z_$][\\w$]*)\\(['"]([^'"]*)['"]\\)$/))){ const fn=window[m[1]]; if(typeof fn==="function"){ fn(m[2]); return true; } }
       if((m=raw.match(/^document\\.getElementById\\(['"]([^'"]+)['"]\\)\\.click\\(\\)$/))){ const target=document.getElementById(m[1]); if(target){ target.click(); return true; } }
       if((m=raw.match(/^alert\\((.*)\\)$/))){ window.alert(m[1].replace(/^['"]|['"]$/g,"")); return true; }
-      const nativeHandler=el.onclick;
-      if(typeof nativeHandler==="function"){ nativeHandler.call(el,event); return true; }
     }catch(error){ console.error("SocialHub interaction:",error); }
     return false;
   };
+  const supported=raw=>/^(show\\(['"][^'"]+['"]\\)|location\\.href=['"][^'"]+['"]|[A-Za-z_$][\\w$]*\\(\\)|[A-Za-z_$][\\w$]*\\(event\\)|[A-Za-z_$][\\w$]*\\(['"][^'"]*['"]\\)|document\\.getElementById\\(['"][^'"]+['"]\\)\\.click\\(\\)|alert\\(.*\\))$/.test(raw);
   const wire=()=>{
     document.querySelectorAll("#site button[onclick],#site a[onclick],#site [role='button'][onclick]").forEach(el=>{
       if(el.dataset.socialhubWired==="1")return;
-      const raw=el.getAttribute("onclick");
+      const raw=(el.getAttribute("onclick")||"").trim();
+      if(!supported(raw))return;
       el.dataset.socialhubWired="1";
       el.removeAttribute("onclick");
       el.addEventListener("click",event=>{
         event.preventDefault();
-        run({getAttribute:()=>raw,onclick:null},event);
+        event.stopPropagation();
+        run(raw,event);
       },{capture:true});
     });
   };
