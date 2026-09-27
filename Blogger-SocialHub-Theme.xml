@@ -285,7 +285,7 @@ button{cursor:pointer;border:0}
 
 .hidden{display:none!important}
 
-.auth{max-width:430px;margin:70px auto;position:relative;z-index:1000;pointer-events:auto;display:none!important}
+.auth{display:none!important}
 .auth input,.auth button{position:relative;z-index:1001;pointer-events:auto}
 
 .auth input{
@@ -477,26 +477,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 </head>
 
 <body>
-
-<div id="auth" class="auth card hidden">
-  <h1 class="logo">SocialHub</h1>
-
-  <p class="muted">
-    Connect with people and share what matters.
-  </p>
-
-  <input id="email" type="email" placeholder="Email" />
-  <input id="password" type="password" placeholder="Password" />
-  <input id="username" placeholder="Username (for new account)" />
-
-  <button class="primary" type="button" onclick="signup()">Create account</button>
-  <button class="action" type="button" onclick="login()">Log in</button>
-  <div class="auth-divider"><span>or</span></div>
-  <button class="google-btn" type="button" onclick="loginWithGoogle()">Continue with Google</button>
-
-  <p id="authmsg"></p>
-</div>
-
 
 <div id="site">
 
@@ -1109,14 +1089,7 @@ function show(id){
 
 
 function openSite(){
-
-  document
-    .getElementById("auth")
-    .classList.add("hidden");
-
-  document
-    .getElementById("site")
-    .classList.remove("hidden");
+  document.getElementById("site").classList.remove("hidden");
 
   loadProfile();
   loadFeed();
@@ -2873,10 +2846,7 @@ if(client) client.auth
   .catch(error=>console.error("Session restore error:",error));
 
 
-if(client) client.auth.onAuthStateChange((_event,session)=>{
-  currentUser=session?.user||null;
-  if(session){
-    openSite();
+openSite();
     setTimeout(()=>ensureGoogleProfile(session.user).catch(error=>console.warn("Profile sync error:",error)),0);
   }else{
     document.getElementById("site").classList.remove("hidden"); document.getElementById("auth").classList.add("hidden");
@@ -2890,17 +2860,6 @@ document.addEventListener("click",function(event){
     menu.classList.add("hidden");
   });
 });
-document.addEventListener("DOMContentLoaded",function(){
-  const signupButton=document.querySelector('#auth button[onclick="signup()"]');
-  const loginButton=document.querySelector('#auth button[onclick="login()"]');
-  const googleButton=document.querySelector('#auth button[onclick="loginWithGoogle()"]');
-  if(signupButton) signupButton.addEventListener("click",function(e){e.preventDefault();signup();});
-  if(loginButton) loginButton.addEventListener("click",function(e){e.preventDefault();login();});
-  if(googleButton) googleButton.addEventListener("click",function(e){e.preventDefault();loginWithGoogle();});
-});
-const authHash=new URLSearchParams(location.hash.replace(/^#/,""));
-if(authHash.get("error_code")==="otp_expired") document.getElementById("authmsg").textContent="Your email confirmation link expired. Request a new confirmation email.";
-
 ]]></script>
 
 <b:section id='bloggerHidden' class='hidden' maxwidgets='1' showaddelement='no'><b:widget id='HTML99' type='HTML' title='' locked='true' version='2'><b:includable id='main'></b:includable></b:widget></b:section>
