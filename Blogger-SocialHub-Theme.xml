@@ -292,7 +292,7 @@ button{cursor:pointer;border:0}
   box-sizing:border-box;
 }
 
-.hidden{display:none!important}
+.hidden{display:none!important}.hidden#auth{display:none!important;pointer-events:none!important}.hidden#site{display:none!important;pointer-events:none!important}#site{position:relative;z-index:1;pointer-events:auto!important}#site *{pointer-events:auto}
 
 .auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;background:linear-gradient(135deg,#eef5ff 0%,#f8f9fb 48%,#edf7ff 100%);position:relative;z-index:1000;pointer-events:auto}.auth-shell{width:min(440px,100%);position:relative;z-index:1001}.auth-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:22px}.auth-logo-mark{width:48px;height:48px;border-radius:14px;background:#1877f2;color:#fff;display:grid;place-items:center;font-size:27px;font-weight:800;box-shadow:0 8px 22px #1877f233}.auth-brand-name{font-size:25px;font-weight:800;color:#1877f2}.auth-brand-tag{font-size:12px;color:#65676b;margin-top:2px}.auth-page *{pointer-events:auto}.auth-page button{position:relative;z-index:2147483647;pointer-events:auto!important;cursor:pointer!important;touch-action:manipulation}.auth-page input{position:relative;z-index:2147483646;pointer-events:auto!important}.auth-card{background:#fff;border:1px solid #e4e6eb;border-radius:20px;padding:28px;box-shadow:0 18px 50px #1c1e2114;position:relative;z-index:1002;pointer-events:auto}.auth-hero{text-align:center;margin-bottom:22px}.auth-hero h1{margin:0 0 7px;font-size:28px;color:#1c1e21}.auth-hero p{margin:0;color:#65676b;font-size:14px;line-height:1.5}.auth-fields label{display:block;font-size:13px;font-weight:700;color:#344054;margin:13px 0 6px}.auth-fields label span{font-weight:400;color:#8a8d91}.auth-fields input,.auth-fields select{width:100%;height:48px;padding:0 14px;border:1px solid #ccd0d5;border-radius:10px;background:#fff;color:#1c1e21;outline:none;box-sizing:border-box;position:relative;z-index:1003;pointer-events:auto}.auth-fields select{appearance:auto}.auth-fields input[type="date"]{font-family:inherit}.auth-fields input:focus{border-color:#1877f2;box-shadow:0 0 0 3px #1877f21a}.auth-actions{display:grid;gap:9px;margin-top:20px}.auth-login,.auth-signup,.auth-google{width:100%;min-height:46px;border-radius:10px;font-weight:700;cursor:pointer;touch-action:manipulation;position:relative;z-index:1004;pointer-events:auto}.auth-login{background:#1877f2;color:#fff}.auth-login:hover{background:#166fe5}.auth-signup{background:#e7f3ff;color:#1877f2}.auth-signup:hover{background:#dceeff}.auth-divider{display:flex;align-items:center;gap:10px;margin:20px 0 14px;color:#8a8d91;font-size:12px}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:#e4e6eb;flex:1}.auth-google{background:#fff;border:1px solid #ccd0d5;color:#1c1e21;display:flex;align-items:center;justify-content:center;gap:9px}.auth-google:hover{background:#f7f7f7}.auth-switch{display:block;width:100%;margin:12px 0 0;background:transparent;color:#1877f2;font-weight:700;padding:8px;cursor:pointer}.auth-switch:hover{text-decoration:underline}.google-icon{font-size:17px;font-weight:800}.auth-message{min-height:20px;margin:14px 0 0;text-align:center;font-size:13px;color:#65676b}.auth-note{text-align:center;color:#8a8d91;font-size:11px;margin-top:14px}.auth-footer{text-align:center;color:#8a8d91;font-size:12px;margin-top:18px}
 
@@ -1085,19 +1085,23 @@ function show(id){
 
 
 function openSite(){
-
-  document
-    .getElementById("auth")
-    .classList.add("hidden");
-
-  document
-    .getElementById("site")
-    .classList.remove("hidden");
-
+  const auth=document.getElementById("auth");
+  const site=document.getElementById("site");
+  if(auth){
+    auth.classList.add("hidden");
+    auth.style.display="none";
+    auth.style.pointerEvents="none";
+  }
+  if(site){
+    site.classList.remove("hidden");
+    site.style.display="block";
+    site.style.pointerEvents="auto";
+    site.style.position="relative";
+    site.style.zIndex="1";
+  }
   loadProfile();
   loadFeed();
   loadStories();
-
 }
 
 
@@ -2868,8 +2872,18 @@ ensureSupabaseReady()
         openSite();
         setTimeout(()=>ensureGoogleProfile(session.user).catch(error=>console.warn("Profile sync error:",error)),0);
       }else{
-        document.getElementById("site").classList.add("hidden");
-        document.getElementById("auth").classList.remove("hidden");
+        const site=document.getElementById("site");
+        const auth=document.getElementById("auth");
+        if(site){
+          site.classList.add("hidden");
+          site.style.display="";
+          site.style.pointerEvents="";
+        }
+        if(auth){
+          auth.classList.remove("hidden");
+          auth.style.display="";
+          auth.style.pointerEvents="";
+        }
       }
     });
   })
