@@ -2619,6 +2619,41 @@ ensureSupabaseReady()
   new MutationObserver(prepare).observe(document.getElementById("site")||document.documentElement,{childList:true,subtree:true});
 })();
 
+// Native interaction layer: wire SocialHub controls with real event listeners instead of relying on inline onclick execution.
+(function installSocialHubInteractionLayer(){
+  const run=(el,event)=>{
+    const raw=(el.getAttribute("onclick")||"").trim();
+    if(!raw)return false;
+    try{
+      let m;
+      if((m=raw.match(/^show\\(['"]([^'"]+)['"]\\)$/))) return show(m[1]);
+      if((m=raw.match(/^location\\.href=['"]([^'"]+)['"]$/))) { location.href=m[1]; return true; }
+      if((m=raw.match(/^([A-Za-z_$][\\w$]*)\\(\\)$/))){ const fn=window[m[1]]; if(typeof fn==="function"){ fn(); return true; } }
+      if((m=raw.match(/^([A-Za-z_$][\\w$]*)\\(event\\)$/))){ const fn=window[m[1]]; if(typeof fn==="function"){ fn(event); return true; } }
+      if((m=raw.match(/^([A-Za-z_$][\\w$]*)\\(['"]([^'"]*)['"]\\)$/))){ const fn=window[m[1]]; if(typeof fn==="function"){ fn(m[2]); return true; } }
+      if((m=raw.match(/^document\\.getElementById\\(['"]([^'"]+)['"]\\)\\.click\\(\\)$/))){ const target=document.getElementById(m[1]); if(target){ target.click(); return true; } }
+      if((m=raw.match(/^alert\\((.*)\\)$/))){ window.alert(m[1].replace(/^['"]|['"]$/g,"")); return true; }
+      const nativeHandler=el.onclick;
+      if(typeof nativeHandler==="function"){ nativeHandler.call(el,event); return true; }
+    }catch(error){ console.error("SocialHub interaction:",error); }
+    return false;
+  };
+  const wire=()=>{
+    document.querySelectorAll("#site button[onclick],#site a[onclick],#site [role='button'][onclick]").forEach(el=>{
+      if(el.dataset.socialhubWired==="1")return;
+      const raw=el.getAttribute("onclick");
+      el.dataset.socialhubWired="1";
+      el.removeAttribute("onclick");
+      el.addEventListener("click",event=>{
+        event.preventDefault();
+        run({getAttribute:()=>raw,onclick:null},event);
+      },{capture:true});
+    });
+  };
+  wire();
+  new MutationObserver(wire).observe(document.getElementById("site")||document.documentElement,{childList:true,subtree:true});
+})();
+
 // Keep menu dismissal from interfering with SocialHub controls.
 document.addEventListener("click",function(event){
   const target=event.target;
