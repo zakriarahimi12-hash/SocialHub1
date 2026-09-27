@@ -944,7 +944,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 <section id="settings" class="section"><div class="card"><div class="menu-title">⚙️ Settings &amp; privacy</div>
 <div class="grid2">
 <div class="feature"><h3>Account</h3><p>Email, username and profile information.</p><button class="action" onclick="location.href='profile.html?v=20260926'">Edit profile</button></div>
-<div class="feature"><h3>Password &amp; security</h3><p>Authentication and account security.</p><button class="action" onclick="alert('Use Supabase authentication email flows to change your password securely.')">Security</button></div>
+<div class="feature"><h3>Password &amp; security</h3><p>Authentication and account security.</p><button class="action" onclick="alert('Use SocialHub account security to change your password securely.')">Security</button></div>
 <div class="feature"><h3>Privacy</h3><p>Control how your profile and content are shared.</p><button class="action" onclick="openSettingsPanel('Privacy')">Privacy</button></div>
 <div class="feature"><h3>Notifications</h3><p>Manage your notification center.</p><button class="action" onclick="show('notifications')">Notifications</button></div>
 <div class="feature"><h3>Blocked people</h3><p>Manage people you do not want to interact with.</p><button class="action" onclick="openSettingsPanel('Blocked people')">Manage</button></div>
@@ -1198,7 +1198,7 @@ async function signup(){
 
   msg.textContent =
     data.user
-      ? "Account created, but Supabase requires email confirmation before signing in. If you want instant signup, turn off Email → Confirm Email in Supabase Authentication → Providers."
+      ? "Account created, but Your SocialHub account was created. You can now sign in with your email and password."
       : "Account could not be created.";
 
 }
@@ -1227,27 +1227,9 @@ async function ensureGoogleProfile(user){
 }
 
 async function loginWithGoogle(){
-
-  const sb=requireClient();
-  if(!sb) return;
-
   const msg=document.getElementById("authmsg");
-  if(msg) msg.textContent="Opening Google sign-in...";
-  try{
-    const {error}=await sb.auth.signInWithOAuth({
-      provider:"google",
-      options:{
-        scopes:"openid email profile",
-        redirectTo:window.location.origin+window.location.pathname
-      }
-    });
-    if(error) throw error;
-  }catch(error){
-    console.error("Google sign-in error:",error);
-    if(msg) msg.textContent=error.message||"Google sign-in could not be started.";
-  }
+  if(msg)msg.textContent="Google sign-in is not configured for the Apps Script backend. Use your SocialHub email and password.";
 }
-
 
 async function login(){
 
@@ -1659,7 +1641,7 @@ async function deletePost(id){
   if(!confirm("Delete this post?")) return;
   const {data, error}=await client.rpc("delete_my_post",{p_post_id:id});
   if(error){
-    alert("Could not delete the post. Please run the latest schema.sql in Supabase SQL Editor. Details: "+error.message);
+    alert("Could not delete the post. Please try again. Details: "+error.message);
     return;
   }
   if(data!==true){
@@ -2718,7 +2700,7 @@ function toggleMoreMenu(){document.getElementById('moreMenu').classList.toggle('
 function closeMoreMenu(){document.getElementById('moreMenu').classList.add('hidden')}
 function openAbout(){openModal('<h2>About</h2><p class="muted">Your SocialHub profile information and account details.</p><button class="primary" onclick="closeModal()">Done</button>')}
 function openProfileMedia(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This profile area is ready for SocialHub media and activity data.</p><button class="primary" onclick="closeModal()">Close</button>')}
-function openSettingsPanel(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This settings panel is connected to the SocialHub interface. Detailed preferences can be added to the corresponding Supabase settings tables.</p><button class="primary" onclick="closeModal()">Done</button>')}
+function openSettingsPanel(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This settings panel is connected to the SocialHub interface. Detailed preferences can be added to the corresponding SocialHub settings tables.</p><button class="primary" onclick="closeModal()">Done</button>')}
 
 async function startChat(){
   const username=document.getElementById("messageUser").value.trim().toLowerCase();
