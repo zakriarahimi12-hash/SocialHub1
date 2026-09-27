@@ -106,7 +106,9 @@ html,body{min-height:100%;overflow-x:hidden}
 #site button,#site a,#site input,#site textarea,#site select,#site [role="button"]{pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer}
 #site input,#site textarea,#site select{cursor:text}
 body>*:not(#site):not(#auth):not(#storyViewer):not(#modal){pointer-events:none!important}
-#blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-1!important}@media(max-width:1050px){.wrap{grid-template-columns:160px minmax(0,1fr)}.right{display:none}}@media(max-width:760px){.top{height:62px;padding:0 11px;gap:8px}.logo{font-size:21px}.search{width:135px}.topnav button{font-size:0;padding:9px}.topnav button:first-letter{font-size:18px}.wrap{display:block;margin:12px auto;padding:0 9px}.side{display:flex;position:static;overflow:auto;gap:4px;margin-bottom:12px;padding:4px;border:1px solid var(--line);border-radius:15px;background:#ffffffcc}.side button{min-width:max-content;width:auto}.right{display:none}.mobilebar{display:none!important}}]]></b:skin>
+#blogger-clickTrap,#blogger-clicktrap,.blogger-clickTrap{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-1!important}@media(max-width:1050px){.wrap{grid-template-columns:160px minmax(0,1fr)}.right{display:none}}@media(max-width:760px){.top{height:62px;padding:0 11px;gap:8px}.logo{font-size:21px}.search{width:135px}.topnav button{font-size:0;padding:9px}.topnav button:first-letter{font-size:18px}.wrap{display:block;margin:12px auto;padding:0 9px}.side{display:flex;position:static;overflow:auto;gap:4px;margin-bottom:12px;padding:4px;border:1px solid var(--line);border-radius:15px;background:#ffffffcc}.side button{min-width:max-content;width:auto}.right{display:none}.mobilebar{display:none!important}}]]>
+.profile-cover{height:230px;border-radius:18px;background:linear-gradient(135deg,#6557f5,#9a6cff 55%,#d9cfff);background-size:cover;background-position:center}.profile-head{display:flex;align-items:center;gap:18px;padding:0 24px 20px;margin-top:-48px;position:relative}.profile-avatar{width:112px;height:112px;border-radius:50%;border:5px solid #fff;background:linear-gradient(135deg,#6557f5,#9a6cff);color:#fff;display:grid;place-items:center;font-size:40px;font-weight:800;box-shadow:0 8px 25px rgba(24,28,52,.18);overflow:hidden;background-size:cover;background-position:center}.profile-identity{flex:1}.profile-identity h1{margin:46px 0 2px;font-size:28px}.profile-bio{margin:8px 0 0;max-width:620px}.profile-actions{display:flex;gap:8px;flex-wrap:wrap}.profile-stats{display:flex;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px 12px}.profile-stats button{flex:1;background:none;border:0;padding:12px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;gap:2px}.profile-stats button:hover{background:var(--soft);border-radius:10px}.profile-stats span{font-size:12px;color:var(--muted)}.profile-tabs{display:flex;gap:4px;overflow:auto;padding:6px 12px 0}.profile-tabs button{background:none;border:0;padding:12px 16px;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap}.profile-tabs button.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:700}.profile-tab-content{margin-top:14px}.profile-photo{width:100%;height:260px;object-fit:cover;border-radius:14px}.profile-about-row{padding:12px 0;border-bottom:1px solid var(--line)}
+</b:skin>
 </head>
 <body>
 
@@ -262,32 +264,36 @@ body>*:not(#site):not(#auth):not(#storyViewer):not(#modal){pointer-events:none!i
 
 
 <section id="profile" class="section">
-  <div class="card">
-    <div style="height:190px;background:linear-gradient(135deg,#dbeafe,#e4e6eb);border-radius:12px"></div>
-    <div class="row" style="margin-top:-34px">
-      <div class="avatar" style="width:88px;height:88px;font-size:28px;border:4px solid #fff" id="profileAvatar">S</div>
-      <div>
-        <h2 id="profileName">Profile</h2>
-        <p id="profileUsername" class="muted"></p>
+  <div class="profile-hero card">
+    <div class="profile-cover" id="profileCover"></div>
+    <div class="profile-head">
+      <div class="profile-avatar" id="profileAvatar">S</div>
+      <div class="profile-identity">
+        <h1 id="profileName">Profile</h1>
+        <div id="profileUsername" class="muted">@user</div>
+        <p id="profileBio" class="profile-bio"></p>
+      </div>
+      <div class="profile-actions">
+        <button class="primary" onclick="editProfile()">Edit profile</button>
+        <button class="action" onclick="show('messages')">💬 Message</button>
       </div>
     </div>
-    <p id="profileBio"></p>
-    <button class="primary" onclick="location.href='profile.html?v=20260926'">Edit profile</button>
-    <button class="action" onclick="show('friends')">Friends</button>
-    <button class="action" onclick="show('photos')">Photos</button>
-    <div class="tabbar">
-      <button onclick="location.href='profile.html?v=20260926'">Posts</button>
-      <button onclick="show('photos')">Photos</button>
-      <button onclick="show('friends')">Friends</button>
-      <button onclick="openAbout()">About</button>
-      <button onclick="openProfileMedia('Videos')">Videos</button>
-      <button onclick="openProfileMedia('Check-ins')">Check-ins</button>
-      <button onclick="openProfileMedia('Music')">Music</button>
+    <div class="profile-stats">
+      <button onclick="show('friends')"><b id="profileFriendsCount">0</b><span>Friends</span></button>
+      <button onclick="show('friends')"><b id="profileFollowersCount">0</b><span>Followers</span></button>
+      <button onclick="show('friends')"><b id="profileFollowingCount">0</b><span>Following</span></button>
+      <button onclick="show('home')"><b id="profilePostsCount">0</b><span>Posts</span></button>
+    </div>
+    <div class="profile-tabs">
+      <button class="active" onclick="profileTab('posts',this)">Posts</button>
+      <button onclick="profileTab('photos',this)">Photos</button>
+      <button onclick="profileTab('friends',this)">Friends</button>
+      <button onclick="profileTab('about',this)">About</button>
+      <button onclick="profileTab('videos',this)">Videos</button>
     </div>
   </div>
-  <div class="card">
-    <h3>Posts</h3>
-    <div id="profilePosts"></div>
+  <div id="profileTabContent" class="profile-tab-content">
+    <div class="card"><h3>Posts</h3><div id="profilePosts"></div></div>
   </div>
 </section>
 
@@ -1430,54 +1436,26 @@ function tagPeople(){
 
 
 async function loadProfile(){
-
-  if(!currentUser) return;
-
-  const {
-    data:p
-  } =
-    await client
-      .from("profiles")
-      .select("*")
-      .eq("id",currentUser.id)
-      .single();
-
-  if(!p) return;
-
-  document.getElementById("profileName").textContent =
-    p.full_name || "Profile";
-
-  document.getElementById("profileUsername").textContent =
-    "@" + (p.username || "user");
-
-  document.getElementById("profileBio").textContent =
-    p.bio || "";
-
-  document.getElementById("profileAvatar").textContent =
-    (p.full_name || "S").charAt(0).toUpperCase();
-
-  const {
-    data:posts
-  } =
-    await client
-      .from("posts")
-      .select("id,content,created_at")
-      .eq("user_id",currentUser.id)
-      .order("created_at",{ascending:false});
-
-  document.getElementById("profilePosts").innerHTML =
-    (posts || []).map(p => `
-      <div class="card">
-
-        <div class="postmeta">
-          ${new Date(p.created_at).toLocaleString()}
-        </div>
-
-        <p>${esc(p.content)}</p>
-
-      </div>
-    `).join("") || "No posts yet.";
-
+  if(!currentUser)return;
+  client.from("profiles").select("*").eq("id",currentUser.id).single().then(async ({data:p})=>{
+    if(!p)return;
+    const name=p.full_name||"Profile", username=p.username||"user";
+    document.getElementById("profileName").textContent=name;
+    document.getElementById("profileUsername").textContent="@"+username;
+    document.getElementById("profileBio").textContent=p.bio||"";
+    const avatar=document.getElementById("profileAvatar");
+    avatar.textContent=name.charAt(0).toUpperCase();
+    if(p.avatar_url){avatar.style.backgroundImage="url('"+String(p.avatar_url).replace(/'/g,"%27")+"')";avatar.textContent="";}
+    const cover=document.getElementById("profileCover");
+    if(p.cover_url)cover.style.backgroundImage="url('"+String(p.cover_url).replace(/'/g,"%27")+"')";
+    const {data:posts}=await client.from("posts").select("id,content,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false});
+    const {data:friends}=await client.from("friendships").select("requester_id,addressee_id").or("requester_id.eq."+currentUser.id+",addressee_id.eq."+currentUser.id).eq("status","accepted");
+    document.getElementById("profilePostsCount").textContent=(posts||[]).length;
+    document.getElementById("profileFriendsCount").textContent=(friends||[]).length;
+    document.getElementById("profileFollowersCount").textContent=(friends||[]).length;
+    document.getElementById("profileFollowingCount").textContent=(friends||[]).length;
+    renderProfilePosts();
+  });
 }
 
 
@@ -2376,6 +2354,29 @@ async function editPost(id,content){const value=prompt("Edit your post:",content
 function openPrivacyMenu(id,current,viewOnly=false){openModal(`<h2>Post privacy</h2><p class="muted">Choose who can see this post.</p><div class="privacy-options"><button onclick="setPostPrivacy('${id}','public',${viewOnly})">🌎 Public</button><button onclick="setPostPrivacy('${id}','friends',${viewOnly})">👥 Friends</button><button onclick="setPostPrivacy('${id}','me',${viewOnly})">🔒 Only me</button></div>`)}
 async function setPostPrivacy(id,privacy,viewOnly){if(viewOnly){closeModal();return}const {error}=await client.from("posts").update({privacy}).eq("id",id).eq("user_id",currentUser.id);if(error)alert(error.message);else{closeModal();loadFeed()}}
 
+function profileTab(tab,button){
+  document.querySelectorAll(".profile-tabs button").forEach(x=>x.classList.remove("active"));
+  if(button)button.classList.add("active");
+  const box=document.getElementById("profileTabContent");
+  if(!box)return;
+  if(tab==="posts")box.innerHTML='<div class="card"><h3>Posts</h3><div id="profilePosts"></div></div>',renderProfilePosts();
+  else if(tab==="photos")box.innerHTML='<div class="card"><h3>Photos</h3><p class="muted">Photos shared on this profile will appear here.</p></div>';
+  else if(tab==="friends")box.innerHTML='<div class="card"><h3>Friends</h3><p class="muted">Open Friends to see your complete friend list.</p><button class="primary" onclick="show(\'friends\')">View friends</button></div>';
+  else if(tab==="about")box.innerHTML='<div class="card"><h3>About</h3><div id="profileAbout"></div></div>',renderProfileAbout();
+  else box.innerHTML='<div class="card"><h3>Videos</h3><p class="muted">Video posts will appear here.</p></div>';
+}
+async function renderProfilePosts(){
+  if(!currentUser)return;
+  const {data:posts}=await client.from("posts").select("id,content,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false});
+  const el=document.getElementById("profilePosts"); if(!el)return;
+  el.innerHTML=(posts||[]).map(p=>'<div class="card"><div class="postmeta">'+new Date(p.created_at).toLocaleString()+'</div><p>'+esc(p.content)+'</p></div>').join("")||"No posts yet.";
+}
+function renderProfileAbout(){
+  client.from("profiles").select("*").eq("id",currentUser.id).single().then(({data:p})=>{
+    const el=document.getElementById("profileAbout"); if(!el||!p)return;
+    el.innerHTML='<div class="profile-about-row"><b>Name</b><br>'+esc(p.full_name||"Not set")+'</div><div class="profile-about-row"><b>Username</b><br>@'+esc(p.username||"user")+'</div><div class="profile-about-row"><b>Bio</b><br>'+esc(p.bio||"No bio yet.")+'</div>';
+  });
+}
 function openAbout(){openModal('<h2>About</h2><p class="muted">Your SocialHub profile information and account details.</p><button class="primary" onclick="closeModal()">Done</button>')}
 function openProfileMedia(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This profile area is ready for SocialHub media and activity data.</p><button class="primary" onclick="closeModal()">Close</button>')}
 function openSettingsPanel(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This settings panel is connected to the SocialHub interface. Detailed preferences can be added to the corresponding Supabase settings tables.</p><button class="primary" onclick="closeModal()">Done</button>')}
