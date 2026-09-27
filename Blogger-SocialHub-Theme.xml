@@ -2932,51 +2932,33 @@ ensureSupabaseReady()
   removeTrap();
   new MutationObserver(removeTrap).observe(document.documentElement,{childList:true,subtree:true});
 })();
-// Keep the signed-in SocialHub UI above any inactive Blogger/theme layers.
+// Interaction hardening for the published Blogger document.
+// SocialHub controls use their normal browser click/tap events. We only neutralize
+// Blogger's known click-trap nodes; we do not synthesize duplicate clicks.
 document.documentElement.style.pointerEvents="auto";
 document.body.style.pointerEvents="auto";
-document.addEventListener("click",function(event){
-  const site=document.getElementById("site");
-  if(site && !site.classList.contains("hidden")){
-    const target=event.target;
-    if(target && target.closest && target.closest("#site button,#site a,#site input,#site textarea,#site select,[role='button']")){
-      return;
-    }
-  }
-},true);
-// Emergency click bridge for Blogger/theme layers: if an invisible layer captures a click,
- // route that click to the actual SocialHub control underneath it.
-(function(){
-  let forwarding=false;
-  document.addEventListener("click",function(event){
-    if(forwarding) return;
+
+(function hardenSocialHubInteractions(){
+  const prepare=()=>{
     const site=document.getElementById("site");
     if(!site || site.classList.contains("hidden")) return;
-    if(event.target && event.target.closest && event.target.closest("#site")) return;
-    const x=event.clientX, y=event.clientY;
-    if(!Number.isFinite(x) || !Number.isFinite(y)) return;
-    const stack=document.elementsFromPoint(x,y);
-    const target=stack.find(el=>{
-      if(!el || !el.closest) return false;
-      const inside=el.closest("#site");
-      if(!inside) return false;
-      return el.matches("button,a,input,textarea,select,[role='button']") ||
-             el.closest("button,a,[role='button']");
+    site.style.setProperty("pointer-events","auto","important");
+    site.querySelectorAll("button,a,input,textarea,select,[role='button']").forEach(el=>{
+      el.style.setProperty("pointer-events","auto","important");
+      el.style.setProperty("touch-action","manipulation","important");
+      if(el.tagName==="BUTTON" || el.getAttribute("role")==="button"){
+        el.style.setProperty("cursor","pointer","important");
+      }
     });
-    if(!target) return;
-    const control=target.matches("button,a,input,textarea,select,[role='button']")
-      ? target
-      : target.closest("button,a,[role='button']");
-    if(!control) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    forwarding=true;
-    try{ control.click(); }catch(error){ console.error("SocialHub click bridge:",error); }
-    setTimeout(()=>{forwarding=false;},0);
-  },true);
+  };
+  prepare();
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",prepare,{once:true});
+  }
+  new MutationObserver(prepare).observe(document.documentElement,{childList:true,subtree:true});
 })();
 
-// Close dropdown menus whenever the user clicks outside their menu area.
+// // Close dropdown menus whenever the user clicks outside their menu area.
 document.addEventListener("click",function(event){
   const target=event.target;
   if(target.closest(".postmenu-wrap,.comment-menu-wrap,.moremenu,.topnav")) return;
