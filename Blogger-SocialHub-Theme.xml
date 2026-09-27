@@ -502,21 +502,6 @@ button{cursor:pointer;border:0}
     <button title="Messenger" onclick="show('messages')">💬</button>
     <button title="Notifications" onclick="show('notifications')">🔔</button>
     <button title="Profile" onclick="location.href='profile.html?v=20260926'">👤</button>
-    <button title="More" onclick="toggleMoreMenu()">☰</button>
-  </div>
-
-  <div id="moreMenu" class="moremenu hidden">
-    <div class="moretitle">All SocialHub</div>
-    <button onclick="show('home');closeMoreMenu()">🏠 Home</button>
-    <button onclick="show('friends');closeMoreMenu()">👥 Friends</button>
-    <button onclick="show('requests');closeMoreMenu()">🤝 Friend requests</button>
-    <button onclick="show('messages');closeMoreMenu()">💬 Messenger</button>
-    <button onclick="show('notifications');closeMoreMenu()">🔔 Notifications</button>
-    <button onclick="show('video');closeMoreMenu()">🎬 Video</button>
-    <button onclick="show('reels');closeMoreMenu()">🎞️ Reels</button>
-    <button onclick="openStories(event);closeMoreMenu()">📖 Stories</button>
-    <button onclick="show('photos');closeMoreMenu()">📷 Photos</button>
-    <button onclick="show('settings');closeMoreMenu()">⚙️ Settings</button>
   </div>
 
 </header>
@@ -527,12 +512,10 @@ button{cursor:pointer;border:0}
 <aside class="side">
   <button class="profile-nav" onclick="location.href='profile.html?v=20260926'"><span class="ico">👤</span><span class="txt">Profile</span></button>
   <button onclick="show('home')"><span class="ico">🏠</span><span class="txt">Home</span></button>
-  <button onclick="show('zrai')"><span class="ico">✨</span><span class="txt">ZR AI</span></button>
   <button onclick="show('friends')"><span class="ico">👥</span><span class="txt">Friends</span></button>
   <button onclick="show('requests')"><span class="ico">🤝</span><span class="txt">Friend requests</span></button>
   <button onclick="show('messages')"><span class="ico">💬</span><span class="txt">Messenger</span></button>
   <button onclick="show('notifications')"><span class="ico">🔔</span><span class="txt">Notifications</span></button>
-  <button onclick="show('video')"><span class="ico">🎬</span><span class="txt">Video</span></button>
 </aside>
 
 
@@ -950,8 +933,6 @@ button{cursor:pointer;border:0}
     <h3>SocialHub</h3>
     <p class="muted">Connect with your community.</p>
     <div class="right-menu-list">
-      <button onclick="openStories(event)"><span class="ico">📖</span><span class="txt">Stories</span></button>
-      <button onclick="show('reels')"><span class="ico">🎞️</span><span class="txt">Reels</span></button>
       <button onclick="show('settings')"><span class="ico">⚙️</span><span class="txt">Settings</span></button>
       <button onclick="logout()"><span class="ico">🚪</span><span class="txt">Log out</span></button>
     </div>
@@ -2706,8 +2687,6 @@ async function editPost(id,content){const value=prompt("Edit your post:",content
 function openPrivacyMenu(id,current,viewOnly=false){openModal(`<h2>Post privacy</h2><p class="muted">Choose who can see this post.</p><div class="privacy-options"><button onclick="setPostPrivacy('${id}','public',${viewOnly})">🌎 Public</button><button onclick="setPostPrivacy('${id}','friends',${viewOnly})">👥 Friends</button><button onclick="setPostPrivacy('${id}','me',${viewOnly})">🔒 Only me</button></div>`)}
 async function setPostPrivacy(id,privacy,viewOnly){if(viewOnly){closeModal();return}const {error}=await client.from("posts").update({privacy}).eq("id",id).eq("user_id",currentUser.id);if(error)alert(error.message);else{closeModal();loadFeed()}}
 
-function toggleMoreMenu(){document.getElementById('moreMenu').classList.toggle('hidden')}
-function closeMoreMenu(){document.getElementById('moreMenu').classList.add('hidden')}
 function openAbout(){openModal('<h2>About</h2><p class="muted">Your SocialHub profile information and account details.</p><button class="primary" onclick="closeModal()">Done</button>')}
 function openProfileMedia(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This profile area is ready for SocialHub media and activity data.</p><button class="primary" onclick="closeModal()">Close</button>')}
 function openSettingsPanel(title){openModal('<h2>'+esc(title)+'</h2><p class="muted">This settings panel is connected to the SocialHub interface. Detailed preferences can be added to the corresponding Supabase settings tables.</p><button class="primary" onclick="closeModal()">Done</button>')}
