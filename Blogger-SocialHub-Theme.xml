@@ -1148,7 +1148,7 @@ async function signup(){
   const password=document.getElementById("password").value;
   const username=document.getElementById("username").value.trim();
   const msg=document.getElementById("authmsg");
-  const button=document.querySelector("#auth button[onclick*="signup"]");
+  const button=document.querySelector('#auth button[onclick*="signup"]');
 
   if(button) button.disabled=true;
   msg.textContent="Creating your account…";
