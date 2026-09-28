@@ -2049,75 +2049,83 @@ async function loadNotifications(){
 
 async function searchAll(){
   const input=document.getElementById("searchPage")||document.getElementById("searchInput");
-  const q=(input?.value||"").trim();
+  const q=(input?.value||"").trim().replace(/^@/,"").toLowerCase();
   show("search");
+
   const pageInput=document.getElementById("searchPage");
-  if(pageInput)pageInput.value=q;
+  if(pageInput)pageInput.value=input?.value||"";
+
   const results=document.getElementById("searchResults");
   if(!results)return;
-  results.innerHTML="<div class=\"card\">Searching people...</div>";
+
+  results.innerHTML='<div class="card">Searching people...</div>';
 
   try{
-    const needle=q.replace(/^@/,"").trim();
-    let query=client
+    const {data,error}=await client
       .from("profiles")
       .select("id,username,full_name,bio,avatar_url")
-      .neq("id",currentUser?.id)
-      .limit(50);
+      .limit(500);
 
-    if(needle){
-      const safe=needle.replace(/,/g,"");
-      query=query.or("username.ilike.%"+safe+"%,full_name.ilike.%"+safe+"%,bio.ilike.%"+safe+"%");
-    }
-
-    const {data,error}=await query;
     if(error)throw error;
 
-    const people=Array.isArray(data)?data:[];
+    let people=Array.isArray(data)?data:[];
+    people=people.filter(p=>p.id!==currentUser?.id);
+
+    if(q){
+      people=people.filter(p=>{
+        const username=String(p.username||"").toLowerCase();
+        const name=String(p.full_name||"").toLowerCase();
+        const bio=String(p.bio||"").toLowerCase();
+        return username.includes(q)||name.includes(q)||bio.includes(q);
+      });
+    }
+
+    const [outgoing,incoming]=await Promise.all([
+      client.from("friendships").select("requester_id,addressee_id,status").eq("requester_id",currentUser.id).limit(500),
+      client.from("friendships").select("requester_id,addressee_id,status").eq("addressee_id",currentUser.id).limit(500)
+    ]);
+
+    if(outgoing.error)throw outgoing.error;
+    if(incoming.error)throw incoming.error;
+
+    const relation={};
+    [...(outgoing.data||[]),...(incoming.data||[])].forEach(f=>{
+      const other=f.requester_id===currentUser.id?f.addressee_id:f.requester_id;
+      relation[other]=f;
+    });
+
     if(!people.length){
-      results.innerHTML="<div class=\"card\"><b>No people found.</b><p class=\"muted\">Try a username or full name.</p></div>";
+      results.innerHTML='<div class="card"><b>No people found.</b><p class="muted">Try another username or name.</p></div>';
       return;
     }
 
-    const ids=people.map(p=>p.id);
-    const {data:friendships,error:friendError}=await client
-      .from("friendships")
-      .select("requester_id,addressee_id,status")
-      .or("requester_id.eq."+currentUser.id+",addressee_id.eq."+currentUser.id);
-
-    if(friendError)throw friendError;
-
-    const relation={};
-    (friendships||[]).forEach(f=>{
-      const other=f.requester_id===currentUser.id?f.addressee_id:f.requester_id;
-      if(ids.includes(other)) relation[other]=f;
-    });
-
-    people.sort((a,b)=>String(a.username||a.full_name||"").localeCompare(String(b.username||b.full_name||"")));
-
     results.innerHTML=people.map(p=>{
-      const id=String(p.id||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+      const id=String(p.id).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
       const rel=relation[p.id];
-      let action="";
+      let action='';
 
       if(!rel){
         action='<button class="primary" onclick="sendFriend(\''+id+'\')">Add friend</button>';
       }else if(rel.status==="accepted"){
         action='<span class="muted">Friends</span>';
+      }else if(rel.status==="pending" && rel.requester_id===currentUser.id){
+        action='<span class="muted">Request sent</span>';
       }else if(rel.status==="pending"){
-        action=rel.requester_id===currentUser.id
-          ? '<span class="muted">Request sent</span>'
-          : '<button class="primary" onclick="acceptRequest(\''+id+'\')">Accept request</button>';
+        action='<button class="primary" onclick="acceptRequest(\''+id+'\')">Accept request</button>';
       }else{
         action='<button class="primary" onclick="sendFriend(\''+id+'\')">Add friend</button>';
       }
 
-      return '<div class="card"><div class="row"><div class="avatar">'+esc((p.full_name||p.username||"U").charAt(0).toUpperCase())+'</div><div><b>'+esc(p.full_name||p.username||"SocialHub user")+'</b><br><span class="muted">@'+esc(p.username||"user")+'</span></div></div><p>'+esc(p.bio||"")+'</p>'+action+'</div>';
+      const avatar=p.avatar_url
+        ? '<img src="'+esc(p.avatar_url)+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover">'
+        : '<div class="avatar">'+esc((p.full_name||p.username||"U").charAt(0).toUpperCase())+'</div>';
+
+      return '<div class="card"><div class="row">'+avatar+'<div><b>'+esc(p.full_name||p.username||"SocialHub user")+'</b><br><span class="muted">@'+esc(p.username||"user")+'</span></div></div><p>'+esc(p.bio||"")+'</p>'+action+'</div>';
     }).join("");
 
   }catch(error){
     console.error("searchAll error:",error);
-    results.innerHTML="<div class=\"card\"><b>Search error</b><p class=\"muted\">"+esc(error?.message||"Please try again.")+"</p></div>";
+    results.innerHTML='<div class="card"><b>Search failed</b><p class="muted">'+esc(error?.message||"Please try again.")+'</p></div>';
   }
 }
 
