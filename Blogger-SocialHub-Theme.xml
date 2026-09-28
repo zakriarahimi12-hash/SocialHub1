@@ -1144,73 +1144,71 @@ async function signup(){
   const sb=requireClient();
   if(!sb) return;
 
-  const email =
-    document.getElementById("email").value.trim();
-
-  const password =
-    document.getElementById("password").value;
-
-  const username =
-    document.getElementById("username").value.trim();
-
-  const msg =
-    document.getElementById("authmsg");
+  const email=document.getElementById("email").value.trim().toLowerCase();
+  const password=document.getElementById("password").value;
+  const username=document.getElementById("username").value.trim().toLowerCase();
+  const msg=document.getElementById("authmsg");
+  const button=document.querySelector("#auth button[onclick*="signup"]");
 
   if(!email || !password || !username){
-
-    msg.textContent =
-      "Please fill in all fields.";
-
+    msg.textContent="Please fill in your email, username and password.";
     return;
-
   }
 
-  const {
-    data,
-    error
-  } =
-    await sb.auth.signUp({
-      email,
-      password
-    });
-
-  if(error){
-
-    msg.textContent =
-      error.message;
-
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    msg.textContent="Please enter a valid email address.";
     return;
-
   }
 
-  let session = data.session || null;
-
-  if(!session){
-    const current = await sb.auth.getSession();
-    session = current.data?.session || null;
+  if(password.length < 6){
+    msg.textContent="Password must be at least 6 characters.";
+    return;
   }
 
-  if(session?.user){
-    const { error: profileError } = await client.from("profiles").upsert(
+  if(!/^[a-z0-9._-]{3,30}$/.test(username)){
+    msg.textContent="Username must be 3–30 characters using letters, numbers, dot, underscore or hyphen.";
+    return;
+  }
+
+  if(button) button.disabled=true;
+  msg.textContent="Creating your account…";
+
+  try{
+    const {data,error}=await sb.auth.signUp({email,password});
+    if(error) throw error;
+
+    let session=data?.session||null;
+    if(!session){
+      const current=await sb.auth.getSession();
+      session=current.data?.session||null;
+    }
+
+    if(!data?.user){
+      throw new Error("The account could not be created. Please try again.");
+    }
+
+    if(!session?.user){
+      msg.textContent="Account created. Please sign in with your email and password.";
+      return;
+    }
+
+    const {error:profileError}=await client.from("profiles").upsert(
       {id:session.user.id,username,full_name:username},
       {onConflict:"id"}
     );
-    if(profileError){
-      msg.textContent=profileError.message;
-      return;
-    }
+    if(profileError) throw profileError;
+
     currentUser=session.user;
+    msg.textContent="";
     openSite();
-    return;
+  }catch(error){
+    console.error("Signup error:",error);
+    msg.textContent=error?.message||"Account creation failed. Please try again.";
+  }finally{
+    if(button) button.disabled=false;
   }
 
-  msg.textContent =
-    data.user
-      ? "Account created, but Your SocialHub account was created. You can now sign in with your email and password."
-      : "Account could not be created.";
-
 }
-
 
 async function ensureGoogleProfile(user){
   if(!user) return;
